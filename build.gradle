@@ -23,6 +23,16 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	//JPA setting
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	//MySQL Driver
+	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// Lombok (auto Getter/Setter....)
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
 }
 
 tasks.named('test') {
