@@ -17,15 +17,14 @@
 <br/>
 
 ## 🗂️ 수정한 파일
-- `/src/main/java/.../auth/AuthController.java`
-- `/src/main/java/.../Application.java`
+- 
 
 ---
 
 ## 🗂️ 새로 작성한 파일
-- `/src/main/java/.../upload/UploadController.java`
-- `/src/main/java/.../upload/UploadService.java`
+- 
 
+---
 ## 🖼️ 스크린샷
 
 <img src="파일주소" width="50%" height="50%"/>
