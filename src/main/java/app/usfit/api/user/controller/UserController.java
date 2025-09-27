@@ -1,13 +1,12 @@
 package app.usfit.api.user.controller;
 
+import java.util.List;
 import java.util.Optional;
 
+import app.usfit.api.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import app.usfit.api.user.entity.User;
 import app.usfit.api.user.service.UserService;
@@ -18,6 +17,9 @@ public class UserController {
     
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserRepository repo;
     
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody User user) {
@@ -34,7 +36,13 @@ public class UserController {
             return ResponseEntity.badRequest().body("Invalid credentials");
         }
     }
-    
+
+    //mock data 잘 들어갔는지 확인 - users list 확인
+    @GetMapping
+    public List<User> all(){
+        return repo.findAll();
+    }
+
     // 로그인 요청을 위한 내부 클래스
     public static class LoginRequest {
         private String username;
