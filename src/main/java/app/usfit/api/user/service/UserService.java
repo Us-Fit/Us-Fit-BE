@@ -1,5 +1,6 @@
 package app.usfit.api.user.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,5 +30,10 @@ public class UserService {
             return userOpt;
         }
         return Optional.empty();
+    }
+    
+    // 모든 사용자 조회 메서드 추가
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 }
