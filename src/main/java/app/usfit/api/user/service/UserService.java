@@ -18,12 +18,7 @@ public class UserService {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
-
-    public User register(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
-    }
-
+    
     public Optional<User> login(String username, String rawPassword) {
         Optional<User> userOpt = userRepository.findByUsername(username);
         if (userOpt.isPresent() && passwordEncoder.matches(rawPassword, userOpt.get().getPassword())) {
@@ -35,5 +30,10 @@ public class UserService {
     // 모든 사용자 조회 메서드 추가
     public List<User> findAll() {
         return userRepository.findAll();
+    }
+    
+    // 사용자 수 조회 메서드 추가
+    public long countUsers() {
+        return userRepository.count();
     }
 }
