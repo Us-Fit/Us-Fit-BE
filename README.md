@@ -1,2 +1,3 @@
 # Us-Fit-BE
-BackEnd
+
+한국진흥공단 공공데이터 application
