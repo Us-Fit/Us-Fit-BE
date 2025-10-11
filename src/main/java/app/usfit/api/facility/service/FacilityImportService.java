@@ -8,6 +8,7 @@ import app.usfit.api.facility.entity.FacilityOwner;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Service
 public class FacilityImportService {
     private final FacilityRepository repo;
 
@@ -50,6 +52,8 @@ public class FacilityImportService {
                 .setSkipHeaderRecord(true)
                 .setIgnoreEmptyLines(true)
                 .setTrim(true)
+                .setIgnoreSurroundingSpaces(true)  // 셀 주위 공백 무시
+                .setAllowMissingColumnNames(true)  // 일부 컬럼 비어 있어도 통과
                 .build();
 
         Iterable<CSVRecord> rows = fmt.parse(reader);
@@ -63,9 +67,8 @@ public class FacilityImportService {
             String roadAddr1 = get(r, "RDNMADR_ONE_NM");       // 업서트 키
             if (name.isBlank()) continue;                      // 최소 검증
 
-            Facility f = upsert
-                    ? repo.findByNameAndRoadAddr1(name, roadAddr1).orElseGet(Facility::new)
-                    : new Facility();
+            List<Facility> hits = upsert ? repo.findAllByNameAndRoadAddr1(name, roadAddr1) : List.of();
+            Facility f = hits.isEmpty() ? new Facility() : hits.get(0);
 
             // ---------- Facility ----------
             f.setName(name);
