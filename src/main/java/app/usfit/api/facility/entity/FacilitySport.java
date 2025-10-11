@@ -20,7 +20,8 @@ import java.math.BigDecimal;
         )
 )
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor
 @Builder
 public class FacilitySport {
