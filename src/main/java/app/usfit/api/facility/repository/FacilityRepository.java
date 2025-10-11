@@ -9,12 +9,16 @@ import java.util.*;
 
 public interface FacilityRepository extends JpaRepository<Facility, Long> {
     @Query("""
-      select f from Facility f
-      join f.addresses a
-      where f.name = :name
-        and a.roadAddr1 = :roadAddr1
+        select f
+        from Facility f
+        where f.name = :name
+        and exists (
+            select 1 from FacilityAddress a
+            where a.facility = f and a.roadAddr1 = :roadAddr1
+        )
+        order by f.id asc
     """)
-    Optional<Facility> findByNameAndRoadAddr1(@Param("name") String name,
-                                              @Param("roadAddr1") String roadAddr1);
+    List<Facility> findAllByNameAndRoadAddr1(@Param("name") String name,
+                                             @Param("roadAddr1") String roadAddr1);
 
 }
