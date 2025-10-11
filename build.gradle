@@ -40,6 +40,9 @@ dependencies {
 	// Lombok (auto Getter/Setter....)
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
+	// CSV parsing
+	implementation 'org.apache.commons:commons-csv:1.11.0'
 }
 
 tasks.named('test') {
