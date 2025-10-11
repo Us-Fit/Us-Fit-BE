@@ -19,7 +19,8 @@ import java.util.List;
 @Entity // JPA가 관리하는 테이블 매핑 객체임을 선언
 @Table(name = "facility") // 테이블 이름 지정(미지정 시 클래스명 기준)
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED) // JPA 프록시 및 리플렉션용 기본 생성자(외부 직접 생성 방지)
+@Setter
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // JPA 프록시 및 리플렉션용 기본 생성자(외부 직접 생성 방지)
 @AllArgsConstructor
 @Builder
 public class Facility {
@@ -61,11 +62,13 @@ public class Facility {
     @Column(length = 200)
     private String homepageUrl;   // 시설 홈페이지 URL (FCLTY_HMPG_URL)
 
+    private String operationStyle; // 시설 운영 형태값 (FCLTY_OPER_STLE_VALUE)
+
     private Integer seatCount;    // 관람석 수 (ADTM_CO)
     private Integer capacity;     // 수용 인원 수 (ACMD_NMPR_CO)
 
     @Column(precision = 12, scale = 2)
-    private BigDecimal areaSqm;   // 시설 면적 m² (FCLTY_AR_CO) - 금액/면적 등 정밀 값은 BigDecimal 권장
+    private Integer areaSqm;   // 시설 면적 m² (FCLTY_AR_CO) - 금액/면적 등 정밀 값은 BigDecimal 권장
 
     @Column(length = 1)
     private String lifeOpenYn;    // 생활 개방 여부 (LVLH_OPN_AT)
