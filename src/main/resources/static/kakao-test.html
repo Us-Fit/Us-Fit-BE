@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kakao Login 테스트</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 24px; color: #222; }
+    h1 { font-size: 20px; }
+    .card { max-width: 720px; border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
+    label { display: block; margin: 8px 0 4px; font-weight: 600; }
+    input[type="text"], select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; }
+    textarea { min-height: 120px; }
+    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .row > * { flex: 1 1 240px; }
+    .actions { margin-top: 12px; display: flex; gap: 8px; }
+    button { cursor: pointer; padding: 10px 14px; background: #111827; color: white; border: none; border-radius: 6px; }
+    .muted { color: #666; font-size: 12px; }
+    pre { background: #0b1020; color: #e5e7eb; padding: 12px; border-radius: 8px; overflow: auto; }
+    .success { color: #065f46; }
+    .error { color: #991b1b; }
+  </style>
+  <!-- Kakao JS SDK: 팝업 로그인으로 실제 access_token 발급 테스트용 -->
+  <script src="https://developers.kakao.com/sdk/js/kakao.min.js"></script>
+  <!-- 이 페이지는 백엔드(8080)에서 정적으로 서빙되므로 CORS 없이 테스트 가능합니다. -->
+  <!-- accessToken을 직접 붙여 테스트하거나, authCode를 보내 서버에 교환을 맡길 수 있습니다. -->
+</head>
+<body>
+  <h1>카카오 로그인 테스트 폼</h1>
+  <!-- SDK 초기화 & 팝업 로그인 카드 -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="row">
+      <div>
+        <label for="jsKey">Kakao JavaScript 키</label>
+        <input id="jsKey" type="text" placeholder="카카오 디벨로퍼 콘솔의 JavaScript 키를 입력" />
+        <div class="muted">플랫폼 > 웹 사이트 도메인에 이 페이지 도메인(예: http://localhost:8080)을 등록해야 팝업 로그인이 동작합니다.</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="initBtn" type="button">SDK 초기화</button>
+      <button id="sdkLoginBtn" type="button" style="background:#0ea5e9">카카오로 로그인(팝업)</button>
+      <button id="sdkLogoutBtn" type="button" style="background:#ef4444">SDK 로그아웃</button>
+    </div>
+    <div class="muted" style="margin-top:8px">
+      참고: JavaScript 키는 access_token이 아닙니다. 키로 SDK를 초기화한 뒤 팝업 로그인 시에 access_token이 발급됩니다.
+    </div>
+  </div>
+  <div class="card">
+    <div class="row">
+      <div>
+        <label for="provider">Provider</label>
+        <select id="provider">
+          <option value="KAKAO" selected>KAKAO</option>
+        </select>
+      </div>
+      <div>
+        <label for="mode">전송 모드</label>
+        <select id="mode">
+          <option value="accessToken" selected>accessToken 전송</option>
+          <option value="authCode">authCode 전송(서버 교환)</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="accessTokenBlock">
+      <label for="accessToken">Kakao access_token</label>
+      <input id="accessToken" type="text" placeholder="카카오에서 받은 access_token을 붙여넣으세요" />
+      <div class="muted">프론트 주도 플로우에서 받은 access_token으로 서버가 카카오 userinfo를 조회합니다.</div>
+    </div>
+
+    <div id="authCodeBlock" style="display:none">
+      <label for="authCode">Kakao auth_code</label>
+      <input id="authCode" type="text" placeholder="인가 코드(code)를 붙여넣으세요" />
+      <div class="muted">서버가 code → token 교환 후 userinfo 조회를 수행합니다. redirect_uri가 백엔드 설정과 일치해야 합니다.</div>
+    </div>
+
+    <div class="actions">
+      <button id="sendBtn">/api/user/login 호출</button>
+      <button id="clearBtn" type="button" style="background:#6b7280">초기화</button>
+    </div>
+
+    <div style="margin-top:16px">
+      <div class="muted">요청 페이로드</div>
+      <pre id="reqView">{}</pre>
+    </div>
+
+    <div style="margin-top:16px">
+      <div class="muted">응답</div>
+      <pre id="resView">(미실행)</pre>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const modeSel = $('mode');
+    const accessTokenBlock = $('accessTokenBlock');
+    const authCodeBlock = $('authCodeBlock');
+    const jsKeyInput = $('jsKey');
+
+    function updateModeUI() {
+      const mode = modeSel.value;
+      accessTokenBlock.style.display = mode === 'accessToken' ? '' : 'none';
+      authCodeBlock.style.display = mode === 'authCode' ? '' : 'none';
+    }
+    modeSel.addEventListener('change', updateModeUI);
+    updateModeUI();
+
+    function setReqView(obj) {
+      $('reqView').textContent = JSON.stringify(obj, null, 2);
+    }
+    function setResView(obj, isError = false) {
+      if (typeof obj === 'string') {
+        $('resView').textContent = obj;
+      } else {
+        $('resView').textContent = JSON.stringify(obj, null, 2);
+      }
+      $('resView').className = isError ? 'error' : 'success';
+    }
+
+    $('clearBtn').addEventListener('click', () => {
+      $('accessToken').value = '';
+      $('authCode').value = '';
+      setReqView({});
+      setResView('(미실행)', false);
+    });
+
+    // Kakao JS SDK: 초기화 및 팝업 로그인으로 access_token 획득
+    function ensureSDKInitialized() {
+      if (!window.Kakao) {
+        alert('Kakao SDK가 로드되지 않았습니다. 네트워크를 확인하세요.');
+        return false;
+      }
+      if (!Kakao.isInitialized()) {
+        const key = (jsKeyInput?.value || '').trim();
+        if (!key) {
+          alert('먼저 JavaScript 키를 입력하고 "SDK 초기화"를 누르세요.');
+          return false;
+        }
+        Kakao.init(key);
+      }
+      return true;
+    }
+
+    $('initBtn')?.addEventListener('click', () => {
+      if (!window.Kakao) {
+        alert('Kakao SDK가 로드되지 않았습니다.');
+        return;
+      }
+      const key = (jsKeyInput?.value || '').trim();
+      if (!key) {
+        alert('JavaScript 키를 입력하세요.');
+        return;
+      }
+      if (!Kakao.isInitialized()) Kakao.init(key);
+      setResView('SDK 초기화 완료: ' + Kakao.isInitialized());
+    });
+
+    $('sdkLoginBtn')?.addEventListener('click', () => {
+      if (!ensureSDKInitialized()) return;
+      Kakao.Auth.login({
+        scope: 'account_email profile_nickname',
+        success: (authObj) => {
+          try {
+            const token = authObj?.access_token;
+            if (!token) {
+              setResView('로그인 성공했지만 access_token이 없습니다: ' + JSON.stringify(authObj), true);
+              return;
+            }
+            $('accessToken').value = token;
+            modeSel.value = 'accessToken';
+            updateModeUI();
+            setReqView({ provider: $('provider').value, accessToken: token });
+            setResView('SDK 로그인 성공. access_token 입력란에 자동 채워졌습니다. 이제 \'/api/user/login 호출\' 버튼을 누르세요.');
+          } catch (e) {
+            setResView('토큰 처리 중 오류: ' + (e?.message || e), true);
+          }
+        },
+        fail: (err) => {
+          setResView('SDK 로그인 실패: ' + JSON.stringify(err), true);
+        },
+      });
+    });
+
+    $('sdkLogoutBtn')?.addEventListener('click', () => {
+      if (!ensureSDKInitialized()) return;
+      try {
+        Kakao.Auth.logout(() => setResView('SDK 로그아웃 완료'));
+      } catch (e) {
+        setResView('로그아웃 실패: ' + (e?.message || e), true);
+      }
+    });
+
+    $('sendBtn').addEventListener('click', async () => {
+      const provider = $('provider').value;
+      const mode = $('mode').value;
+      const accessToken = $('accessToken').value.trim();
+      const authCode = $('authCode').value.trim();
+
+      const payload = { provider };
+      if (mode === 'accessToken') {
+        if (!accessToken) {
+          alert('access_token을 입력하세요');
+          return;
+        }
+        payload.accessToken = accessToken;
+      } else {
+        if (!authCode) {
+          alert('auth_code를 입력하세요');
+          return;
+        }
+        payload.authCode = authCode;
+      }
+
+      setReqView(payload);
+
+      try {
+        const res = await fetch('/api/user/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const text = await res.text();
+        let data;
+        try { data = JSON.parse(text); } catch(_) { data = text; }
+
+        if (!res.ok) {
+          setResView({ status: res.status, body: data }, true);
+        } else {
+          setResView(data, false);
+        }
+      } catch (e) {
+        setResView('요청 실패: ' + (e?.message || e), true);
+      }
+    });
+  </script>
+</body>
+</html>
