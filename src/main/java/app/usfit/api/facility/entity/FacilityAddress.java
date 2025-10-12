@@ -12,7 +12,8 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "facility_address")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor
 @Builder
 public class FacilityAddress {

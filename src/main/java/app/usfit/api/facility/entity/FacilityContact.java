@@ -10,7 +10,8 @@ import lombok.*;
 @Entity
 @Table(name = "facility_contact")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
 @AllArgsConstructor
 @Builder
 public class FacilityContact {
