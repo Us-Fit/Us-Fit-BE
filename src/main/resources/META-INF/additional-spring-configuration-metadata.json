@@ -1,0 +1,34 @@
+{
+  "properties": [
+    {
+      "name": "kakao.oauth.client-id",
+      "type": "java.lang.String",
+      "description": "Kakao OAuth client id"
+    },
+    {
+      "name": "kakao.oauth.client-secret",
+      "type": "java.lang.String",
+      "description": "Kakao OAuth client secret"
+    },
+    {
+      "name": "kakao.oauth.redirect-uri",
+      "type": "java.lang.String",
+      "description": "Kakao OAuth redirect URI"
+    },
+    {
+      "name": "kakao.oauth.token-uri",
+      "type": "java.lang.String",
+      "description": "Kakao OAuth token endpoint URI"
+    },
+    {
+      "name": "kakao.oauth.authorize-uri",
+      "type": "java.lang.String",
+      "description": "Kakao OAuth authorization endpoint URI"
+    },
+    {
+      "name": "kakao.oauth.user-info-uri",
+      "type": "java.lang.String",
+      "description": "Kakao user info endpoint URI"
+    }
+  ]
+}

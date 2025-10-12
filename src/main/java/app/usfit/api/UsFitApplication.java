@@ -14,7 +14,6 @@ public class UsFitApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(UsFitApplication.class, args);
 	}
-
 	//facility data가 database에 없을 시 처음 서버 작동에만 주석 해제
 	//file이 너무 큰 관계로 임시 dataset 생성 99개의 행만 추출
 	/*@Bean
