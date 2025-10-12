@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
         name = "club_member",
         uniqueConstraints = @UniqueConstraint(
                 name = "uk_club_member",
-                columnNames = {"club_id", "user_id"}
+                columnNames = {"club_id", "user_id"} //unique 유지하기 위함
         )
 )
 @Getter
