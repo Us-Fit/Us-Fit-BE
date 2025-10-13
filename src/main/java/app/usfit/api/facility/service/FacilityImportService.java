@@ -67,12 +67,15 @@ public class FacilityImportService {
             String roadAddr1 = get(r, "RDNMADR_ONE_NM");       // 업서트 키
             if (name.isBlank()) continue;                      // 최소 검증
 
+            String statusValue = get(r, "FCLTY_STATE_VALUE");
+            if (statusValue.equals("폐업")) continue; // statusValue가 폐업이면 데이터 베이스에 저장하지 않음
+
             List<Facility> hits = upsert ? repo.findAllByNameAndRoadAddr1(name, roadAddr1) : List.of();
             Facility f = hits.isEmpty() ? new Facility() : hits.get(0);
 
             // ---------- Facility ----------
             f.setName(name);
-            f.setStatusValue(get(r, "FCLTY_STATE_VALUE"));
+            f.setStatusValue(statusValue);
             f.setTypeCode(get(r, "FCLTY_TY_CD"));
             f.setTypeName(get(r, "FCLTY_TY_NM"));
             f.setSubdivCode(get(r, "FCLTY_SDIV_CD"));
