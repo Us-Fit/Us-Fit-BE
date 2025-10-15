@@ -17,7 +17,10 @@ import java.math.BigDecimal;
         uniqueConstraints = @UniqueConstraint(
                 name = "uk_facility_sport",
                 columnNames = {"facility_id", "sport_id"}
-        )
+        ),
+        indexes = {
+                @Index(name = "idx_fs_sport_facility", columnList = "sport_id, facility_id")
+        }
 )
 @Getter
 @Setter
