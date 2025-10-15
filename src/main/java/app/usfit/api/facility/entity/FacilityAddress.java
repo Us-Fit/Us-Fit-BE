@@ -10,7 +10,21 @@ import java.math.BigDecimal;
  * - 도로명/지번/행정코드/좌표를 보관
  */
 @Entity
-@Table(name = "facility_address")
+@Table(
+        name = "facility_address",
+        indexes = {
+                // 코드 기반 지역 검색
+                @Index(name = "idx_address_sigungu_cd", columnList = "sigungu_cd"),
+                // 이름으로도 검색 -> 잘 쓸지 모르겠음 보류
+                @Index(name = "idx_address_sigungu_nm", columnList = "sigungu_nm"),
+                // 위경도 BBox 검색 최적화 (lat 먼저 범위, 그 다음 lng)
+                @Index(name = "idx_address_lat_lng", columnList = "lat, lng"),
+                // 조인 성능 향상(FK)
+                @Index(name = "idx_address_facility_id", columnList = "facility_id"),
+                // 지역 + 조인 동시 사용
+                @Index(name = "idx_address_sigungu_cd_facility", columnList = "sigungu_cd, facility_id")
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
@@ -53,10 +67,10 @@ public class FacilityAddress {
     @Column(length = 50)
     private String sidoNm;    // 시도 명 (CTPRVN_NM)
 
-    @Column(length = 20)
+    @Column(name = "sigungu_cd", length = 20)
     private String sigunguCd; // 시군구 코드 (SIGNGU_CD)
 
-    @Column(length = 50)
+    @Column(name = "sigungu_nm", length = 50)
     private String sigunguNm; // 시군구 명 (SIGNGU_NM)
 
     // 관리 관할(행정)
