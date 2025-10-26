@@ -13,6 +13,7 @@ import app.usfit.api.user.dto.LoginResponse;
 import app.usfit.api.user.dto.UserRegisterRequest;
 import app.usfit.api.user.entity.User;
 import app.usfit.api.user.repository.UserRepository;
+import app.usfit.api.user.service.login.LoginHandler;
 
 ///<summary>
 /// 회원가입 관련 기능들을 담당하는 서비스
@@ -22,11 +23,11 @@ import app.usfit.api.user.repository.UserRepository;
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final Map<AuthProviderEnum, app.usfit.api.user.service.login.LoginHandler> handlerMap;
+    private final Map<AuthProviderEnum, LoginHandler> handlerMap;
 
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
-                       List<app.usfit.api.user.service.login.LoginHandler> handlers) {
+                       List<LoginHandler> handlers) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         // stream -> 데이터 요소들의 파이프라인 처리용 시퀀스
