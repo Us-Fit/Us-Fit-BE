@@ -36,4 +36,9 @@ public class UserService {
     public long countUsers() {
         return userRepository.count();
     }
+
+    // 이름
+    public Optional<User> findByName(String nickname) {
+        return userRepository.findByUsername(nickname);
+    }
 }

@@ -39,6 +39,9 @@ public class KakaoLoginHandler implements LoginHandler {
             KakaoTokenResponse tokenResponse = kakaoOAuthClient.exchangeToken(request.getAuthCode());
             accessToken = tokenResponse.accessToken();
         }
+        else {
+            throw new RuntimeException("카카오 로그인: authCode 또는 accessToken 중 하나는 필수입니다.");
+        }
 
         // 2) 사용자 정보 조회
         KakaoUserInfoResponse profile = kakaoOAuthClient.getUserInfo(accessToken);
@@ -71,6 +74,5 @@ public class KakaoLoginHandler implements LoginHandler {
 
         // 4) 토큰 발행은 제외 (틀만) → token=null 로 응답
         return LoginResponse.of(user, null);
-
     }
 }
