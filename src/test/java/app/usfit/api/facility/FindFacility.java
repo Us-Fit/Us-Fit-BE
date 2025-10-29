@@ -26,4 +26,12 @@ public class FindFacility {
         System.out.println("facility ids = " + ids);
         assertThat(ids).isNotNull();
     }
+
+    @Test
+    @DisplayName("facility type code 로 어떤 종목의 시설인지 찾고 facility id를 반환")
+    void findIdsByTypeCode(){
+        List<Long> ids = repo.findFacilityIdsByTypeCd("N1701"); //농구 시설 반환
+        System.out.println("facility ids = " + ids);
+        assertThat(ids).isNotNull();
+    }
 }
