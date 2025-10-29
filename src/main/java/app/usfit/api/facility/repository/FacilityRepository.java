@@ -40,10 +40,12 @@ public interface FacilityRepository extends JpaRepository<Facility, Long> {
     )
     List<Long> findFacilityIdsBySidoCd(@Param("sidoCd") String sidoCd);
 
-    //sport id에 맞는 facility id 찾기
-//    @Query("""
-//
-//           """
-//    )
-//    List<Long> findFacilityIdsBySport(@Param("sportId") )
+    //facility type cd 로 facility id 찾기
+    @Query("""
+           select f.id
+           from Facility f
+           where f.typeCode = :typeCode
+           """
+    )
+    List<Long> findFacilityIdsByTypeCd(@Param("typeCode") String typeCode);
 }
