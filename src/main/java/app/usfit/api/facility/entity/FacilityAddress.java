@@ -15,6 +15,10 @@ import java.math.BigDecimal;
         indexes = {
                 // 코드 기반 지역 검색
                 @Index(name = "idx_address_sigungu_cd", columnList = "sigungu_cd"),
+
+                //시, 도 cd로 검색
+                @Index(name = "idx_address_sido_cd", columnList = "sido_cd"),
+
                 // 이름으로도 검색 -> 잘 쓸지 모르겠음 보류
                 @Index(name = "idx_address_sigungu_nm", columnList = "sigungu_nm"),
                 // 위경도 BBox 검색 최적화 (lat 먼저 범위, 그 다음 lng)
