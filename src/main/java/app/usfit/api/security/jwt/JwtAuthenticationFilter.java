@@ -17,16 +17,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final AntPathMatcher matcher = new AntPathMatcher();
     private static final String[] WHITELIST = {
+        "/v3/api-docs",
         "/api/user/login",
         "/api/user/signup",
-        "/kakao-test.html"
+        "/kakao-test.html",
+        "/v3/api-docs/**",
+        "/swagger-ui.html",
+        "/swagger-ui/**",
+        "/login"
     };
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) return true; // CORS preflight
         String path = request.getRequestURI();
         for (String p : WHITELIST) {
-            if (matcher.match(p, path)) return true; // permitAll 경로는 필터 건너뜀
+            System.out.println("매칭 시도: " + p + " [vs] " + path);
+            if (matcher.match(p, path)) {System.out.println("매칭"); return true;} // permitAll 경로는 필터 건너뜀
         }
         return false;
     }
