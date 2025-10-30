@@ -14,6 +14,7 @@ import app.usfit.api.user.dto.UserRegisterRequest;
 import app.usfit.api.user.entity.User;
 import app.usfit.api.user.repository.UserRepository;
 import app.usfit.api.user.service.login.LoginHandler;
+import jakarta.transaction.Transactional;
 
 ///<summary>
 /// 회원가입 관련 기능들을 담당하는 서비스
@@ -27,7 +28,8 @@ public class AuthService {
 
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
-                       List<LoginHandler> handlers) {
+                       List<LoginHandler> handlers
+                       ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         // stream -> 데이터 요소들의 파이프라인 처리용 시퀀스
@@ -35,27 +37,23 @@ public class AuthService {
     }
 
     // 회원가입
-    public User register(String email, String nickname, String password) {
-        // 이메일 중복 확인
-        if (userRepository.findByEmail(email).isPresent()) {
-            throw new RuntimeException("이미 존재하는 이메일입니다: " + email);
-        }
-        
-        // 새 사용자 생성
-        User newUser = User.builder()
-                .email(email)
-                .nickname(nickname)
-                .username(email)  // username을 email로 설정
-                .password(passwordEncoder.encode(password))
-                .provider(AuthProviderEnum.LOCAL)
-                .build();
-        
-        return userRepository.save(newUser);
+    @Transactional
+    public User register(UserRegisterRequest req) {
+        // 1) User 생성
+        User user = createUser(req);
+        return user;
     }
-    
-    // DTO를 받는 편의 메서드 (내부적으로 위 메서드 호출)
-    public User register(UserRegisterRequest request) {
-        return register(request.getEmail(), request.getNickname(), request.getPassword());
+
+    private User createUser(UserRegisterRequest req) {
+        userRepository.findByEmail(req.getEmail()).ifPresent(u -> {
+            throw new IllegalArgumentException("이미 존재하는 이메일");
+        });
+        User user = User.builder()
+            .email(req.getEmail())
+            .password(passwordEncoder.encode(req.getPassword()))
+            .provider(AuthProviderEnum.LOCAL)
+            .build();
+        return userRepository.save(user);
     }
 
     // 전략 패턴 기반 로그인 진입점

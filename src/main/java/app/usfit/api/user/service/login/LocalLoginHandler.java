@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import app.usfit.api.common.enums.AuthProviderEnum;
+import app.usfit.api.security.jwt.JwtTokenProvider;
 import app.usfit.api.user.dto.LoginRequest;
 import app.usfit.api.user.dto.LoginResponse;
 import app.usfit.api.user.entity.User;
@@ -16,10 +17,12 @@ public class LocalLoginHandler implements LoginHandler {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public LocalLoginHandler(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public LocalLoginHandler(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
@@ -40,7 +43,8 @@ public class LocalLoginHandler implements LoginHandler {
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("비밀번호 불일치");
         }
-        // 토큰 발급 부분은 아직 없으므로 null
-        return LoginResponse.of(user, null);
+        // 토큰 발급
+        String jwt = jwtTokenProvider.createAccessToken(user.getId(), user.getProvider().name(), user.getEmail());
+        return LoginResponse.of(user, jwt);
     }
 }
