@@ -23,9 +23,4 @@ public record KakaoUserInfoResponse(
     public String safeEmail() {
         return (kakaoAccount != null) ? kakaoAccount.email : null;
     }
-    public String safeNickname() {
-        return (kakaoAccount != null && kakaoAccount.profile != null) 
-            ? kakaoAccount.profile.nickname 
-            : null;
-    }
 }

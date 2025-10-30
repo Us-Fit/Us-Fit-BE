@@ -17,6 +17,7 @@ import app.usfit.api.user.entity.User;
 import app.usfit.api.user.repository.UserRepository;
 import app.usfit.api.user.service.AuthService;
 import app.usfit.api.user.service.UserService;
+
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
@@ -59,5 +60,10 @@ public class UserController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body("회원가입 실패: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/signup")
+    public ResponseEntity<String> signupGetInfo() {
+        return ResponseEntity.ok("회원가입은 POST /api/user/signup 로 호출하세요.");
     }
 }
