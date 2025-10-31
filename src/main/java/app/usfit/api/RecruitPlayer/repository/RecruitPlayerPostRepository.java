@@ -10,4 +10,6 @@ import app.usfit.api.RecruitPlayer.entity.RecruitPlayerPost;
 @Repository
 public interface RecruitPlayerPostRepository extends JpaRepository<RecruitPlayerPost, Long> {
     List<RecruitPlayerPost> findByIsActiveTrue();
+    java.util.List<RecruitPlayerPost> findByWriter_IdAndIsActiveTrueOrderByIdDesc(Long writerId);
+    java.util.List<RecruitPlayerPost> findByWriter_IdOrderByIdDesc(Long writerId);
 }
