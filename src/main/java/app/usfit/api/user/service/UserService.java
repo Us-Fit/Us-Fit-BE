@@ -36,4 +36,9 @@ public class UserService {
     public long countUsers() {
         return userRepository.count();
     }
+
+    // ID로 사용자 조회 메서드 추가
+    public Optional<User> findbyId(Long id) {
+        return userRepository.findById(id);
+    }
 }

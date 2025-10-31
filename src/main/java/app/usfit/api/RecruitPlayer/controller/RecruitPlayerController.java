@@ -1,47 +1,109 @@
 package app.usfit.api.RecruitPlayer.controller;
 
-import java.security.Principal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import app.usfit.api.RecruitPlayer.dto.RecruitPlayerPostRequest;
+import app.usfit.api.RecruitPlayer.dto.RecruitPlayerPostResponse;
 import app.usfit.api.RecruitPlayer.entity.RecruitPlayerPost;
 import app.usfit.api.RecruitPlayer.service.RecruitPlayerPostService;
-import app.usfit.api.user.service.UserService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/recruits")
 public class RecruitPlayerController {
 
     @Autowired
-    private RecruitPlayerPostService service;
-    @Autowired
-    private UserService userService;
+    private final RecruitPlayerPostService service;
+
+    public RecruitPlayerController(RecruitPlayerPostService service) {
+        this.service = service;
+    }
 
     @PostMapping
-    public ResponseEntity<RecruitPlayerPost> createPost(@RequestBody RecruitPlayerPostRequest req, Principal principal) {
-        // principal에서 로그인된 유저 정보 가져오기 (Spring Security 사용 시)
-        // User writer = userService.findByName(principal.getName()).orElse(null);
+    public ResponseEntity<RecruitPlayerPostResponse> createPost(@Valid @RequestBody RecruitPlayerPostRequest req, Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(401).build();
+        }
 
-        // if (writer == null) {
-        //     System.out.println("작성자 정보가 없습니다.");
-        //     return ResponseEntity.status(401).build(); // Unauthorized
-        // }
-        //RecruitPlayerPost post = service.createPost(req, writer);
+        Long userId = Long.parseLong(authentication.getName());
 
-        RecruitPlayerPost post = service.createPost(req, null); // 임시로 null 전달
-        return ResponseEntity.ok(post);
+        RecruitPlayerPost saved = service.createPost(req, userId);
+
+        RecruitPlayerPostResponse res = new RecruitPlayerPostResponse(
+            saved.getId(),
+            saved.getWriter().getId(),
+            saved.getSport().getId(),
+            saved.getTitle(),
+            saved.getDescription(),
+            saved.getLocation(),
+            saved.getRecruitDeadline(),
+            saved.getActivityStartTime(),
+            saved.getActivityDurationMinutes(),
+            saved.getMaxMember(),
+            saved.getIsActive()
+        );
+
+        return ResponseEntity.ok(res);
     }
 
     @GetMapping
-    public List<RecruitPlayerPost> getAllActivePosts() {
-        return service.getActivePosts();
+    public ResponseEntity<List<RecruitPlayerPostResponse>> getAllActivePosts() {
+        var list = service.getActivePosts().stream().map(p ->
+            new RecruitPlayerPostResponse(
+                p.getId(),
+                p.getWriter().getId(),
+                p.getSport().getId(),
+                p.getTitle(),
+                p.getDescription(),
+                p.getLocation(),
+                p.getRecruitDeadline(),
+                p.getActivityStartTime(),
+                p.getActivityDurationMinutes(),
+                p.getMaxMember(),
+                p.getIsActive()
+            )
+        ).toList();
+
+        return ResponseEntity.ok(list);
+    }
+
+    // 내가 작성한 글 목록
+    @GetMapping(value = "/me", produces = "application/json")
+    public ResponseEntity<List<RecruitPlayerPostResponse>> getMyPosts(
+        Authentication authentication,
+        @RequestParam(name = "activeOnly", defaultValue = "true") boolean activeOnly
+    ) {
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(401).build();
+        }
+        Long userId = Long.parseLong(authentication.getName());
+
+        var list = service.getMyPosts(userId, activeOnly).stream().map(p ->
+            new RecruitPlayerPostResponse(
+                p.getId(),                          // 엔티티 식별자 getter에 맞춰 사용
+                p.getWriter().getId(),
+                p.getSport().getId(),
+                p.getTitle(),
+                p.getDescription(),
+                p.getLocation(),
+                p.getRecruitDeadline(),
+                p.getActivityStartTime(),
+                p.getActivityDurationMinutes(),
+                p.getMaxMember(),
+                p.getIsActive()
+            )
+        ).toList();
+
+        return ResponseEntity.ok(list);
     }
 }
