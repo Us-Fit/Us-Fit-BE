@@ -17,6 +17,8 @@ import app.usfit.api.user.entity.User;
 import app.usfit.api.user.repository.UserRepository;
 import app.usfit.api.user.service.AuthService;
 import app.usfit.api.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
@@ -30,6 +32,7 @@ public class UserController {
     @Autowired
     private UserRepository repo;
     
+    @Operation(summary = "로그인", security={})
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest request) {
         return authService.login(request);
@@ -50,7 +53,8 @@ public class UserController {
         return ResponseEntity.ok(count);
     }
     
-    // 회원가입 엔드포인트 (이메일, 이름, 비밀번호)
+    // 회원가입 엔드포인트 (이메일, 이름, 비밀번호)(토큰 요구 X)
+    @Operation(summary = "회원가입", security = {})
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody UserRegisterRequest request) {
         try {
@@ -59,5 +63,10 @@ public class UserController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body("회원가입 실패: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/signup")
+    public ResponseEntity<String> signupGetInfo() {
+        return ResponseEntity.ok("회원가입은 POST /api/user/signup 로 호출하세요.");
     }
 }

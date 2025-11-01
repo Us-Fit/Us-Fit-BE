@@ -29,8 +29,6 @@ public class GoogleLoginHandler implements LoginHandler {
         User user = userRepository.findByProviderAndProviderId(AuthProviderEnum.GOOGLE, mockProviderId)
                 .orElseGet(() -> userRepository.save(User.builder()
                         .email("google_" + mockProviderId + "@placeholder.local")
-                        .nickname("GoogleUser")
-                        .username("google_" + mockProviderId)
                         .provider(AuthProviderEnum.GOOGLE)
                         .providerId(mockProviderId)
                         .password(null)

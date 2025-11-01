@@ -19,8 +19,8 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
     
-    public Optional<User> login(String username, String rawPassword) {
-        Optional<User> userOpt = userRepository.findByUsername(username);
+    public Optional<User> login(String email, String rawPassword) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isPresent() && passwordEncoder.matches(rawPassword, userOpt.get().getPassword())) {
             return userOpt;
         }
@@ -35,5 +35,10 @@ public class UserService {
     // 사용자 수 조회 메서드 추가
     public long countUsers() {
         return userRepository.count();
+    }
+
+    // ID로 사용자 조회 메서드 추가
+    public Optional<User> findbyId(Long id) {
+        return userRepository.findById(id);
     }
 }
