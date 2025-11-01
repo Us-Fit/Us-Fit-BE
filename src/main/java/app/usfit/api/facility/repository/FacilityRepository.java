@@ -31,21 +31,30 @@ public interface FacilityRepository extends JpaRepository<Facility, Long> {
     )
     List<Facility> findFacilityById(@Param("ids") Collection<Long> ids);
 
-    //시, 도 로 facility id 찾기
+    //도로 facility 찾기
     @Query("""
-           select distinct a.facility.id
+           select distinct a.facility
            from FacilityAddress a
            where a.sidoCd = :sidoCd
            """
     )
-    List<Long> findFacilityIdsBySidoCd(@Param("sidoCd") String sidoCd);
+    List<Facility> findFacilityBySidoCd(@Param("sidoCd") String sidoCd);
 
-    //facility type cd 로 facility id 찾기
+    //시로 facility 찾기
     @Query("""
-           select f.id
+           select distinct a.facility
+           from FacilityAddress a
+           where a.sigunguCd = :sigunguCd
+           """
+    )
+    List<Facility> findFacilityBySigunguCd(@Param("sigunguCd") String sigunguCd);
+
+    //facility type cd 로 facility 찾기
+    @Query("""
+           select f
            from Facility f
            where f.typeCode = :typeCode
            """
     )
-    List<Long> findFacilityIdsByTypeCd(@Param("typeCode") String typeCode);
+    List<Facility> findFacilityByTypeCd(@Param("typeCode") String typeCode);
 }
