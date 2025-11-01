@@ -1,13 +1,7 @@
 package app.usfit.api;
 
-import app.usfit.api.facility.service.FacilityImportService;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 
 @SpringBootApplication
 public class UsFitApplication {
