@@ -1,5 +1,6 @@
 package app.usfit.api.facility;
 
+import app.usfit.api.facility.dto.FacilityDetailDto;
 import app.usfit.api.facility.entity.Facility;
 import app.usfit.api.facility.repository.FacilityRepository;
 import app.usfit.api.facility.repository.FacilitySportRepository;
@@ -78,5 +79,17 @@ public class FindFacility {
         }
 
         assertThat(facilities).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("facility id로 facility detail 정보 넘기기")
+    void getFacilityDetailById() {
+        Long id = 1L;
+
+        FacilityDetailDto dto = facilityRepo.getFacilityInfo(id);
+
+        System.out.println("facility : " + dto.getName() + " / " + dto.getRoadAddr1());
+
+        assertThat(dto).isNotNull();
     }
 }
