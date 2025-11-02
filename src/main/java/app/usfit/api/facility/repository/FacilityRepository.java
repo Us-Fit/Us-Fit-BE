@@ -1,5 +1,6 @@
 package app.usfit.api.facility.repository;
 
+import app.usfit.api.facility.dto.FacilityDetailDto;
 import app.usfit.api.facility.entity.Facility;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,6 +21,24 @@ public interface FacilityRepository extends JpaRepository<Facility, Long> {
     """)
     List<Facility> findAllByNameAndRoadAddr1(@Param("name") String name,
                                              @Param("roadAddr1") String roadAddr1);
+
+    //facility id로 facility 상세 페이지에 필요한 내용들 출력
+    @Query("""
+        select new app.usfit.api.facility.dto.FacilityDetailDto(
+            f.name,
+            f.typeName,
+            a.sidoNm,
+            a.sigunguNm,
+            a.roadAddr1,
+            a.lat,
+            a.lng
+        )
+        from Facility f
+        join FacilityAddress a
+            on a.facility = f
+        where f.id = :id
+    """)
+    FacilityDetailDto getFacilityInfo(@Param("id") Long id);
 
     //facility id List를 넘겨주면 facility entity list 반환
     @Query("""
