@@ -88,7 +88,7 @@ public class FindFacility {
 
         FacilityDetailDto dto = facilityRepo.getFacilityInfo(id);
 
-        System.out.println("facility : " + dto.getName() + " / " + dto.getRoadAddr1());
+        System.out.println(dto);
 
         assertThat(dto).isNotNull();
     }

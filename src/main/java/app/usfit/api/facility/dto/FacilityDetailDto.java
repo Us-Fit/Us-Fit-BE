@@ -15,8 +15,11 @@ public class FacilityDetailDto {
     private String roadAddr1;
     private BigDecimal lat;
     private BigDecimal lng;
+    private String managerPhone;
+    private Integer areaSqm;
+    private String indoorOutdoor;
 
-    // 💡 이 생성자가 핵심이야. 순서/타입 전부 JPQL과 같아야 함.
+    //순서/타입 전부 JPQL과 같아야 함.
     public FacilityDetailDto(
             String name,
             String typeName,
@@ -24,7 +27,10 @@ public class FacilityDetailDto {
             String sigunguNm,
             String roadAddr1,
             BigDecimal lat,
-            BigDecimal lng
+            BigDecimal lng,
+            String managerPhone,
+            Integer areaSqm,
+            String indoorOutdoor
     ) {
         this.name = name;
         this.typeName = typeName;
@@ -33,5 +39,24 @@ public class FacilityDetailDto {
         this.roadAddr1 = roadAddr1;
         this.lat = lat;
         this.lng = lng;
+        this.managerPhone = managerPhone;
+        this.areaSqm = areaSqm;
+        this.indoorOutdoor = indoorOutdoor;
+    }
+
+    @Override
+    public String toString() {
+        return "FacilityDetailDto{" +
+                "name='" + name + '\'' +
+                ", typeName='" + typeName + '\'' +
+                ", sidoNm='" + sidoNm + '\'' +
+                ", sigunguNm='" + sigunguNm + '\'' +
+                ", roadAddr1='" + roadAddr1 + '\'' +
+                ", lat=" + lat +
+                ", lng=" + lng +
+                ", managerPhone='" + managerPhone + '\'' +
+                ", areaSqm=" + areaSqm +
+                ", indoorOutdoor='" + indoorOutdoor + '\'' +
+                '}';
     }
 }
