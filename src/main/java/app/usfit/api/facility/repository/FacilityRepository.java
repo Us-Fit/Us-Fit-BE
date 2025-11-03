@@ -31,11 +31,16 @@ public interface FacilityRepository extends JpaRepository<Facility, Long> {
             a.sigunguNm,
             a.roadAddr1,
             a.lat,
-            a.lng
+            a.lng,
+            b.managerPhone,
+            f.areaSqm,
+            f.indoorOutdoor
         )
         from Facility f
         join FacilityAddress a
             on a.facility = f
+        join FacilityContact b
+            on b.facility = f
         where f.id = :id
     """)
     FacilityDetailDto getFacilityInfo(@Param("id") Long id);
