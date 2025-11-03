@@ -1,5 +1,6 @@
 package app.usfit.api.facility.repository;
 
+import app.usfit.api.facility.dto.FacilityDetailDto;
 import app.usfit.api.facility.entity.Facility;
 import app.usfit.api.facility.entity.FacilitySport;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,17 +44,31 @@ public interface FacilitySportRepository extends JpaRepository<FacilitySport, Lo
             @Param("sidoNm") String sidoNm
     );
 
+    //sport name과 facility sigunguNm으로 facility 찾기
     @Query("""
-    SELECT DISTINCT f
+    SELECT DISTINCT new app.usfit.api.facility.dto.FacilityDetailDto(
+        f.name,
+        f.typeName,
+        addr.sidoNm,
+        addr.sigunguNm,
+        addr.roadAddr1,
+        addr.lat,
+        addr.lng,
+        contact.managerPhone,
+        f.areaSqm,
+        f.indoorOutdoor
+    )
     FROM FacilitySport fs
     JOIN fs.sport s
     JOIN fs.facility f
     JOIN FacilityAddress addr ON addr.facility = f
+    JOIN FacilityContact contact ON contact.facility = f
     WHERE s.name = :sportName
       AND addr.sigunguNm = :sigunguNm
     """)
-    List<Facility> findFacilitiesBySportNameAndSigungu(
+    List<FacilityDetailDto> findFacilitiesBySportNameAndSigungu(
             @Param("sportName") String sportName,
             @Param("sigunguNm") String sigunguNm
     );
+
 }
