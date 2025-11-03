@@ -72,13 +72,13 @@ public class FindFacility {
     @Test
     @DisplayName("sport name과 sigunguCd로 (시) facility 찾기")
     void findFacilityBySportNameAndSigungu(){
-        List<Facility> facilities = facilitySportRepo.findFacilitiesBySportNameAndSigungu("간이운동장", "김천시");
+        List<FacilityDetailDto> dto = facilitySportRepo.findFacilitiesBySportNameAndSigungu("간이운동장", "김천시");
 
-        for (Facility facility : facilities) {
-            System.out.println("시설 이름: " + facility.getName());
+        for (FacilityDetailDto d : dto) {
+            System.out.println(d);
         }
 
-        assertThat(facilities).isNotEmpty();
+        assertThat(dto).isNotEmpty();
     }
 
     @Test
