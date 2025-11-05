@@ -1,12 +1,13 @@
 package app.usfit.api.sport.repository;
 
-import app.usfit.api.sport.entity.UserSport;
-import app.usfit.api.sport.entity.Sport;
-import app.usfit.api.user.entity.User;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import app.usfit.api.sport.entity.Sport;
+import app.usfit.api.sport.entity.UserSport;
+import app.usfit.api.user.entity.User;
 
 public interface UserSportRepository extends JpaRepository<UserSport, Long> {
 
