@@ -7,6 +7,7 @@ import app.usfit.api.common.enums.AuthProviderEnum;
 import app.usfit.api.oauth.kakao.KakaoOAuthClient;
 import app.usfit.api.oauth.kakao.dto.KakaoTokenResponse;
 import app.usfit.api.oauth.kakao.dto.KakaoUserInfoResponse;
+import app.usfit.api.security.jwt.JwtTokenProvider;
 import app.usfit.api.user.dto.LoginRequest;
 import app.usfit.api.user.dto.LoginResponse;
 import app.usfit.api.user.entity.User;
@@ -17,10 +18,16 @@ public class KakaoLoginHandler implements LoginHandler {
 
     private final UserRepository userRepository;
     private final KakaoOAuthClient kakaoOAuthClient;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public KakaoLoginHandler(UserRepository userRepository, KakaoOAuthClient kakaoOAuthClient) {
+    public KakaoLoginHandler(
+        UserRepository userRepository, 
+        KakaoOAuthClient kakaoOAuthClient,
+        JwtTokenProvider jwtTokenProvider
+    ) {
         this.userRepository = userRepository;
         this.kakaoOAuthClient = kakaoOAuthClient;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
@@ -39,6 +46,9 @@ public class KakaoLoginHandler implements LoginHandler {
             KakaoTokenResponse tokenResponse = kakaoOAuthClient.exchangeToken(request.getAuthCode());
             accessToken = tokenResponse.accessToken();
         }
+        else {
+            throw new RuntimeException("카카오 로그인: authCode 또는 accessToken 중 하나는 필수입니다.");
+        }
 
         // 2) 사용자 정보 조회
         KakaoUserInfoResponse profile = kakaoOAuthClient.getUserInfo(accessToken);
@@ -48,19 +58,15 @@ public class KakaoLoginHandler implements LoginHandler {
         }
         String providerId = profile.id().toString();
         String email = profile.safeEmail();
-        String nickname = profile.safeNickname();
         // 카카오는 사용자가 동의하지 않으면 이메일/닉네임이 없을 수 있다고 해서 일단 임시값.
         if (!StringUtils.hasText(email)) email = "kakao_" + providerId + "@placeholder.local";
-        if (!StringUtils.hasText(nickname)) nickname = "KakaoUser";
 
         // 3) upsert (provider + providerId)
         final String emailFinal = email;
-        final String nicknameFinal = nickname;
+        
         User user = userRepository.findByProviderAndProviderId(AuthProviderEnum.KAKAO, providerId)
                 .orElseGet(() -> userRepository.save(User.builder()
                         .email(emailFinal)
-                        .nickname(nicknameFinal)
-                        .username(emailFinal)
                         .provider(AuthProviderEnum.KAKAO)
                         .providerId(providerId)
                         .password(null)
@@ -69,8 +75,8 @@ public class KakaoLoginHandler implements LoginHandler {
         // .orElse -> 값이 없든 있는 뒤 먼저 실행
         // .build() -> User 객체 생성
 
-        // 4) 토큰 발행은 제외 (틀만) → token=null 로 응답
-        return LoginResponse.of(user, null);
-
+        // 4) 토큰 발행 (jwt)
+        String jwt = jwtTokenProvider.createAccessToken(user.getId(), user.getProvider().name(), user.getEmail());
+        return LoginResponse.of(user, jwt);
     }
 }
