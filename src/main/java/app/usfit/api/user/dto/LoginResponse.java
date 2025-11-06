@@ -12,7 +12,6 @@ import app.usfit.api.user.entity.User;
 public record LoginResponse(
         Long userId,
         String email,
-        String nickname,
         AuthProviderEnum provider,
         String token
 ) {
@@ -20,7 +19,6 @@ public record LoginResponse(
         return new LoginResponse(
                 user.getId(),
                 user.getEmail(),
-                user.getNickname(),
                 user.getProvider(),
                 token
         );
