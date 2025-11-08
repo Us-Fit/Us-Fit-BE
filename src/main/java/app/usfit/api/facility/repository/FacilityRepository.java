@@ -25,6 +25,7 @@ public interface FacilityRepository extends JpaRepository<Facility, Long> {
     //facility id로 facility 상세 페이지에 필요한 내용들 출력
     @Query("""
         select new app.usfit.api.facility.dto.FacilityDetailDto(
+            f.id,
             f.name,
             f.typeName,
             a.sidoNm,
