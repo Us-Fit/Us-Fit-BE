@@ -47,6 +47,7 @@ public interface FacilitySportRepository extends JpaRepository<FacilitySport, Lo
     //sport name과 facility sigunguNm으로 facility 찾기
     @Query("""
     SELECT DISTINCT new app.usfit.api.facility.dto.FacilityDetailDto(
+        f.id,
         f.name,
         f.typeName,
         addr.sidoNm,
