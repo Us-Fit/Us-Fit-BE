@@ -22,7 +22,7 @@ public class UsFitApplication {
 	CommandLineRunner importFacilities(FacilityImportService service) {
 		return args -> {
 			// CSV 파일 경로 지정 (절대경로 또는 상대경로)
-			Path csvPath = Path.of("C:/Users/tpgus/Desktop/2025-2/usfit-bigdata/dataTemp.csv");
+			Path csvPath = Path.of("C:/Users/tpgus/OneDrive/usfit-bigdata/dataTemp.csv");
 
 			// 인코딩 설정: 파일이 MS949면 StandardCharsets.UTF_8 대신 Charset.forName("MS949")
 			int imported = service.importCsv(csvPath, true, StandardCharsets.UTF_8);
