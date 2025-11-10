@@ -8,6 +8,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -64,18 +65,32 @@ public class FacilityImportService {
 
         Iterable<CSVRecord> rows = fmt.parse(reader);
 
-        // upsert면 미리 한 번에 가져오기
+        // upsert면 기존 데이터 미리 가져오기 (페이징 or 키 기반)
         Map<String, Facility> existingMap = Collections.emptyMap();
+
         if (upsert) {
             existingMap = new HashMap<>();
-            for (Facility f : repo.findAll()) {
-                String addr = (f.getAddresses().isEmpty()) ? "" : f.getAddresses().get(0).getRoadAddr1();
-                String key = makeKey(f.getName(), addr);
-                existingMap.put(key, f);
-            }
+
+            int pageSize = 2000;
+            int page = 0;
+            List<Facility> pageResult;
+
+            do {
+                pageResult = repo.findAll(PageRequest.of(page, pageSize)).getContent();
+
+                for (Facility f : pageResult) {
+                    String addr = (f.getAddresses().isEmpty()) ? "" : f.getAddresses().get(0).getRoadAddr1();
+                    String key = makeKey(f.getName(), addr);
+                    existingMap.put(key, f);
+                }
+
+                page++;
+                //em.clear(); // 메모리 방지
+            } while (!pageResult.isEmpty());
         }
 
-        final int BATCH = 5000;
+
+        final int BATCH = 2000;
         List<Facility> batch = new ArrayList<>(BATCH);
         int count = 0;
 

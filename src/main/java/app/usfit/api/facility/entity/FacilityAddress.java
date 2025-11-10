@@ -77,6 +77,9 @@ public class FacilityAddress {
     @Column(name = "sigungu_nm", length = 50)
     private String sigunguNm; // 시군구 명 (SIGNGU_NM)
 
+    @Column(name = "sigungu_clean")
+    private String sigunguClean;
+
     // 관리 관할(행정)
     @Column(length = 10)
     private String mngSidoCd; // 관리 시도 코드
