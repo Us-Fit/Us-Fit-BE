@@ -45,8 +45,35 @@ public interface FacilitySportRepository extends JpaRepository<FacilitySport, Lo
     );
 
     //sport name과 facility sigunguNm으로 facility 찾기
+//    @Query("""
+//    SELECT DISTINCT new app.usfit.api.facility.dto.FacilityDetailDto(
+//        f.id,
+//        f.name,
+//        f.typeName,
+//        addr.sidoNm,
+//        addr.sigunguNm,
+//        addr.roadAddr1,
+//        addr.lat,
+//        addr.lng,
+//        contact.managerPhone,
+//        f.areaSqm,
+//        f.indoorOutdoor
+//    )
+//    FROM FacilitySport fs
+//    JOIN fs.sport s
+//    JOIN fs.facility f
+//    JOIN FacilityAddress addr ON addr.facility = f
+//    JOIN FacilityContact contact ON contact.facility = f
+//    WHERE s.name = :sportName
+//      AND addr.sigunguNm = :sigunguNm
+//    """)
+//    List<FacilityDetailDto> findFacilitiesBySportNameAndSigungu(
+//            @Param("sportName") String sportName,
+//            @Param("sigunguNm") String sigunguNm
+//    );
     @Query("""
     SELECT DISTINCT new app.usfit.api.facility.dto.FacilityDetailDto(
+        f.id,
         f.name,
         f.typeName,
         addr.sidoNm,
@@ -61,8 +88,8 @@ public interface FacilitySportRepository extends JpaRepository<FacilitySport, Lo
     FROM FacilitySport fs
     JOIN fs.sport s
     JOIN fs.facility f
-    JOIN FacilityAddress addr ON addr.facility = f
-    JOIN FacilityContact contact ON contact.facility = f
+    JOIN f.addresses addr
+    LEFT JOIN f.contacts contact
     WHERE s.name = :sportName
       AND addr.sigunguNm = :sigunguNm
     """)
