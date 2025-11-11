@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
 @Schema(description = "시설 상세 정보 DTO")
 public class FacilityDetailDto {
 
+    @Schema(description = "시설 ID", example = "101")
+    private Long facilityId;
+
     @Schema(description = "시설 이름", example = "김천종합운동장")
     private String name;
 
@@ -43,6 +46,7 @@ public class FacilityDetailDto {
 
     //순서/타입 전부 JPQL과 같아야 함.
     public FacilityDetailDto(
+            Long facilityId,
             String name,
             String typeName,
             String sidoNm,
@@ -54,6 +58,7 @@ public class FacilityDetailDto {
             Integer areaSqm,
             String indoorOutdoor
     ) {
+        this.facilityId = facilityId;
         this.name = name;
         this.typeName = typeName;
         this.sidoNm = sidoNm;
@@ -69,6 +74,7 @@ public class FacilityDetailDto {
     @Override
     public String toString() {
         return "FacilityDetailDto{" +
+                "facilityId=" + facilityId + '\'' +
                 "name='" + name + '\'' +
                 ", typeName='" + typeName + '\'' +
                 ", sidoNm='" + sidoNm + '\'' +
