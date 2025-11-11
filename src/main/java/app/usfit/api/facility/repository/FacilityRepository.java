@@ -38,9 +38,9 @@ public interface FacilityRepository extends JpaRepository<Facility, Long> {
             f.indoorOutdoor
         )
         from Facility f
-        join FacilityAddress a
+        left join FacilityAddress a
             on a.facility = f
-        join FacilityContact b
+        left join FacilityContact b
             on b.facility = f
         where f.id = :id
     """)
