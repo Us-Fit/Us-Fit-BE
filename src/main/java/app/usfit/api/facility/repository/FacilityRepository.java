@@ -82,4 +82,33 @@ public interface FacilityRepository extends JpaRepository<Facility, Long> {
            """
     )
     List<Facility> findFacilityByTypeCd(@Param("typeCode") String typeCode);
+
+    @Query("""
+    select new app.usfit.api.facility.dto.FacilityDetailDto(
+            f.id,
+            f.name,
+            f.typeName,
+            a.sidoNm,
+            a.sigunguNm,
+            a.roadAddr1,
+            a.lat,
+            a.lng,
+            b.managerPhone,
+            f.areaSqm,
+            f.indoorOutdoor
+    )
+    FROM FacilityAddress addr
+    JOIN addr.facility f
+    WHERE ST_Distance_Sphere(
+            point(:lng, :lat),
+            point(addr.lng, addr.lat)
+    ) <= :radius * 1000
+    ORDER BY distance ASC
+    """)
+        List<FacilityDetailDto> findNearbyFacilities(
+                @Param("lat") double lat,
+                @Param("lng") double lng,
+                @Param("radius") double radius
+        );
+
 }
