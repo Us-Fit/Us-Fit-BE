@@ -1,6 +1,7 @@
 package app.usfit.api.facility.repository;
 
 import app.usfit.api.facility.dto.FacilityDetailDto;
+import app.usfit.api.facility.dto.FacilityDetailView;
 import app.usfit.api.facility.entity.Facility;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -82,4 +83,52 @@ public interface FacilityRepository extends JpaRepository<Facility, Long> {
            """
     )
     List<Facility> findFacilityByTypeCd(@Param("typeCode") String typeCode);
+
+
+
+    @Query(value = """
+    SELECT
+        f.id                               AS id,
+        f.name                             AS name,
+        f.type_name                        AS typeName,
+        addr.sido_nm                       AS sidoNm,
+        addr.sigungu_nm                    AS sigunguNm,
+        addr.road_addr1                    AS roadAddr1,
+        addr.lat                           AS lat,
+        addr.lng                           AS lng,
+        c.manager_phone                    AS managerPhone,
+        f.area_sqm                         AS areaSqm,
+        f.indoor_outdoor                   AS indoorOutdoor,
+        ST_Distance_Sphere(
+            ST_SRID(POINT(:lng, :lat), 4326),
+            addr.loc
+        ) AS distance
+    FROM facility_address addr
+    JOIN facility f           ON f.id = addr.facility_id
+    LEFT JOIN facility_contact c ON c.facility_id = f.id
+    JOIN facility_sport fs     ON fs.facility_id = f.id
+    JOIN sports s              ON s.id = fs.sport_id
+    WHERE
+        (:sportIdsIsEmpty = TRUE OR s.id IN (:sportIds))
+        AND ST_Distance_Sphere(
+              ST_SRID(POINT(:lng, :lat), 4326),
+              addr.loc
+            ) <= :radiusKm * 1000
+    GROUP BY
+        f.id, f.name, f.type_name, addr.sido_nm, addr.sigungu_nm,
+        addr.road_addr1, addr.lat, addr.lng, c.manager_phone, f.area_sqm, f.indoor_outdoor
+    ORDER BY
+        distance ASC
+    LIMIT :limit OFFSET :offset
+""", nativeQuery = true)
+    List<FacilityDetailView> findNearbyFacilitiesNative(
+            @Param("lat") double lat,
+            @Param("lng") double lng,
+            @Param("radiusKm") double radiusKm,
+            @Param("sportIds") List<Long> sportIds,
+            @Param("sportIdsIsEmpty") boolean sportIdsIsEmpty,
+            @Param("limit") int limit,
+            @Param("offset") int offset
+    );
+
 }
