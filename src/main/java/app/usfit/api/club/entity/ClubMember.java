@@ -1,11 +1,27 @@
 package app.usfit.api.club.entity;
 
-import app.usfit.api.user.entity.User;
-import jakarta.persistence.*;
-import lombok.*;
+import java.time.LocalDateTime;
+
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import app.usfit.api.user.entity.User;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * ClubMember (동호회 회원) 엔티티
@@ -23,6 +39,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@Setter
 public class ClubMember {
 
     @Id
@@ -39,10 +56,10 @@ public class ClubMember {
             foreignKey = @ForeignKey(name = "fk_club_member_user"))
     private User user; // 회원 사용자 FK
 
-    @Column(length = 20)
+    @Column(name = "role", length = 20)
     private String role;   // 역할: owner/admin/member 등
 
-    @Column(length = 20)
+    @Column(name = "status", length = 20)
     private String status; // 상태: active/pending/banned/left 등
 
     @CreationTimestamp

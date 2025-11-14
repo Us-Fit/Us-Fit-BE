@@ -8,9 +8,11 @@ import lombok.Data;
 @Data
 public class RecruitPlayerPostRequest {
     @NotNull
-    private Long sportTypeId;
+    private String sportName; // 운동 이름
 
+    @NotNull
     private String title;
+    @NotNull
     private String description;
       
     private String location;
