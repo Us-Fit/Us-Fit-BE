@@ -1,20 +1,27 @@
 package app.usfit.api;
 
-import app.usfit.api.facility.service.FacilityImportService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Profile;
-
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
+import org.springframework.core.env.Environment;
 
 @SpringBootApplication
 public class UsFitApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(UsFitApplication.class, args);
 	}
+
+	@Bean
+    CommandLineRunner printDb(Environment env) {
+        return args -> {
+            System.out.println(">>> spring.datasource.url = " + env.getProperty("spring.datasource.url"));
+            System.out.println(">>> ENV SPRING_DATASOURCE_URL = " + System.getenv("SPRING_DATASOURCE_URL"));
+            System.out.println(">>> ENV DB_URL = " + System.getenv("DB_URL"));
+            System.out.println(">>> JVM prop spring.datasource.url = " + System.getProperty("spring.datasource.url"));
+            System.out.println(">>> Active profiles = " + String.join(",", env.getActiveProfiles()));
+        };
+    }
 	//facility data가 database에 없을 시 처음 서버 작동에만 주석 해제
 //	@Bean
 //	@Profile("!test")
