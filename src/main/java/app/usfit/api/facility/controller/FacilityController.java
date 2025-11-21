@@ -62,10 +62,13 @@ public class FacilityController {
             @Parameter(description = "스포츠 이름 (예: 간이운동장)", example = "간이운동장", required = true)
             @RequestParam String sportName,
 
+            @Parameter(description = "시 이름 (예: 경상북도)", example = "경상북도", required = true)
+            @RequestParam String sidoNm,
+
             @Parameter(description = "시군구 이름 (예: 김천시)", example = "김천시", required = true)
             @RequestParam String sigunguNm
     ) {
-        return facilitySportRepository.findFacilitiesBySportNameAndSigungu(sportName, sigunguNm);
+        return facilitySportRepository.findFacilitiesBySportNameAndSigungu(sportName, sidoNm, sigunguNm);
     }
 
     /**
