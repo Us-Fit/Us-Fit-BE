@@ -79,6 +79,7 @@ public interface FacilitySportRepository extends JpaRepository<FacilitySport, Lo
         addr.sidoNm,
         addr.sigunguNm,
         addr.roadAddr1,
+        addr.roadAddr2,
         addr.lat,
         addr.lng,
         contact.managerPhone,

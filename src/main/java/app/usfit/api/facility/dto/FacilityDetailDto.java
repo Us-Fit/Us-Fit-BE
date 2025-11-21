@@ -29,6 +29,9 @@ public class FacilityDetailDto {
     @Schema(description = "도로명 주소", example = "김천시 시청로 1")
     private String roadAddr1;
 
+    @Schema(description = "상세 도로명 주소", example = "2층")
+    private String roadAddr2;
+
     @Schema(description = "위도", example = "36.133")
     private BigDecimal lat;
 
@@ -52,6 +55,7 @@ public class FacilityDetailDto {
             String sidoNm,
             String sigunguNm,
             String roadAddr1,
+            String roadAddr2,
             BigDecimal lat,
             BigDecimal lng,
             String managerPhone,
@@ -64,6 +68,7 @@ public class FacilityDetailDto {
         this.sidoNm = sidoNm;
         this.sigunguNm = sigunguNm;
         this.roadAddr1 = roadAddr1;
+        this.roadAddr2 = roadAddr2;
         this.lat = lat;
         this.lng = lng;
         this.managerPhone = managerPhone;
@@ -80,6 +85,7 @@ public class FacilityDetailDto {
                 ", sidoNm='" + sidoNm + '\'' +
                 ", sigunguNm='" + sigunguNm + '\'' +
                 ", roadAddr1='" + roadAddr1 + '\'' +
+                ", roadAddr2='" + roadAddr2 + '\'' +
                 ", lat=" + lat +
                 ", lng=" + lng +
                 ", managerPhone='" + managerPhone + '\'' +
