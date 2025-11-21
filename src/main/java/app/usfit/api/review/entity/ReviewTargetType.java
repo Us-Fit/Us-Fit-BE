@@ -1,4 +1,6 @@
 package app.usfit.api.review.entity;
 
-public class ReviewTargetType {
+public enum ReviewTargetType {
+    COURSE,
+    FACILITY
 }
