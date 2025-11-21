@@ -91,10 +91,11 @@ public interface FacilitySportRepository extends JpaRepository<FacilitySport, Lo
     JOIN f.addresses addr
     LEFT JOIN f.contacts contact
     WHERE s.name = :sportName
-      AND addr.sigunguNm = :sigunguNm
+      AND addr.sigunguNm = :sigunguNm AND addr.sidoNm = :sidoNm
     """)
     List<FacilityDetailDto> findFacilitiesBySportNameAndSigungu(
             @Param("sportName") String sportName,
+            @Param("sidoNm") String sidoNm,
             @Param("sigunguNm") String sigunguNm
     );
 
