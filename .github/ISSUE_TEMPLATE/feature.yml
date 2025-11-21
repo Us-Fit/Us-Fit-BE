@@ -20,7 +20,7 @@ body:
     id: summary
     attributes:
       label: 작업 제목
-      placeholder: "예: [refactor][structure] config 패키지 이동"
+      placeholder: "예: [feat][facility] 내 주변 시설 찾기 api 추가"
 
   - type: textarea
     id: background
