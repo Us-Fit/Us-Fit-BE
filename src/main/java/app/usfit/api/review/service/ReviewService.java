@@ -1,4 +1,143 @@
 package app.usfit.api.review.service;
 
+import app.usfit.api.review.dto.ReviewCreateRequest;
+import app.usfit.api.review.dto.ReviewDto;
+import app.usfit.api.review.dto.ReviewResponse;
+import app.usfit.api.review.dto.ReviewUpdateRequest;
+import app.usfit.api.review.entity.Review;
+import app.usfit.api.review.entity.ReviewImage;
+import app.usfit.api.review.entity.ReviewTargetType;
+import app.usfit.api.review.repository.ReviewRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
 public class ReviewService {
+
+    private static final String S3_BASE_URL =
+            "https://usfit-s3-bucket.s3.ap-southeast-2.amazonaws.com/";
+    private final ReviewRepository reviewRepository;
+    private final ReviewImageService reviewImageService;
+
+    //review 생성
+    public ReviewResponse createReview(ReviewCreateRequest request,
+                                       List<MultipartFile> images) {
+
+        // 1. 리뷰 저장
+        Review review = Review.builder()
+                .targetType(request.getTargetType())
+                .targetId(request.getTargetId())
+                .userId(request.getUserId())
+                .rating(request.getRating())
+                .comment(request.getComment())
+                .build();
+
+        reviewRepository.save(review);
+
+        // 2. 이미지 업로드 → ReviewImage 생성
+        if (images != null) {
+            for (MultipartFile image : images) {
+
+                String key = reviewImageService.uploadReviewImage(image, review.getId());
+
+                ReviewImage reviewImage = ReviewImage.builder()
+                        .review(review)
+                        .imageUrl(key)
+                        .build();
+
+                review.getImages().add(reviewImage);
+            }
+        }
+
+        reviewRepository.save(review);
+
+        // 3. Response 생성
+        List<String> imageUrls = review.getImages().stream()
+                .map(ReviewImage::getImageUrl)
+                .toList();
+
+        return ReviewResponse.builder()
+                .reviewId(review.getId())
+                .rating(review.getRating())
+                .comment(review.getComment())
+                .imageUrls(imageUrls)
+                .build();
+    }
+
+    //review 조회
+    public List<ReviewDto> getReviews(ReviewTargetType targetType, Long targetId) {
+        List<Review> reviews =
+                reviewRepository.findByTargetTypeAndTargetId(targetType, targetId);
+
+        return reviews.stream()
+                .map(ReviewDto::fromEntity)
+                .toList();
+    }
+
+    @Transactional
+    public ReviewResponse updateReview(
+            Long reviewId,
+            ReviewUpdateRequest request,
+            List<MultipartFile> newImages
+    ) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("리뷰 없음"));
+
+        // 1. 기본 필드 수정
+        review.setRating(request.getRating());
+        review.setComment(request.getComment());
+
+        // 2. 기존 이미지 삭제 (S3 + DB)
+        if (request.getDeleteImageUrls() != null) {
+            for (String url : request.getDeleteImageUrls()) {
+                // url → key 변환
+                String key = url.replace(S3_BASE_URL, "");
+
+                // S3 삭제
+                reviewImageService.deleteImage(key);
+
+                // DB 삭제
+                review.getImages()
+                        .removeIf(img -> img.getImageUrl().equals(key));
+            }
+        }
+
+        // 3. 새 이미지 추가
+        if (newImages != null) {
+            for (MultipartFile file : newImages) {
+                String key = reviewImageService.uploadReviewImage(file, reviewId);
+
+                ReviewImage reviewImage = ReviewImage.builder()
+                        .review(review)
+                        .imageUrl(key)
+                        .build();
+
+                review.getImages().add(reviewImage);
+            }
+        }
+
+        // 변경사항 자동 저장됨 (Transactional)
+
+        return ReviewResponse.from(ReviewDto.fromEntity(review));
+    }
+
+    @Transactional
+    public void deleteReview(Long reviewId) {
+
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("리뷰 없음"));
+
+        // 1. 리뷰 이미지 전부 S3에서 삭제
+        for (ReviewImage img : review.getImages()) {
+            reviewImageService.deleteImage(img.getImageUrl());
+        }
+
+        // 2. 리뷰 삭제 (연관 이미지도 cascade로 자동 삭제)
+        reviewRepository.delete(review);
+    }
 }
