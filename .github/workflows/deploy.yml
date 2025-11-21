@@ -2,8 +2,8 @@ name: Deploy to EC2
 
 on:
   push:
-    branches: ["dev"]    # dev에 push될 때 자동 배포
-  workflow_dispatch:      # 수동 실행도 가능
+    branches: ["dev"]
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -22,6 +22,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean build -x test
 
+      # 1) jar를 EC2의 app 폴더로만 복사 (폴더로 취급)
       - name: Copy JAR to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -29,15 +30,24 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "build/libs/*.jar"
-          target: "/home/ec2-user/app/usfit.jar"   # 항상 동일 파일명으로 덮어쓰기
+          target: "/home/ec2-user/app/"   # <= 슬래시! 폴더로 복사
 
+      # 2) EC2에서 jar 파일 이름을 usfit.jar로 맞추고 서비스 재시작
       - name: Restart service on EC2
         uses: appleboy/ssh-action@v1.1.0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
-          key: ${{ secrets.EC2_SSH_KEY }}
+          key: ${{ secrets_EC2_SSH_KEY }}
           script: |
+            cd /home/ec2-user/app
+
+            # 기존 usfit.jar 파일/폴더 있으면 삭제
+            rm -rf usfit.jar
+
+            # 새로 복사된 jar 하나를 usfit.jar로 이름 변경
+            mv build/libs/*.jar usfit.jar
+
             sudo systemctl daemon-reload
             sudo systemctl restart usfit
-            sudo systemctl status usfit --no-pager
+            sudo systemctl status usfit --no-pager || true
