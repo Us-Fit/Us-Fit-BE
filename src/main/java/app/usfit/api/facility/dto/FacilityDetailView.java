@@ -8,6 +8,7 @@ public interface FacilityDetailView {
     String getSidoNm();
     String getSigunguNm();
     String getRoadAddr1();
+    String getRoadAddr2();
     Double getLat();
     Double getLng();
     String getManagerPhone();

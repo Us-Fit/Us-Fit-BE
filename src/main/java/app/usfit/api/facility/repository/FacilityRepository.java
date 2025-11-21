@@ -32,6 +32,7 @@ public interface FacilityRepository extends JpaRepository<Facility, Long> {
             a.sidoNm,
             a.sigunguNm,
             a.roadAddr1,
+            a.roadAddr2,
             a.lat,
             a.lng,
             b.managerPhone,
@@ -94,6 +95,7 @@ public interface FacilityRepository extends JpaRepository<Facility, Long> {
         addr.sido_nm                       AS sidoNm,
         addr.sigungu_nm                    AS sigunguNm,
         addr.road_addr1                    AS roadAddr1,
+        addr.road_addr2                    AS roadAddr2,
         addr.lat                           AS lat,
         addr.lng                           AS lng,
         c.manager_phone                    AS managerPhone,
@@ -116,7 +118,7 @@ public interface FacilityRepository extends JpaRepository<Facility, Long> {
             ) <= :radiusKm * 1000
     GROUP BY
         f.id, f.name, f.type_name, addr.sido_nm, addr.sigungu_nm,
-        addr.road_addr1, addr.lat, addr.lng, c.manager_phone, f.area_sqm, f.indoor_outdoor
+        addr.road_addr1, addr.road_addr2, addr.lat, addr.lng, c.manager_phone, f.area_sqm, f.indoor_outdoor
     ORDER BY
         distance ASC
     LIMIT :limit OFFSET :offset

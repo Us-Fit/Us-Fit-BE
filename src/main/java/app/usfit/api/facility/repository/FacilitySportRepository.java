@@ -79,6 +79,7 @@ public interface FacilitySportRepository extends JpaRepository<FacilitySport, Lo
         addr.sidoNm,
         addr.sigunguNm,
         addr.roadAddr1,
+        addr.roadAddr2,
         addr.lat,
         addr.lng,
         contact.managerPhone,
@@ -91,10 +92,11 @@ public interface FacilitySportRepository extends JpaRepository<FacilitySport, Lo
     JOIN f.addresses addr
     LEFT JOIN f.contacts contact
     WHERE s.name = :sportName
-      AND addr.sigunguNm = :sigunguNm
+      AND addr.sigunguNm = :sigunguNm AND addr.sidoNm = :sidoNm
     """)
     List<FacilityDetailDto> findFacilitiesBySportNameAndSigungu(
             @Param("sportName") String sportName,
+            @Param("sidoNm") String sidoNm,
             @Param("sigunguNm") String sigunguNm
     );
 
