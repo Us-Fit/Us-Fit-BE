@@ -22,7 +22,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean build -x test
 
-      # 1) jar를 EC2의 app 폴더로만 복사 (폴더로 취급)
+      # 1) jar들을 통째로 EC2 app 폴더로 복사
       - name: Copy JAR to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -30,9 +30,9 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "build/libs/*.jar"
-          target: "/home/ec2-user/app/"   # <= 슬래시! 폴더로 복사
+          target: "/home/ec2-user/app/"
 
-      # 2) EC2에서 jar 파일 이름을 usfit.jar로 맞추고 서비스 재시작
+      # 2) 실행 가능한 jar만 골라 usfit.jar로 복사 후 systemd 재시작
       - name: Restart service on EC2
         uses: appleboy/ssh-action@v1.1.0
         with:
@@ -42,11 +42,15 @@ jobs:
           script: |
             cd /home/ec2-user/app
 
-            # 기존 usfit.jar 파일/폴더 있으면 삭제
-            rm -rf usfit.jar
+            # 기존 파일 제거
+            rm -f usfit.jar
 
-            # 새로 복사된 jar 하나를 usfit.jar로 이름 변경
-            mv build/libs/*.jar usfit.jar
+            # plain 제외 jar만 선택
+            JAR_PATH=$(ls build/libs/*SNAPSHOT.jar | grep -v plain | head -n 1)
+            echo "Using JAR: $JAR_PATH"
+
+            # usfit.jar로 복사
+            cp "$JAR_PATH" usfit.jar
 
             sudo systemctl daemon-reload
             sudo systemctl restart usfit
