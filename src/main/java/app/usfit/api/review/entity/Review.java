@@ -27,6 +27,7 @@ public class Review {
     private Integer rating;
     private String comment;
 
+    @Builder.Default
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReviewImage> images = new ArrayList<>();
 
