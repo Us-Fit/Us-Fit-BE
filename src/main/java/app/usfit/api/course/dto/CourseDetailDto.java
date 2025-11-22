@@ -11,8 +11,7 @@ import app.usfit.api.course.entity.Course;
 @Builder
 public class CourseDetailDto {
 
-    private Long id;
-
+    private Long courseId;
     private String bsnsNo;
     private String fcltyNm;
     private String itemCd;
@@ -39,7 +38,7 @@ public class CourseDetailDto {
         if (course == null) return null;
 
         return CourseDetailDto.builder()
-                .id(course.getId())
+                .courseId(course.getId())
                 .bsnsNo(course.getBsnsNo())
                 .fcltyNm(course.getFcltyNm())
                 .itemCd(course.getItemCd())
