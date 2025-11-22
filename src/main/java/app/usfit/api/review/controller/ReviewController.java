@@ -4,13 +4,13 @@ import app.usfit.api.review.dto.ReviewCreateRequest;
 import app.usfit.api.review.dto.ReviewDto;
 import app.usfit.api.review.dto.ReviewResponse;
 import app.usfit.api.review.dto.ReviewUpdateRequest;
-import app.usfit.api.review.entity.Review;
 import app.usfit.api.review.entity.ReviewTargetType;
-import app.usfit.api.review.repository.ReviewRepository;
 import app.usfit.api.review.service.ReviewImageService;
 import app.usfit.api.review.service.ReviewService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,7 +22,7 @@ import java.util.List;
 public class ReviewController {
     private final ReviewImageService reviewImageService;
     private final ReviewService reviewService;
-    private final ReviewRepository reviewRepository;
+    private final ObjectMapper objectMapper;
 
     //review에 이미지 업로드
     @PostMapping("/{reviewId}/images")
@@ -58,12 +58,16 @@ public class ReviewController {
     }
 
     // 리뷰 수정
-    @PutMapping(value = "/{reviewId}", consumes = {"multipart/form-data"})
-    public ReviewResponse  updateReview(
+    @PutMapping(value = "/{reviewId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ReviewResponse updateReview(
             @PathVariable Long reviewId,
-            @RequestPart("request") ReviewUpdateRequest request,
+            @RequestPart("request") String requestJson,   // 문자열로 받기
             @RequestPart(value = "images", required = false) List<MultipartFile> newImages
-    ) {
+    ) throws JsonProcessingException {
+
+        // JSON 문자열 → DTO 로 수동 변환
+        ReviewUpdateRequest request = objectMapper.readValue(requestJson, ReviewUpdateRequest.class);
+
         return reviewService.updateReview(reviewId, request, newImages);
     }
 
