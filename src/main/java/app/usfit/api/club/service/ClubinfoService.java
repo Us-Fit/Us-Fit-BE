@@ -62,20 +62,187 @@ public class ClubinfoService {
                 .build();
     }
 
-    // 동호회원 탈퇴
+    // 동호회원 탈퇴 -> 관리자가 탈퇴 처리
+    /**
+     * 운영자(소유자/관리자)가 특정 멤버를 강제 탈퇴시킴
+     * - owner: member, admin 삭제 가능(다른 owner 삭제 불가)
+     * - admin: member만 삭제 가능
+     * - 자기 자신 강제 삭제 불가 (자기 탈퇴 API 사용)
+     */
     @Transactional
     public void removeMember(Long clubId, Long memberId, Long requesterId) {
+        if (memberId.equals(requesterId)) {
+            throw new IllegalStateException("자기 자신을 강제 탈퇴시킬 수 없습니다.");
+        }
+        // 동호회 여부 확인
         Club club = entityManager.find(Club.class, clubId);
         if (club == null) throw new IllegalStateException("동호회가 존재하지 않습니다.");
-        if (club.getOwner() == null || !club.getOwner().getId().equals(requesterId)) {
-            throw new IllegalStateException("동호회 소유자만 동호회원의 탈퇴를 처리할 수 있습니다.");
+
+        ClubMember user = entityManager.createQuery(
+                "SELECT cm FROM ClubMember cm WHERE cm.club.id = :clubId AND cm.user.id = :userId", ClubMember.class)
+                .setParameter("clubId", clubId)
+                .setParameter("userId", memberId)
+                .setMaxResults(1)
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
+        if (user == null) throw new IllegalStateException("동호회원이 존재하지 않습니다.");
+        
+        ClubMember target = entityManager.createQuery(
+                "SELECT cm FROM ClubMember cm WHERE cm.club.id = :clubId AND cm.user.id = :userId", ClubMember.class)
+                .setParameter("clubId", clubId)
+                .setParameter("userId", requesterId)
+                .setMaxResults(1)
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
+        if (target == null) throw new IllegalStateException("대상이 동호회원이 아닙니다.");
+
+        // 권한 확인
+        String userRole = user.getRole() == null ? "member" : user.getRole().toLowerCase();
+        String targetRole = target.getRole() == null ? "member" : target.getRole().toLowerCase();
+
+        // 권한 검증
+        if ("owner".equals(userRole)) {
+            // 혹시 몰라서 넣어둠. owner는 owner 삭제 불가
+            if ("owner".equals(targetRole)) {
+                throw new IllegalStateException("다른 소유자를 삭제할 수 없습니다.");
+            }
+        }
+        else if ("admin".equals(userRole)) {
+            if (!"member".equals(targetRole)) {
+                throw new IllegalStateException("관리자는 일반 멤버만 강제 탈퇴시킬 수 있습니다.");
+            }
+        }
+        else {
+            throw new IllegalStateException("운영자(소유자/관리자)만 동호회원 강제 탈퇴가 가능합니다.");
         }
 
-        ClubMember cm = entityManager.find(ClubMember.class, memberId);
+        entityManager.remove(target);
+    }
+
+    // 동호회원 본인 탈퇴
+    @Transactional
+    public void leaveClub(Long clubId, Long userId) {
+        Club club = entityManager.find(Club.class, clubId);
+        if (club == null) throw new IllegalStateException("동호회가 존재하지 않습니다.");
+        ClubMember cm = entityManager.createQuery(
+                "SELECT cm FROM ClubMember cm WHERE cm.club.id = :clubId AND cm.user.id = :userId", ClubMember.class)
+                .setParameter("clubId", clubId)
+                .setParameter("userId", userId)
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
+
+        
         if (cm == null) throw new IllegalStateException("동호회원이 존재하지 않습니다.");
-        if (!cm.getClub().getId().equals(clubId)) throw new IllegalStateException("해당 동호회의 동호회원이 아닙니다.");
         if (cm.getRole().equalsIgnoreCase("owner")) throw new IllegalStateException("동호회 소유자는 탈퇴할 수 없습니다.");
 
         entityManager.remove(cm);
+    }
+
+    // 동호회 소유 권한 넘기기
+    // 기존 소유자는 자동으로 일반 멤버가 됨
+    @Transactional
+    public void transferOwnershop(Long clubId, Long userId, Long newOwnerId) {
+        Club club = entityManager.find(Club.class, clubId);
+        if (club == null) throw new IllegalStateException("동호회가 존재하지 않습니다.");
+        // 소유자 확인
+        if (club.getOwner() == null || !club.getOwner().getId().equals(userId)) {
+            throw new IllegalStateException("동호회 소유자만 소유권을 이전할 수 있습니다.");
+        }
+        // 본인에게 이전 불가
+        if (userId.equals(newOwnerId)) {
+            throw new IllegalStateException("본인에게 소유권을 이전할 수 없습니다.");
+        }
+        // 새 소유자가 동호회원인지 확인
+        ClubMember newOwnerMember = entityManager.createQuery(
+                "SELECT cm FROM ClubMember cm WHERE cm.club.id = :clubId AND cm.user.id = :newOwnerId", ClubMember.class)
+                .setParameter("clubId", clubId)
+                .setParameter("newOwnerId", newOwnerId)
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
+
+        if (newOwnerMember == null) throw new IllegalStateException("새 소유자가 동호회원이 아닙니다.");
+
+        // 기존 소유자 역할 변경
+        ClubMember currentOwnerMember = entityManager.createQuery(
+                "SELECT cm FROM ClubMember cm WHERE cm.club.id = :clubId AND cm.user.id = :userId", ClubMember.class)
+                .setParameter("clubId", clubId)
+                .setParameter("userId", userId)
+                .getSingleResult();
+        
+        // 기존 소유자 역할을 admin으로 변경
+        currentOwnerMember.setRole("admin");
+        entityManager.merge(currentOwnerMember);
+
+        // 새 소유자 역할 변경
+        newOwnerMember.setRole("owner");
+        entityManager.merge(newOwnerMember);
+
+        // 동호회 소유자 변경
+        club.setOwner(newOwnerMember.getUser());
+        entityManager.merge(club);
+    }
+
+    // 소유자가 admin권리 부여
+    @Transactional
+    public void grantAdminRole(Long clubId, Long ownerId, Long memberId) {
+        Club club = entityManager.find(Club.class, clubId);
+        if (club == null) throw new IllegalStateException("동호회가 존재하지 않습니다.");
+
+        if (club.getOwner() == null || !club.getOwner().getId().equals(ownerId)) {
+            throw new IllegalStateException("소유자만 관리자 권한을 부여할 수 있습니다.");
+        }
+
+        ClubMember target = entityManager.createQuery(
+                "SELECT cm FROM ClubMember cm WHERE cm.club.id = :clubId AND cm.user.id = :userId", ClubMember.class)
+                .setParameter("clubId", clubId)
+                .setParameter("userId", memberId)
+                .setMaxResults(1)
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
+
+        if (target == null) throw new IllegalStateException("대상 사용자가 동호회원이 아닙니다.");
+
+        // 이미 owner이면 권한 변경 불필요
+        if ("owner".equalsIgnoreCase(target.getRole())) {
+            throw new IllegalStateException("소유자에게는 관리자 권한을 부여할 수 없습니다.");
+        }
+
+        target.setRole("admin");
+        entityManager.merge(target);
+    }
+
+    // 소유자가 admin권리 박탈
+    @Transactional
+    public void revokeAdminRole(Long clubId, Long ownerId, Long memberId) {
+        Club club = entityManager.find(Club.class, clubId);
+        if (club == null) throw new IllegalStateException("동호회가 존재하지 않습니다.");
+
+        if (club.getOwner() == null || !club.getOwner().getId().equals(ownerId)) {
+            throw new IllegalStateException("소유자만 관리자 권한을 박탈할 수 있습니다.");
+        }
+
+        ClubMember target = entityManager.createQuery(
+                "SELECT cm FROM ClubMember cm WHERE cm.club.id = :clubId AND cm.user.id = :userId", ClubMember.class)
+                .setParameter("clubId", clubId)
+                .setParameter("userId", memberId)
+                .setMaxResults(1)
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
+
+        if (target == null) throw new IllegalStateException("대상 사용자가 동호회원이 아닙니다.");
+
+        // 이미 owner이면 권한 변경 불필요
+        if ("owner".equalsIgnoreCase(target.getRole())) {
+            throw new IllegalStateException("소유자의 관리자 권한은 박탈할 수 없습니다.");
+        }
+
+        target.setRole("member");
+        entityManager.merge(target);
     }
 }
