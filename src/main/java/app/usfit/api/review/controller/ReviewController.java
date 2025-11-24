@@ -7,14 +7,14 @@ import app.usfit.api.review.dto.ReviewUpdateRequest;
 import app.usfit.api.review.entity.ReviewTargetType;
 import app.usfit.api.review.service.ReviewImageService;
 import app.usfit.api.review.service.ReviewService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 @RestController
@@ -23,7 +23,6 @@ import java.util.List;
 public class ReviewController {
     private final ReviewImageService reviewImageService;
     private final ReviewService reviewService;
-    private final ObjectMapper objectMapper;
 
     //review에 이미지 업로드
     @PostMapping("/{reviewId}/images")
@@ -40,12 +39,15 @@ public class ReviewController {
     @PostMapping(consumes = {"multipart/form-data"})
     public ReviewResponse createReview(
             Authentication authentication,
-            @RequestPart("request") String requestJson,
+            @RequestPart("request")
+            @Parameter(
+                    description = "리뷰 본문 데이터",
+                    schema = @Schema(implementation = ReviewCreateRequest.class),
+                    example = "{\n  \"targetType\": \"COURSE\",\n  \"targetId\": 1,\n  \"rating\": 5,\n  \"comment\": \"좋아요!\"\n}"
+            )
+            ReviewCreateRequest request,
             @RequestPart(value = "images", required = false) List<MultipartFile> images
-    ) throws Exception {
-
-        ObjectMapper mapper = new ObjectMapper();
-        ReviewCreateRequest request = mapper.readValue(requestJson, ReviewCreateRequest.class);
+    ) {
 
         Long userId = Long.parseLong(authentication.getName());
 
@@ -66,12 +68,15 @@ public class ReviewController {
     public ReviewResponse updateReview(
             Authentication authentication,
             @PathVariable Long reviewId,
-            @RequestPart("request") String requestJson,   // 문자열로 받기
+            @RequestPart("request")
+            @Parameter(
+                    description = "리뷰 수정 본문 데이터",
+                    schema = @Schema(implementation = ReviewUpdateRequest.class),
+                    example = "{\n  \"rating\": 4,\n  \"comment\": \"코멘트 수정\",\n  \"deleteImageUrls\": [\n    \"https://usfit-s3-bucket.s3.ap-southeast-2.amazonaws.com/review/1/img1.png\"\n  ]\n}"
+            )
+            ReviewUpdateRequest request,
             @RequestPart(value = "images", required = false) List<MultipartFile> newImages
-    ) throws JsonProcessingException {
-
-        // JSON 문자열 → DTO 로 수동 변환
-        ReviewUpdateRequest request = objectMapper.readValue(requestJson, ReviewUpdateRequest.class);
+    ) {
 
         Long userId = Long.parseLong(authentication.getName());
 
