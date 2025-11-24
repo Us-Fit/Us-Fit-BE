@@ -27,7 +27,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         "/login",
         "/api/facility/**",
         "/api/course/**",
-        "/api/review/**"
     };
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
