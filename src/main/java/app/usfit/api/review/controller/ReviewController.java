@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,6 +39,7 @@ public class ReviewController {
     //review 작성
     @PostMapping(consumes = {"multipart/form-data"})
     public ReviewResponse createReview(
+            Authentication authentication,
             @RequestPart("request") String requestJson,
             @RequestPart(value = "images", required = false) List<MultipartFile> images
     ) throws Exception {
@@ -45,7 +47,9 @@ public class ReviewController {
         ObjectMapper mapper = new ObjectMapper();
         ReviewCreateRequest request = mapper.readValue(requestJson, ReviewCreateRequest.class);
 
-        return reviewService.createReview(request, images);
+        Long userId = Long.parseLong(authentication.getName());
+
+        return reviewService.createReview(request, images, userId);
     }
 
     //review 리스트 받아오기
@@ -60,6 +64,7 @@ public class ReviewController {
     // 리뷰 수정
     @PutMapping(value = "/{reviewId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ReviewResponse updateReview(
+            Authentication authentication,
             @PathVariable Long reviewId,
             @RequestPart("request") String requestJson,   // 문자열로 받기
             @RequestPart(value = "images", required = false) List<MultipartFile> newImages
@@ -68,13 +73,16 @@ public class ReviewController {
         // JSON 문자열 → DTO 로 수동 변환
         ReviewUpdateRequest request = objectMapper.readValue(requestJson, ReviewUpdateRequest.class);
 
-        return reviewService.updateReview(reviewId, request, newImages);
+        Long userId = Long.parseLong(authentication.getName());
+
+        return reviewService.updateReview(reviewId, request, newImages, userId);
     }
 
 
     // 리뷰 삭제
     @DeleteMapping("/{reviewId}")
-    public void deleteReview(@PathVariable Long reviewId) {
-        reviewService.deleteReview(reviewId);
+    public void deleteReview(Authentication authentication, @PathVariable Long reviewId) {
+        Long userId = Long.parseLong(authentication.getName());
+        reviewService.deleteReview(reviewId, userId);
     }
 }
