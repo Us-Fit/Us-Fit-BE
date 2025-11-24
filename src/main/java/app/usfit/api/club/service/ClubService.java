@@ -79,7 +79,6 @@ public class ClubService {
                 Sport sportEntity = sportMap.get(norm);
 
                 if (sportEntity == null) {
-                    
                     continue; // 없는 운동은 무시   
                 }
 
