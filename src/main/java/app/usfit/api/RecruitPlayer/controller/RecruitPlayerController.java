@@ -20,6 +20,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/recruits")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "RecruitPlayer", description = "용병 모집(모집글) 작성 및 조회 API")
 public class RecruitPlayerController {
 
     @Autowired
@@ -29,8 +30,21 @@ public class RecruitPlayerController {
         this.service = service;
     }
 
-    @PostMapping
-    public ResponseEntity<RecruitPlayerPostResponse> createPost(@Valid @RequestBody RecruitPlayerPostRequest req, Authentication authentication) {
+        @PostMapping
+        @io.swagger.v3.oas.annotations.Operation(summary = "모집글 작성", description = "새 모집글을 작성합니다. 요청 예시를 참고하세요.")
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "모집글 작성 예시", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = RecruitPlayerPostRequest.class), examples = {@io.swagger.v3.oas.annotations.media.ExampleObject(name = "한글_예시", value = """
+                {
+                    "sportId": 1,
+                    "title": "주말 축구 용병 모집",
+                    "description": "주말에 같이 뛰실 분 구합니다.",
+                    "location": "서울 강남구",
+                    "recruitDeadline": "2025-12-01T18:00:00",
+                    "activityStartTime": "2025-12-07T10:00:00",
+                    "activityDurationMinutes": 90,
+                    "maxMember": 5
+                }
+                """)}))
+        public ResponseEntity<RecruitPlayerPostResponse> createPost(@Valid @RequestBody RecruitPlayerPostRequest req, Authentication authentication) {
         if (authentication == null || authentication.getName() == null) {
             return ResponseEntity.status(401).build();
         }
@@ -57,6 +71,7 @@ public class RecruitPlayerController {
     }
 
     @GetMapping
+    @io.swagger.v3.oas.annotations.Operation(summary = "활성 모집글 목록 조회", description = "현재 활성화된 모집글들을 조회합니다. 반환 예시를 참고하세요.")
     public ResponseEntity<List<RecruitPlayerPostResponse>> getAllActivePosts() {
         var list = service.getActivePosts().stream().map(p ->
             new RecruitPlayerPostResponse(
@@ -79,6 +94,7 @@ public class RecruitPlayerController {
 
     // 내가 작성한 글 목록
     @GetMapping(value = "/me", produces = "application/json")
+    @io.swagger.v3.oas.annotations.Operation(summary = "내가 작성한 모집글 조회", description = "로그인한 사용자가 작성한 모집글 목록을 조회합니다. 쿼리 파라미터 `activeOnly`로 활성글만 필터링 가능합니다.")
     public ResponseEntity<List<RecruitPlayerPostResponse>> getMyPosts(
         Authentication authentication,
         @RequestParam(name = "activeOnly", defaultValue = "true") boolean activeOnly
