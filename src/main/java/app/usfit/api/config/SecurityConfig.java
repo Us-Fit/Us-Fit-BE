@@ -36,8 +36,7 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/login",
             "/api/facility/**",
-            "/api/course/**",
-            "/api/review/**"
+            "/api/course/**"
         );
     }
 
@@ -76,6 +75,7 @@ public class SecurityConfig {
                     "/kakao-test.html",
                     "/api/user/signup"
                 ).permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/review/**").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);

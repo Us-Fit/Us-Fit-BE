@@ -9,6 +9,7 @@ import app.usfit.api.review.entity.ReviewImage;
 import app.usfit.api.review.entity.ReviewTargetType;
 import app.usfit.api.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,20 +20,20 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReviewService {
 
-    private static final String S3_BASE_URL =
-            "https://usfit-s3-bucket.s3.ap-southeast-2.amazonaws.com/";
+    private static final String S3_BASE_URL = "https://usfit-s3-bucket.s3.ap-southeast-2.amazonaws.com/";
     private final ReviewRepository reviewRepository;
     private final ReviewImageService reviewImageService;
 
     //review 생성
     public ReviewResponse createReview(ReviewCreateRequest request,
-                                       List<MultipartFile> images) {
+                                       List<MultipartFile> images,
+                                       Long userId) {
 
         // 1. 리뷰 저장
         Review review = Review.builder()
                 .targetType(request.getTargetType())
                 .targetId(request.getTargetId())
-                .userId(request.getUserId())
+                .userId(userId)
                 .rating(request.getRating())
                 .comment(request.getComment())
                 .build();
@@ -83,10 +84,13 @@ public class ReviewService {
     public ReviewResponse updateReview(
             Long reviewId,
             ReviewUpdateRequest request,
-            List<MultipartFile> newImages
+            List<MultipartFile> newImages,
+            Long userId
     ) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("리뷰 없음"));
+
+        validateOwnership(review, userId);
 
         // 1. 기본 필드 수정
         review.setRating(request.getRating());
@@ -127,10 +131,12 @@ public class ReviewService {
     }
 
     @Transactional
-    public void deleteReview(Long reviewId) {
+    public void deleteReview(Long reviewId, Long userId) {
 
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("리뷰 없음"));
+
+        validateOwnership(review, userId);
 
         // 1. 리뷰 이미지 전부 S3에서 삭제
         for (ReviewImage img : review.getImages()) {
@@ -139,5 +145,11 @@ public class ReviewService {
 
         // 2. 리뷰 삭제 (연관 이미지도 cascade로 자동 삭제)
         reviewRepository.delete(review);
+    }
+
+    private void validateOwnership(Review review, Long userId) {
+        if (!review.getUserId().equals(userId)) {
+            throw new AccessDeniedException("본인 리뷰만 수정/삭제할 수 있습니다.");
+        }
     }
 }
