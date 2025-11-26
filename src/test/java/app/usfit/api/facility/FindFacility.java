@@ -72,7 +72,7 @@ public class FindFacility {
     @Test
     @DisplayName("sport name과 sigunguCd로 (시) facility 찾기")
     void findFacilityBySportNameAndSigungu(){
-        List<FacilityDetailDto> dto = facilitySportRepo.findFacilitiesBySportNameAndSigungu("간이운동장", "김천시");
+        List<FacilityDetailDto> dto = facilitySportRepo.findFacilitiesBySportNameAndSigungu("간이운동장", "경기", "김천시");
 
         for (FacilityDetailDto d : dto) {
             System.out.println(d);
