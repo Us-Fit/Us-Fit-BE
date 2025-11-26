@@ -14,4 +14,9 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
             String ctprvnNm,
             String signguNm
     );
+
+    //강좌 id로 특정 강좌 검색
+    Course findCourseById(
+            Long id
+    );
 }

@@ -29,4 +29,9 @@ public class CourseService {
                 .map(CourseDetailDto::fromEntity)
                 .toList();
     }
+
+    public CourseDetailDto getCourseById(Long id) {
+        Course course = courseRepository.findCourseById(id);
+        return CourseDetailDto.fromEntity(course);
+    }
 }
