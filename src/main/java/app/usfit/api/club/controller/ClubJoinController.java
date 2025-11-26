@@ -49,11 +49,25 @@ public class ClubJoinController {
     // 동호회장이 전체 신청자 조회
         @GetMapping("/{clubId}/requests")
         @io.swagger.v3.oas.annotations.Operation(summary = "가입 신청 목록 조회", description = "동호회장이 해당 동호회의 전체 가입 신청 목록을 조회합니다. 반환 예시를 참고하세요.")
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "신청 목록", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", examples = {@io.swagger.v3.oas.annotations.media.ExampleObject(name = "한글_예시", value = """
-                        [
-                            { "id": 1, "clubId": 10, "userId": 200, "status": "pending", "message": "예: 같이 하면 좋겠습니다.", "requestedAt": "2025-11-20T10:00:00" }
-                        ]
-                        """)}))
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "신청 목록", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", examples = {@io.swagger.v3.oas.annotations.media.ExampleObject(name = "한글_예시", 
+        value = """
+            [
+                {
+                    "id": 1,
+                    "clubId": 10,
+                    "user": {
+                    "userId": 12,
+                    "nickname": "이름",
+                    "profileImageUrl": null,
+                    "gender": true
+                    },
+                    "status": "pending",
+                    "message": "예: 같이 하면 좋겠습니다.",
+                    "requestedAt": "2025-11-20T10:00:00"
+                }
+            ]
+            """)
+            }))
         public ResponseEntity<Object> listRequests(@PathVariable("clubId") Long clubId, Authentication authentication) {
         if (authentication == null || authentication.getName() == null) {
             return ResponseEntity.status(401).build();

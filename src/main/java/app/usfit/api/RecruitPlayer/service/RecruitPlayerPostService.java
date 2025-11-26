@@ -45,6 +45,7 @@ public class RecruitPlayerPostService {
 
         Map<String, Sport> sportMap = sportService.findByNamesAsMap(List.of(sportName));
         Sport sport = sportMap.get(sportName.trim().toLowerCase());
+
         if (sport == null) {
             throw new IllegalArgumentException("스포츠 유형을 찾을 수 없습니다.");            
         }
@@ -54,7 +55,7 @@ public class RecruitPlayerPostService {
         post.setSport(sport);
         post.setTitle(req.getTitle());
         post.setDescription(req.getDescription());
-        post.setLocation(req.getLocation());
+        post.setFacilityId(req.getFacilityId());
         post.setRecruitDeadline(req.getRecruitDeadline());
         post.setActivityStartTime(req.getActivityStartTime());
         post.setActivityDurationMinutes(req.getActivityDurationMinutes());

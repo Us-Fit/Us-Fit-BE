@@ -34,7 +34,10 @@ public class RecruitPlayerPost {
 
     private String title; // 제목
     private String description; // 설명
-    private String location; // 장소
+
+    // 시설 ID로 활동 위치 지정
+    @Column(name = "facility_id", nullable = false)
+    private Long facilityId; // 장소
 
     @Column(name = "recruit_deadline", nullable = false)
     private LocalDateTime recruitDeadline;
