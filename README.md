@@ -1,16 +1,16 @@
-# 🏋️‍♂️ UsFit – 운동으로 연결되는 우리
+# UsFit – 운동으로 연결되는 우리
 
 > **스포츠 시설 정보부터 동호회·용병 매칭까지 한 번에!**  
 > 공공데이터와 커뮤니티 기능을 묶어 체육활동 참여를 촉진하는 통합 스포츠 플랫폼
 
 ---
 
-## 📱 주요 화면 (Screenshots)
+## 주요 화면 (Screenshots)
 (앱 주요 화면 캡처 추가 예정)
 
 ---
 
-## 👥 팀구성
+## 팀구성
 
 <table align="center">
   <tbody>
@@ -69,7 +69,7 @@
 
 ---
 
-## 📖 프로젝트 개요
+## 프로젝트 개요
 
 **UsFit** 백엔드는 Spring Boot 3 기반의 REST API 서버로 다음과 같은 도메인을 제공합니다.
 
@@ -79,11 +79,11 @@
 - **리뷰**: 시설·강좌 대상 리뷰 CRUD + AWS S3 이미지 업로드/삭제
 - **회원 & 인증**: 자체 회원가입/로그인, Kakao OAuth2.0, Google(스텁), JWT 기반 보호 API, 사용자 프로필/관심 종목 관리
 
-> 🎯 **목표**: 체육시설 접근성을 높이고, 개인 → 커뮤니티 → 지역사회로 이어지는 건강한 운동 문화를 확산
+> **목표**: 체육시설 접근성을 높이고, 개인 → 커뮤니티 → 지역사회로 이어지는 건강한 운동 문화를 확산
 
 ---
 
-## 🧭 백엔드 기능 맵
+## 백엔드 기능 맵
 
 | 영역 | 주요 엔드포인트 | 설명 |
 | --- | --- | --- |
@@ -100,7 +100,7 @@ OpenAPI(Swagger UI)는 `http://localhost:8080/swagger-ui/index.html`에서 JWT �
 
 ---
 
-## 🔐 인증 & 보안
+## 인증 & 보안
 
 - **JWT**: `JwtTokenProvider`가 `jwt.secret`, `jwt.access-token-validity-seconds` 값을 사용해 액세스 토큰 생성/검증
 - **보안 필터**: `JwtAuthenticationFilter`가 `/api/user/login`, `/api/user/signup`, `/api/facility/**`, `/api/course/**` 등 화이트리스트를 제외한 모든 요청을 보호
@@ -109,7 +109,33 @@ OpenAPI(Swagger UI)는 `http://localhost:8080/swagger-ui/index.html`에서 JWT �
 
 ---
 
-## 🏗 시스템 아키텍처
+## 기술 스택 (Tech Stack)
+
+### Backend
+<img src="https://img.shields.io/badge/Java_21-007396?style=for-the-badge&logo=openjdk&logoColor=white"/> <img src="https://img.shields.io/badge/Spring_Boot_3.5-6DB33F?style=for-the-badge&logo=springboot&logoColor=white"/> <img src="https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white"/> 
+<img src="https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=for-the-badge&logo=spring&logoColor=white"/> <img src="https://img.shields.io/badge/Spring_Validation-6DB33F?style=for-the-badge&logo=spring&logoColor=white"/> <img src="https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=hibernate&logoColor=white"/> 
+
+### Database
+<img src="https://img.shields.io/badge/MySQL_8-4479A1?style=for-the-badge&logo=mysql&logoColor=white"/> <img src="https://img.shields.io/badge/H2-003B57?style=for-the-badge&logo=databricks&logoColor=white"/> 
+
+### Security & Auth
+<img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white"/> <img src="https://img.shields.io/badge/jjwt_0.11-000000?style=for-the-badge&logoColor=white"/> 
+
+### API & Docs
+<img src="https://img.shields.io/badge/REST_API-005571?style=for-the-badge&logo=apache&logoColor=white"/> <img src="https://img.shields.io/badge/SpringDoc_OpenAPI-85EA2D?style=for-the-badge&logo=swagger&logoColor=white"/> 
+
+### 외부 연동
+<img src="https://img.shields.io/badge/AWS_S3_SDK_v2-569A31?style=for-the-badge&logo=amazons3&logoColor=white"/> <img src="https://img.shields.io/badge/Apache_Commons_CSV-D22128?style=for-the-badge&logo=apache&logoColor=white"/> <img src="https://img.shields.io/badge/Kakao_Map_API-FFCD00?style=for-the-badge&logo=kakaotalk&logoColor=000"/> <img src="https://img.shields.io/badge/Kakao_Login_API-FFCD00?style=for-the-badge&logo=kakaotalk&logoColor=000"/> 
+
+### Infra
+<img src="https://img.shields.io/badge/AWS_EC2-FF9900?style=for-the-badge&logo=amazonec2&logoColor=white"/> <img src="https://img.shields.io/badge/AWS_RDS-527FFF?style=for-the-badge&logo=amazonrds&logoColor=white"/> <img src="https://img.shields.io/badge/AWS_S3-569A31?style=for-the-badge&logo=amazons3&logoColor=white"/> 
+
+### Build & Tools
+<img src="https://img.shields.io/badge/Gradle_8-02303A?style=for-the-badge&logo=gradle&logoColor=white"/> <img src="https://img.shields.io/badge/Lombok-CA4245?style=for-the-badge&logoColor=white"/> <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white"/> <img src="https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white"/> <img src="https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white"/> <img src="https://img.shields.io/badge/IntelliJ_IDEA-000000?style=for-the-badge&logo=intellijidea&logoColor=white"/> <img src="https://img.shields.io/badge/VSCode-0078D4?style=for-the-badge&logo=visualstudiocode&logoColor=white"/> <img src="https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white"/> 
+
+---
+
+## 시스템 아키텍처
 
 ```mermaid
 graph LR
@@ -121,42 +147,70 @@ graph LR
 
 ---
 
-## 🧱 프로젝트 구조
+## 프로젝트 구조
 
 ```
-.
-├── build.gradle              # Spring Boot 3.5, Java 21, JPA, JWT, AWS SDK
-├── src
-│   ├── main
-│   │   ├── java/app/usfit/api
-│   │   │   ├── facility/      # 시설 엔티티·검색·CSV import
-│   │   │   ├── course/        # 강좌 엔티티·검색·CSV import
-│   │   │   ├── club/          # 클럽, 멤버, join workflow
-│   │   │   ├── RecruitPlayer/ # 용병 모집글 & 신청
-│   │   │   ├── review/        # 리뷰 + S3 이미지 업로드
-│   │   │   ├── user/          # 회원, 프로필, 로그인 전략
-│   │   │   ├── security/jwt/  # JWT 필터/토큰
-│   │   │   └── config/        # Security, Swagger, S3 설정
-│   │   └── resources
-│   │       ├── application.properties
-│   │       └── static/kakao-test.html
-│   └── test/java/app/usfit/api
-└── README.md
+usfit-api/
+├── src/
+│   ├── main/
+│   │   ├── java/app/usfit/api/
+│   │   │   ├── club/                    # 동호회 도메인
+│   │   │   │   ├── controller/         # 동호회 API 엔드포인트
+│   │   │   │   ├── dto/               # 요청/응답 DTO
+│   │   │   │   ├── entity/            # 동호회 엔티티 (Club, ClubMember, ClubJoin 등)
+│   │   │   │   ├── repository/        # JPA Repository
+│   │   │   │   └── service/           # 비즈니스 로직
+│   │   │   │
+│   │   │   ├── facility/               # 체육시설 도메인
+│   │   │   │   ├── controller/        # 시설 검색 API
+│   │   │   │   ├── dto/               # 시설 DTO
+│   │   │   │   ├── entity/            # 시설 엔티티 (Facility, FacilityAddress 등)
+│   │   │   │   ├── repository/        # 시설 Repository (위치 기반 검색)
+│   │   │   │   └── service/           # 시설 검색 로직
+│   │   │   │
+│   │   │   ├── recruitplayer/          # 용병 매칭 도메인
+│   │   │   │   ├── controller/        # 용병 모집 API
+│   │   │   │   ├── dto/               # 용병 DTO
+│   │   │   │   ├── entity/            # 용병 모집글 엔티티
+│   │   │   │   ├── repository/        # 용병 Repository
+│   │   │   │   └── service/           # 용병 매칭 로직
+│   │   │   │
+│   │   │   ├── sport/                  # 종목 도메인
+│   │   │   │   ├── controller/        # 종목 API
+│   │   │   │   ├── dto/               # 종목 DTO
+│   │   │   │   ├── entity/            # 종목 엔티티
+│   │   │   │   ├── repository/        # 종목 Repository
+│   │   │   │   └── service/           # 종목 관리 로직
+│   │   │   │
+│   │   │   ├── user/                   # 사용자 도메인
+│   │   │   │   ├── controller/        # 회원 API
+│   │   │   │   ├── dto/               # 회원/프로필 DTO
+│   │   │   │   ├── entity/            # User, UserProfile, UserInterestSport
+│   │   │   │   ├── repository/        # 회원 Repository
+│   │   │   │   └── service/           # 회원 관리 로직
+│   │   │   │
+│   │   │   ├── config/                 # Spring 설정
+│   │   │   │   ├── SwaggerConfig.java # Swagger 설정
+│   │   │   │   └── WebConfig.java     # CORS 등 웹 설정
+│   │   │   │
+│   │   │   └── UsfitApiApplication.java # Spring Boot 메인 클래스
+│   │   │
+│   │   └── resources/
+│   │       ├── application.yml         # 메인 설정 (프로파일 분리)
+│   │       ├── application-dev.yml     # 개발 환경 설정
+│   │       ├── application-prod.yml    # 운영 환경 설정 (AWS RDS)
+│   │       └── application-local.yml   # 로컬 환경 설정 (H2)
+│   │
+│   └── test/                            # 테스트 코드
+│       └── java/app/usfit/api/
+│
+├── build.gradle                         # Gradle 빌드 설정
+└── README.md                            # 프로젝트 문서
 ```
 
 ---
 
-## 🛠 기술 스택
-
-- **Language**: Java 21
-- **Framework**: Spring Boot 3.5, Spring Security, Spring Data JPA, Spring Validation
-- **Persistence**: MySQL 8.x, Hibernate, H2 (테스트)
-- **Infra & Library**: AWS S3 SDK v2, jjwt 0.11, SpringDoc OpenAPI, Apache Commons CSV
-- **Build**: Gradle 8 (Wrapper)
-
----
-
-## ⚙️ 환경 변수
+## 환경 변수
 
 | 변수 | 설명 | 기본값 (`application.properties`) |
 | --- | --- | --- |
@@ -170,7 +224,7 @@ graph LR
 
 ---
 
-## 🚀 로컬 실행
+## 로컬 실행
 
 1. **사전 준비**  
    - JDK 21, MySQL 8.x, AWS CLI 자격 증명 (S3 업로드용), Kakao REST API 키
@@ -192,7 +246,7 @@ graph LR
 
 ---
 
-## 🗂 데이터 적재 (CSV Import)
+## 데이터 적재 (CSV Import)
 
 대용량 공공데이터는 별도의 서비스에서 일괄 적재합니다.
 
@@ -210,25 +264,10 @@ graph LR
 
 ---
 
-## 🧪 테스트 & 품질
+## 테스트 & 품질
 
 - 유닛/통합 테스트: `./gradlew test`
 - Swagger 문서로 엔드포인트 통합 검증
 - Validator/JPA 에러는 IDE 또는 Spring Boot 에러 로그를 통해 확인
-
----
-
-## 🗺 로드맵 & TODO
-
-- React Native 앱과의 실시간 인터랙션 (지도, 채팅) 연계
-- Google OAuth 정식 연동 및 Refresh Token 발급
-- 클럽/모집글 검색 필터 고도화, Elasticsearch 연동
-- AWS ECS / RDS / CloudFront 배포 및 Observability (CloudWatch, X-Ray)
-
----
-
-## 📱 주요 화면 (Screenshots)
-
-(앱 주요 화면 캡처 예정)
 
 ---
