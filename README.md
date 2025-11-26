@@ -271,4 +271,3 @@ usfit-api/
 - Validator/JPA 에러는 IDE 또는 Spring Boot 에러 로그를 통해 확인
 
 ---
-
