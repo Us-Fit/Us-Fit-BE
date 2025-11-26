@@ -14,4 +14,7 @@ public interface UserInterestSportRepository extends JpaRepository<UserInterestS
 
     // 조회
     List<UserInterestSport> findByUser_Id(Long userId);
+
+    // UserInterestSport.user.id 기준으로 조회
+    List<UserInterestSport> findByUser_IdIn(List<Long> userIds);
 }

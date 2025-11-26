@@ -16,10 +16,12 @@ import jakarta.persistence.PostPersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.Data;
+import lombok.Getter;
 
 @Entity
 @Table(name = "user_profile")
 @Data
+@Getter
 public class UserProfile implements Persistable<Long> {
     @Id
     @Column(name = "user_id")
@@ -32,6 +34,9 @@ public class UserProfile implements Persistable<Long> {
 
     @Column(name = "nickname")
     private String nickname; // 닉네임
+
+    @Column(name = "profile_image_key")
+    private String profileImageKey; // 프로필 이미지 S3 키
 
     @Column(name = "gender")
     private boolean gender; // 성별 (true: 남성, false: 여성)

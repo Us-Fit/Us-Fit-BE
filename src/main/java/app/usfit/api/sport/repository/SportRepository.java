@@ -15,6 +15,8 @@ public interface SportRepository extends JpaRepository<Sport, Long> {
     List<Sport> findByCodeIn(List<String> codes);
     boolean existsByCode(String code);
 
+    Sport findByName(String name);
+
     // 대소문자 무시 버전 (JPQL)
     @Query("select s.id from Sport s where lower(trim(s.name)) in :names")
     List<Long> findIdsByNormalizedNames(@Param("names") Collection<String> normalizedNames);

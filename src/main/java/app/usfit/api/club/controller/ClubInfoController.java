@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import app.usfit.api.club.DTO.ClubDetailInfoResponse;
 import app.usfit.api.club.DTO.ClubMemberResponse;
 import app.usfit.api.club.DTO.ClubMemberRoleUpdateRequest;
 import app.usfit.api.club.service.ClubinfoService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 @RestController
@@ -27,10 +29,23 @@ public class ClubInfoController {
     public ClubInfoController(ClubinfoService clubService) {
         this.clubinfoService = clubService;
     }
+    // 특정 동호회 상세 정보 조회
+    @GetMapping("/{clubId}")
+    @Operation(summary = "동호회 상세 정보 조회", description = "특정 동호회의 상세 정보를 반환합니다. 반환 예시는 아래를 참고하세요.")
+    public ResponseEntity<Object> getClubDetail(@PathVariable("clubId") Long clubId) {
+        try {
+            ClubDetailInfoResponse resp = clubinfoService.getClubDetail(clubId);
+            return ResponseEntity.ok(resp);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "서버 오류"));
+        }
+    }
 
     // 특정 동호회 동호회원 목록 조회
-        @GetMapping("/{clubId}/members")
-        @io.swagger.v3.oas.annotations.Operation(summary = "동호회 멤버 목록 조회", description = "해당 동호회의 멤버 목록을 반환합니다. 반환 예시는 아래를 참고하세요. `role` 필드는 'owner', 'admin', 'member' 중 하나입니다.")
+    @GetMapping("/{clubId}/members")
+    @Operation(summary = "동호회 멤버 목록 조회", description = "해당 동호회의 멤버 목록을 반환합니다. 반환 예시는 아래를 참고하세요. `role` 필드는 'owner', 'admin', 'member' 중 하나입니다.")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "멤버 목록", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", examples = {@io.swagger.v3.oas.annotations.media.ExampleObject(name = "한글_예시", value = """
             [
               { "id": 1, "clubId": 10, "userId": 100, "role": "owner", "status": "active", "joinedAt": "2025-11-01T12:34:56" },
