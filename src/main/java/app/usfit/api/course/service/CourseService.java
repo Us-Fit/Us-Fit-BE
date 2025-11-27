@@ -1,5 +1,6 @@
 package app.usfit.api.course.service;
 
+import app.usfit.api.common.exception.CourseNotFoundException;
 import app.usfit.api.course.dto.CourseDetailDto;
 import app.usfit.api.course.entity.Course;
 import app.usfit.api.course.repository.CourseRepository;
@@ -31,7 +32,8 @@ public class CourseService {
     }
 
     public CourseDetailDto getCourseById(Long id) {
-        Course course = courseRepository.findCourseById(id);
+        Course course = courseRepository.findCourseById(id)
+                .orElseThrow(() -> new CourseNotFoundException(id));
         return CourseDetailDto.fromEntity(course);
     }
 }
