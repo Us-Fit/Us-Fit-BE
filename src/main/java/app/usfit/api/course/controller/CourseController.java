@@ -1,7 +1,6 @@
 package app.usfit.api.course.controller;
 
 import app.usfit.api.course.dto.CourseDetailDto;
-import app.usfit.api.course.repository.CourseRepository;
 import app.usfit.api.course.service.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +32,7 @@ public class CourseController {
 
     @GetMapping("/{id}")
     public CourseDetailDto getCourseDetail(
-            @RequestParam Long id
+            @PathVariable Long id
     ){
         return courseService.getCourseById(id);
     }
