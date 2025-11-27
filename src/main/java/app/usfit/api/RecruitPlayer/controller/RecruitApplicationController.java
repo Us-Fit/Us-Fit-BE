@@ -20,6 +20,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/recruits/{postId}/applications")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "RecruitApplication", description = "모집 게시글에 대한 신청(용병 모집 신청) API")
 public class RecruitApplicationController {
     private final RecruitApplicationService service;
 
@@ -29,6 +30,10 @@ public class RecruitApplicationController {
 
     //신청
     @PostMapping(consumes= "application/json", produces= "application/json")
+    @io.swagger.v3.oas.annotations.Operation(summary = "모집 글에 신청", description = "해당 모집 게시글에 참여 신청을 합니다. 요청 예시를 참고하세요.")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "신청 요청 예시", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ApplicationApplyRequest.class), examples = {@io.swagger.v3.oas.annotations.media.ExampleObject(name = "한글_예시", value = """
+        { "message": "예: 경기를 같이 뛰고 싶습니다. 주말 가능" }
+        """)}))
     public ResponseEntity<ApplicationResponse> apply(
         @PathVariable("postId") Long postId,
         @RequestBody ApplicationApplyRequest request,
@@ -40,6 +45,10 @@ public class RecruitApplicationController {
 
     // 해당 게시글 신청 목록 조회 (작성자)
     @GetMapping(produces = "application/json")
+    @io.swagger.v3.oas.annotations.Operation(summary = "해당 게시글 신청 목록 조회", description = "작성자는 해당 게시글에 들어온 신청 목록을 조회할 수 있습니다. 반환 예시를 참고하세요.")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "신청 목록", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", examples = {@io.swagger.v3.oas.annotations.media.ExampleObject(name = "한글_예시", value = """
+        [ { "id": 1, "postId": 10, "applicantId": 200, "status": "PENDING", "message": "예: 같이 하고 싶습니다.", "appliedAt": "2025-11-20T10:00:00" } ]
+        """)}))
     public ResponseEntity<List<ApplicationResponse>> list(
         @PathVariable("postId") Long postId,
         Authentication authentication
@@ -50,6 +59,10 @@ public class RecruitApplicationController {
 
     // 상태 변경(작성자만) - ACCEPTED / REJECTED
     @PatchMapping(value = "/{applicationId}", consumes = "application/json", produces = "application/json")
+    @io.swagger.v3.oas.annotations.Operation(summary = "신청 상태 변경(수락/거절)", description = "작성자가 신청을 수락하거나 거절합니다. 요청 예시를 참고하세요.")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "상태 변경 예시", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = ApplicationStatusRequest.class), examples = {@io.swagger.v3.oas.annotations.media.ExampleObject(name = "한글_예시", value = """
+        { "status": "ACCEPTED" }
+        """)}))
     public ResponseEntity<ApplicationResponse> changeStatus(
         @PathVariable("postId") Long postId,
         @PathVariable("applicationId") Long applicationId,
@@ -63,6 +76,7 @@ public class RecruitApplicationController {
     }
 
     @GetMapping(value = "/me", produces = "application/json")
+    @io.swagger.v3.oas.annotations.Operation(summary = "내가 신청한 내역 조회", description = "로그인한 사용자가 본인이 신청한 모든 모집 내역을 조회합니다. 반환 예시를 참고하세요.")
     public ResponseEntity<List<ApplicationResponse>> listMyApplications(Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
         return ResponseEntity.ok(service.listMyApplications(userId)); // 내가 신청한 모든 모집글 조회

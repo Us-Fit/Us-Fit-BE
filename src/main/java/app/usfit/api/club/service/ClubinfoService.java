@@ -1,19 +1,101 @@
 package app.usfit.api.club.service;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import app.usfit.api.club.DTO.ClubDetailInfoResponse;
 import app.usfit.api.club.DTO.ClubMemberResponse;
+import app.usfit.api.club.DTO.ClubSportResponse;
 import app.usfit.api.club.entity.Club;
 import app.usfit.api.club.entity.ClubMember;
+import app.usfit.api.facility.dto.FacilityDetailView;
+import app.usfit.api.facility.repository.FacilityRepository;
+import app.usfit.api.user.dto.SimpleProfileResponse;
+import app.usfit.api.user.service.ProfileService;
 import jakarta.transaction.Transactional;
 
 @Service
 public class ClubinfoService {
     private final jakarta.persistence.EntityManager entityManager;
-    public ClubinfoService(jakarta.persistence.EntityManager entityManager) {
+    private final FacilityRepository facilityRepository;
+    private final ProfileService profileService;
+    
+    public ClubinfoService(jakarta.persistence.EntityManager entityManager, FacilityRepository facilityRepository, ProfileService profileService) {
         this.entityManager = entityManager;
+        this.facilityRepository = facilityRepository;
+        this.profileService = profileService;
+    }
+
+    // 특정 동호회 정보 상세 조회
+    @Transactional
+    public ClubDetailInfoResponse getClubDetail(Long clubId) {
+        Club club = entityManager.find(Club.class, clubId);
+        if (club == null) {
+            throw new IllegalStateException("동호회가 존재하지 않습니다.");
+        }
+
+        // 이미 URL을 Club에 저장해두었으므로 직접 사용
+        String imageUrl = null;
+        try {
+            imageUrl = club.getClubMainImageUrl();
+        } catch (Throwable ignored) {
+            imageUrl = null;
+        }
+
+        // member count - JPQL count로 안전하게 계산
+        int currMemberCount = club.getMembers() != null ? club.getMembers().size() : 0;
+
+        // facility -> projection (FacilityDetailView) 사용
+        FacilityDetailView facilityView = null;
+        try {
+            if (club.getMainFacility() != null && club.getMainFacility().getId() != null) {
+                Long mainFacilityId = club.getMainFacility().getId();
+                facilityView = facilityRepository.findProjectedById(mainFacilityId).orElse(null);
+            }
+        } catch (Throwable ignored) {
+            facilityView = null;
+        }
+
+        // sports -> DTO (트랜잭션 내에서 안전하게 lazy 접근)
+        List<ClubSportResponse> sports = List.of();
+        try {
+            if (club.getSports() != null) {
+                sports = club.getSports().stream()
+                        .map(s -> new ClubSportResponse(
+                                s.getId(),
+                                s.getSport() != null ? s.getSport().getName() : null
+                        ))
+                        .collect(Collectors.toList());
+            }
+        } catch (Throwable ignored) {
+            sports = List.of();
+        }
+
+        // created date
+        LocalDate createdAt = null;
+        try {
+            if (club.getCreatedAt() != null) {
+                createdAt = club.getCreatedAt().toLocalDate();
+            }
+        } catch (Throwable ignored) {
+            createdAt = null;
+        }
+
+        return new ClubDetailInfoResponse(
+                club.getName(),
+                club.getDescription(),
+                imageUrl,
+                currMemberCount,
+                club.getMemberLimit(),
+                club.getPhoneNumber(),
+                createdAt,
+                club.getSnsLink(),
+                facilityView,
+                sports
+        );
     }
 
     // 동호회 모든 동호회원 조회
@@ -24,14 +106,25 @@ public class ClubinfoService {
                 .setParameter("clubId", clubId)
                 .getResultList();
             
-        return members.stream().map(cm -> new ClubMemberResponse(
-                    cm.getId(),
-                    cm.getClub().getId(),
-                    cm.getUser().getId(),
-                    cm.getRole(),
-                    cm.getStatus(),
-                    cm.getJoinedAt().toString()
-                )).toList();
+        return members.stream().map(cm -> {
+                    // userId로 간단 프로필 조회
+                    SimpleProfileResponse simple = null;
+                    try {
+                        simple = profileService.getSimpleProfile(cm.getUser().getId());
+                    } catch (Exception ignored) {
+                        // 프로필 조회 실패 시 null 허용
+                    }
+
+                    return new ClubMemberResponse(
+                            cm.getId(),
+                            cm.getClub().getId(),
+                            simple,                     // 기존 userId 대신 SimpleProfileResponse
+                            cm.getRole(),
+                            cm.getStatus(),
+                            cm.getJoinedAt().toString()
+                    );
+                }).toList();
+                
     }
 
     // 동호회원 역할 변경
@@ -52,10 +145,11 @@ public class ClubinfoService {
         cm.setRole(newRole);
         entityManager.merge(cm);
 
+        var simpleProfile = profileService.getSimpleProfile(cm.getUser().getId());
         return ClubMemberResponse.builder()
                 .id(cm.getId())
                 .clubId(cm.getClub().getId())
-                .userId(cm.getUser().getId())
+                .userSimpleProfile(simpleProfile)
                 .role(cm.getRole())
                 .status(cm.getStatus())
                 .joinedAt(cm.getJoinedAt().toString())

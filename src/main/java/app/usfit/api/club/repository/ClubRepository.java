@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import app.usfit.api.club.entity.Club;
 
 public interface ClubRepository extends JpaRepository<Club, Long> {
+    boolean existsByIdAndOwnerId(Long id, Long ownerId);
 }

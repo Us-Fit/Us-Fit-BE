@@ -1,9 +1,12 @@
 package app.usfit.api.club.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import app.usfit.api.club.DTO.ClubJoinResponse;
 import app.usfit.api.club.entity.Club;
@@ -11,22 +14,26 @@ import app.usfit.api.club.entity.ClubJoin;
 import app.usfit.api.club.entity.ClubMember;
 import app.usfit.api.club.repository.ClubJoinRequestRepository;
 import app.usfit.api.club.repository.ClubRepository;
+import app.usfit.api.user.dto.SimpleProfileResponse;
 import app.usfit.api.user.entity.User;
+import app.usfit.api.user.service.ProfileService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
+
 
 @Service
 public class ClubJoinService {
     private final ClubRepository clubRepository;
     private final ClubJoinRequestRepository clubJoinRequestRepository;
+    private final ProfileService profileService;
     
     @PersistenceContext
     private EntityManager entityManager;
 
-    public ClubJoinService(ClubRepository clubRepository, ClubJoinRequestRepository clubJoinRequestRepository) {
+    public ClubJoinService(ClubRepository clubRepository, ClubJoinRequestRepository clubJoinRequestRepository, ProfileService profileService) {
         this.clubRepository = clubRepository;
         this.clubJoinRequestRepository = clubJoinRequestRepository;
+        this.profileService = profileService;
     }
 
     @Transactional
@@ -47,11 +54,16 @@ public class ClubJoinService {
                 .build();
 
         entityManager.persist(jr);
+
+        SimpleProfileResponse userProfile = profileService.getSimpleProfile(requesterId);
+        if (userProfile == null) {
+            throw new IllegalStateException("사용자 프로필을 찾을 수 없습니다.");
+        }
         // 엔티티를 DTO로 매핑하여 반환
         return ClubJoinResponse.builder()
-                .id(jr.getId())
+                .requestId(jr.getId())
                 .clubId(clubRef.getId())
-                .userId(requester.getId())
+                .user(userProfile)
                 .status(jr.getStatus())
                 .message(jr.getMessage())
                 .requestedAt(jr.getRequestedAt())
@@ -59,7 +71,7 @@ public class ClubJoinService {
     }
 
     // 동호회의 모든 요청 목록을 확인 (관리자용)
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ClubJoinResponse> listRequestsForClub(Long clubId, Long requesterOwnerId) {
         Club club = entityManager.find(Club.class, clubId);
         if (club == null) {
@@ -69,15 +81,51 @@ public class ClubJoinService {
             throw new SecurityException("권한이 없습니다.");
         }
 
-        List<ClubJoin> list = clubJoinRequestRepository.findAllByClub_Id(clubId);
-        return list.stream().map(jr -> ClubJoinResponse.builder()
-                .id(jr.getId())
-                .clubId(jr.getClub().getId())
-                .userId(jr.getUser().getId())
-                .status(jr.getStatus())
-                .message(jr.getMessage())
-                .requestedAt(jr.getRequestedAt())
-                .build()).collect(Collectors.toList());
+        List<ClubJoin> list = clubJoinRequestRepository.findAllByClub_IdWithUser(clubId);
+        
+        list.forEach(jr -> {
+           System.out.println("[TRACE] ClubJoin id=" + jr.getId() + " user=" + (jr.getUser() == null ? "null" : jr.getUser().getId()));
+        });
+        
+        // 1) 모든 userId 수집
+        List<Long> userIds = list.stream()
+                .map(jr -> jr.getUser() != null ? jr.getUser().getId() : null)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        userIds.forEach(uid -> {
+            System.out.println("[TRACE] Collected userId=" + uid);
+        });
+
+        // 2) 한 번에 간단 프로필 조회
+        Map<Long, SimpleProfileResponse> profileMap = profileService.getSimpleProfiles(userIds);
+        
+        if (profileMap != null) {
+            profileMap.keySet().forEach(k -> System.out.println("[TRACE] profileMap contains userId=" + k + " -> " + (profileMap.get(k) == null ? "null" : "ok")));
+        }
+
+        // 3) 매핑하여 응답 생성
+        return list.stream().map(jr -> {
+                SimpleProfileResponse userProfile = null;
+                var uid = jr.getUser() != null ? jr.getUser().getId() : null;
+                System.out.println("[TRACE] mapping ClubJoin id=" + jr.getId() + " uid=" + uid);
+                if (uid != null) {
+                    userProfile = profileMap.get(uid);
+                    if (userProfile == null) {
+                        System.out.println("[WARN] profileMap has no entry for userId=" + uid);
+                    }
+                }
+
+                return ClubJoinResponse.builder()
+                        .requestId(jr.getId())
+                        .clubId(jr.getClub().getId())
+                        .user(userProfile)   // SimpleProfileResponse 삽입
+                        .status(jr.getStatus())
+                        .message(jr.getMessage())
+                        .requestedAt(jr.getRequestedAt())
+                        .build();
+            }).collect(Collectors.toList());
     }
 
     // 동호회장이 가입 요청 수락/거절
@@ -114,11 +162,16 @@ public class ClubJoinService {
 
         // 변경 반영
         entityManager.merge(jr);
+        
+        SimpleProfileResponse userProfile = profileService.getSimpleProfile(jr.getUser().getId());
+        if (userProfile == null) {
+            throw new IllegalStateException("사용자 프로필을 찾을 수 없습니다.");
+        }
 
         return ClubJoinResponse.builder()
-                .id(jr.getId())
+                .requestId(jr.getId())
                 .clubId(club.getId())
-                .userId(jr.getUser().getId())
+                .user(userProfile)
                 .status(jr.getStatus())
                 .message(jr.getMessage())
                 .requestedAt(jr.getRequestedAt())
