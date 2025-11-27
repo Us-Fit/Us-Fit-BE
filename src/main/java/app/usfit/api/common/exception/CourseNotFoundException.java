@@ -1,0 +1,12 @@
+package app.usfit.api.common.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+@ResponseStatus(HttpStatus.NOT_FOUND)
+public class CourseNotFoundException extends RuntimeException {
+
+    public CourseNotFoundException(Long id) {
+        super("존재하지 않는 코스입니다. id=" + id);
+    }
+}

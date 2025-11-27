@@ -4,6 +4,7 @@ import app.usfit.api.course.entity.Course;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CourseRepository extends JpaRepository<Course, Long> {
     /**
@@ -16,7 +17,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     );
 
     //강좌 id로 특정 강좌 검색
-    Course findCourseById(
+    Optional<Course> findCourseById(
             Long id
     );
 }
