@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import app.usfit.api.club.DTO.ClubCreatedResponse;
 import app.usfit.api.club.DTO.ClubSimpleInfoResponse;
 import app.usfit.api.club.DTO.CreateClubRequest;
-import app.usfit.api.club.entity.Club;
 import app.usfit.api.club.service.ClubService;
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -45,14 +45,14 @@ public class ClubController {
                         }
                         """)})
         )
-        public ResponseEntity<Club> createClub(@RequestBody CreateClubRequest req, Authentication authentication) {
+        public ResponseEntity<ClubCreatedResponse> createClub(@RequestBody CreateClubRequest req, Authentication authentication) {
         if (authentication == null || authentication.getName() == null) {
             return ResponseEntity.status(401).build();
         }
 
         Long userId = Long.parseLong(authentication.getName());
 
-        Club c = clubService.createClub(req, userId);
+        ClubCreatedResponse c = clubService.createClub(req, userId);
         return ResponseEntity.ok(c);
         //return ResponseEntity.created(URI.create("/api/clubs/" + c.getId())).body(c);
     }

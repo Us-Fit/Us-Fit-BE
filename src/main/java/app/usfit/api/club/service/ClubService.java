@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import app.usfit.api.club.DTO.ClubCreatedResponse;
 import app.usfit.api.club.DTO.ClubSimpleInfoResponse;
 import app.usfit.api.club.DTO.ClubSportRequest;
 import app.usfit.api.club.DTO.ClubSportResponse;
@@ -41,8 +42,11 @@ public class ClubService {
     }
 
     @Transactional
-    public Club createClub(CreateClubRequest req, Long ownerId) {
+    public ClubCreatedResponse createClub(CreateClubRequest req, Long ownerId) {
         User owner = entityManager.find(User.class, ownerId);
+        if (owner == null) {
+            throw new IllegalArgumentException("소유자(user)가 존재하지 않습니다. id=" + ownerId);
+        }
 
         Club.ClubBuilder builder = Club.builder()
                 .owner(owner)
@@ -57,8 +61,12 @@ public class ClubService {
                 .snsLink(req.getSnsLink());
 
         if (req.getMainFacilityId() != null) {
-            Facility fRef = entityManager.getReference(Facility.class, req.getMainFacilityId());
-            builder.mainFacility(fRef);
+            try {
+                Facility fRef = entityManager.getReference(Facility.class, req.getMainFacilityId());
+                builder.mainFacility(fRef);
+            } catch (jakarta.persistence.EntityNotFoundException ex) {
+                // 선택한 시설이 없으면 무시하거나 예외로 바꿀 수 있음. 현재는 무시.
+            }
         }
 
         Club club = builder.build();
@@ -71,9 +79,12 @@ public class ClubService {
                 .role("owner")
                 .status("active")
                 .build();
-        // 양방향이 매핑되어 있다면 members에 추가
         entityManager.persist(ownerMember);
-        
+        // 양방향 관계가 있으면 컬렉션에 추가
+        try {
+            if (club.getMembers() != null) club.getMembers().add(ownerMember);
+        } catch (Exception ignored) {}
+
         // 선택된 운동들 처리
         if (req.getSports() != null && !req.getSports().isEmpty()) {
             List<String> sportNames = req.getSports().stream()
@@ -81,7 +92,7 @@ public class ClubService {
                     .toList();
 
             Map<String, Sport> sportMap = sportService.findByNamesAsMap(sportNames);
-            
+
             for (ClubSportRequest sreq : req.getSports()) {
                 String norm = sreq.getSportName().trim().toLowerCase();
                 Sport sportEntity = sportMap.get(norm);
@@ -98,11 +109,23 @@ public class ClubService {
                         .build();
                 cs.setClub(club);
                 entityManager.persist(cs);
+                try {
+                    if (club.getSports() != null) club.getSports().add(cs);
+                } catch (Exception ignored) {}
             }
-            
         }
-        
-        return club;
+
+        SimpleProfileResponse ownerProfile = profileService.getSimpleProfile(ownerId);
+        Long mainFacilityId = null;
+        try { mainFacilityId = club.getMainFacility() != null ? club.getMainFacility().getId() : null; } catch (Exception ignored) {}
+
+        return new ClubCreatedResponse(
+            club.getId(),
+            club.getName(),
+            club.getDescription(),
+            ownerProfile,
+            mainFacilityId
+        );
     }
 
     // 동호회 목록 조회 (간단 정보 DTO 반환)
