@@ -10,19 +10,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import app.usfit.api.club.DTO.ClubImageReqeust;
 import app.usfit.api.club.DTO.ClubImageResponse;
 import app.usfit.api.club.entity.ClubImage;
 import app.usfit.api.club.service.ClubImageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -39,30 +36,37 @@ public class ClubImageController {
     )
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
         description = "multipart/form-data 형식. files 필드에 이미지 파일들을 첨부하세요. title/description 은 선택입니다.",
-        content = @Content(
+        content = @io.swagger.v3.oas.annotations.media.Content(
             mediaType = "multipart/form-data",
             examples = {
-                @ExampleObject(
+                @io.swagger.v3.oas.annotations.media.ExampleObject(
                     name = "업로드 예시",
                     value = """
                         {
-                        "files": [ {file1}, {file2}, ... ],
-                        "title": "클럽 워크샵 사진",
-                        "description": "2025년 봄 워크샵에서 찍은 사진들"
+                          "files": [ <file1>, <file2> ],
+                          "title": "클럽 워크샵 사진",
+                          "description": "2025년 봄 워크샵에서 찍은 사진들"
                         }
                         """
-                        )}))
+                )
+            }
+        )
+    )
     public ResponseEntity<Object> uploadClubImages(
             @Parameter(in = ParameterIn.PATH, name = "clubId", required = true, description = "클럽 ID", example = "123")
             @PathVariable("clubId") Long clubId,
-            @RequestPart("files") MultipartFile[] files,
-            @RequestParam(value = "title", required = false) String title,
-            @RequestParam(value = "description", required = false) String description,
+            @org.springframework.web.bind.annotation.ModelAttribute ClubImageReqeust req,
             Authentication authentication
     ) {
         try {
+            if (authentication == null || authentication.getName() == null) {
+                return ResponseEntity.status(401).body(Map.of("error", "인증 필요"));
+            }
             Long userId = Long.parseLong(authentication.getName());
-            List<ClubImage> uploaded = clubImageService.uploadClubImages(files, clubId, userId , title, description);
+            MultipartFile[] files = req.getFiles();
+            String title = req.getTitle();
+            String description = req.getDescription();
+            List<ClubImage> uploaded = clubImageService.checkUploadRole(files, clubId, userId , title, description);
             List<String> keys = uploaded.stream().map(ClubImage::getImageKey).collect(Collectors.toList());
             return ResponseEntity.ok(keys);
         } catch (SecurityException se) {

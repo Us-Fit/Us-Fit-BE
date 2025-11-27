@@ -175,7 +175,7 @@ public class ClubinfoService {
         ClubMember user = entityManager.createQuery(
                 "SELECT cm FROM ClubMember cm WHERE cm.club.id = :clubId AND cm.user.id = :userId", ClubMember.class)
                 .setParameter("clubId", clubId)
-                .setParameter("userId", memberId)
+                .setParameter("userId", requesterId)
                 .setMaxResults(1)
                 .getResultStream()
                 .findFirst()
@@ -185,7 +185,7 @@ public class ClubinfoService {
         ClubMember target = entityManager.createQuery(
                 "SELECT cm FROM ClubMember cm WHERE cm.club.id = :clubId AND cm.user.id = :userId", ClubMember.class)
                 .setParameter("clubId", clubId)
-                .setParameter("userId", requesterId)
+                .setParameter("userId", memberId)
                 .setMaxResults(1)
                 .getResultStream()
                 .findFirst()
