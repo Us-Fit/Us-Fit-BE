@@ -18,15 +18,18 @@ import java.util.List;
  */
 @Entity
 @Table(name = "club")
-@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 @Setter
+@Getter
 public class Club {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 동호회 PK
+
+    @Column(name = "club_main_image_url") 
+    private String clubMainImageUrl; // 동호회 메인 이미지 URL
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false,
