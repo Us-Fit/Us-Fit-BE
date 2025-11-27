@@ -80,7 +80,9 @@ public class ProfileController {
 
     @Operation(summary = "간단한 프로필 조회 (다른 사용자)", description = "특정 사용자의 간단한 프로필을 조회합니다.")
     @GetMapping("/{userId}/simple-profile")
-    public ResponseEntity<SimpleProfileResponse> getSimpleProfile(@PathVariable Long userId) {
+    public ResponseEntity<SimpleProfileResponse> getSimpleProfile(
+        @io.swagger.v3.oas.annotations.Parameter(in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH, name = "userId", required = true, description = "조회할 사용자 ID", example = "123")
+        @PathVariable("userId") Long userId) {
         try {
             SimpleProfileResponse res = profileService.getSimpleProfile(userId);
             if (res == null) return ResponseEntity.notFound().build();

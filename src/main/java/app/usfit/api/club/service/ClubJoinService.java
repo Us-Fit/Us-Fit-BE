@@ -49,7 +49,7 @@ public class ClubJoinService {
         ClubJoin jr = ClubJoin.builder()
                 .club(clubRef)
                 .user(requester)
-                .status("wating")
+                .status("waiting")
                 .message(message)
                 .build();
 
@@ -141,6 +141,8 @@ public class ClubJoinService {
         if (club.getOwner() == null || !club.getOwner().getId().equals(ownerId)) {
             throw new SecurityException("권한이 없습니다.");
         }
+
+        System.out.println("[TRACE] Deciding request id=" + jr.getId() + " current status=" + jr.getStatus() + " accept=" + accept);
 
         if (!"waiting".equalsIgnoreCase(jr.getStatus())) {
             throw new IllegalStateException("이미 처리된 요청입니다.");

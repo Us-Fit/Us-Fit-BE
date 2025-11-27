@@ -105,7 +105,12 @@ public class ClubInfoController {
     // 동호회원 본인 탈퇴
     @DeleteMapping("/{clubId}/members/me/remove")
     @io.swagger.v3.oas.annotations.Operation(summary = "본인 탈퇴", description = "로그인된 사용자가 스스로 동호회를 탈퇴합니다.")
-    public ResponseEntity<Object> leaveClub(@PathVariable Long clubId, Authentication authentication) {
+    public ResponseEntity<Object> leaveClub(
+        @io.swagger.v3.oas.annotations.Parameter(in = io.swagger.v3.oas.annotations.enums.ParameterIn.PATH, name = "clubId", required = true, description = "탈퇴할 동호회 ID", example = "123")
+        @PathVariable("clubId") Long clubId, Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "인증 필요"));
+        }
         Long userId = Long.parseLong(authentication.getName());
         try {
             clubinfoService.leaveClub(clubId, userId);
