@@ -1,4 +1,7 @@
 package app.usfit.api.club.activity.entity;
 
-public class ActivityStatus {
+public enum ActivityStatus {
+    OPEN,
+    CLOSED,
+    CANCELLED
 }
