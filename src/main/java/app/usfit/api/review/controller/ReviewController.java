@@ -57,10 +57,12 @@ public class ReviewController {
     //review 리스트 받아오기
     @GetMapping
     public List<ReviewDto> getReviews(
+            Authentication authentication,
             @RequestParam ReviewTargetType targetType,
             @RequestParam Long targetId
     ) {
-        return reviewService.getReviews(targetType, targetId);
+        Long currentUserId = Long.parseLong(authentication.getName());
+        return reviewService.getReviews(targetType, targetId, currentUserId);
     }
 
     // 리뷰 수정

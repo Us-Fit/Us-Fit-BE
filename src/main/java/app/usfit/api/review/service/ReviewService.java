@@ -8,6 +8,8 @@ import app.usfit.api.review.entity.Review;
 import app.usfit.api.review.entity.ReviewImage;
 import app.usfit.api.review.entity.ReviewTargetType;
 import app.usfit.api.review.repository.ReviewRepository;
+import app.usfit.api.user.entity.UserProfile;
+import app.usfit.api.user.repository.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ public class ReviewService {
     private static final String S3_BASE_URL = "https://usfit-s3-bucket.s3.ap-southeast-2.amazonaws.com/";
     private final ReviewRepository reviewRepository;
     private final ReviewImageService reviewImageService;
+    private final UserProfileRepository userProfileRepository;
 
     //review 생성
     public ReviewResponse createReview(ReviewCreateRequest request,
@@ -71,12 +74,23 @@ public class ReviewService {
     }
 
     //review 조회
-    public List<ReviewDto> getReviews(ReviewTargetType targetType, Long targetId) {
+    public List<ReviewDto> getReviews(
+            ReviewTargetType targetType,
+            Long targetId,
+            Long currentUserId   // 👈 추가
+    ) {
         List<Review> reviews =
                 reviewRepository.findByTargetTypeAndTargetId(targetType, targetId);
 
         return reviews.stream()
-                .map(ReviewDto::fromEntity)
+                .map(review -> {
+                    // 작성자 프로필 조회
+                    Long authorId = review.getUserId();
+                    UserProfile profile = userProfileRepository.findById(authorId)
+                            .orElse(null);
+
+                    return ReviewDto.fromEntity(review, currentUserId, profile);
+                })
                 .toList();
     }
 
