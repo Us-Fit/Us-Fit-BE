@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import app.usfit.api.config.S3Config;
 import org.springframework.stereotype.Service;
 
 import app.usfit.api.club.DTO.ClubCreatedResponse;
@@ -24,25 +25,31 @@ import app.usfit.api.user.entity.User;
 import app.usfit.api.user.service.ProfileService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ClubService {
     private final ClubRepository clubRepository;
     private final SportService sportService;
     private final ProfileService profileService;
+    private final ClubImageService clubImageService;
     
     @PersistenceContext
     private EntityManager entityManager;
 
-    public ClubService(ClubRepository clubRepository, SportService sportService, ProfileService profileService) {
+    public ClubService(ClubRepository clubRepository, SportService sportService, ProfileService profileService, ClubImageService clubImageService) {
         this.clubRepository = clubRepository;
         this.sportService = sportService;
         this.profileService = profileService;
+        this.clubImageService = clubImageService;
     }
 
+    //클럽 생성
     @Transactional
-    public ClubCreatedResponse createClub(CreateClubRequest req, Long ownerId) {
+    public ClubCreatedResponse createClub(CreateClubRequest req,
+                                          MultipartFile mainImage,
+                                          Long ownerId) {
         User owner = entityManager.find(User.class, ownerId);
         if (owner == null) {
             throw new IllegalArgumentException("소유자(user)가 존재하지 않습니다. id=" + ownerId);
@@ -65,14 +72,22 @@ public class ClubService {
                 Facility fRef = entityManager.getReference(Facility.class, req.getMainFacilityId());
                 builder.mainFacility(fRef);
             } catch (jakarta.persistence.EntityNotFoundException ex) {
-                // 선택한 시설이 없으면 무시하거나 예외로 바꿀 수 있음. 현재는 무시.
+                // 선택한 시설이 없으면 무시
             }
         }
 
+        // 1) club 먼저 저장해서 clubId 확보
         Club club = builder.build();
         club = clubRepository.save(club);
 
-        // 소유자를 ClubMember로 추가 (role: owner)
+        // 2) 메인 이미지가 있다면 업로드 후 key 저장
+        if (mainImage != null && !mainImage.isEmpty()) {
+            String imageKey = clubImageService.uploadClubMainImage(club.getId(), ownerId, mainImage);
+            club.setClubMainImageUrl(imageKey);   // 여기서 프로필 이미지 세팅
+            // 트랜잭션 안이니까 별도 save() 안 해도 flush 시점에 업데이트 됨
+        }
+
+        // 3) 소유자를 ClubMember로 추가
         ClubMember ownerMember = ClubMember.builder()
                 .club(club)
                 .user(owner)
@@ -80,12 +95,11 @@ public class ClubService {
                 .status("active")
                 .build();
         entityManager.persist(ownerMember);
-        // 양방향 관계가 있으면 컬렉션에 추가
-        try {
-            if (club.getMembers() != null) club.getMembers().add(ownerMember);
-        } catch (Exception ignored) {}
+        if (club.getMembers() != null) {
+            club.getMembers().add(ownerMember);
+        }
 
-        // 선택된 운동들 처리
+        // 4) 종목 처리
         if (req.getSports() != null && !req.getSports().isEmpty()) {
             List<String> sportNames = req.getSports().stream()
                     .map(s -> s.getSportName().trim().toLowerCase())
@@ -96,10 +110,7 @@ public class ClubService {
             for (ClubSportRequest sreq : req.getSports()) {
                 String norm = sreq.getSportName().trim().toLowerCase();
                 Sport sportEntity = sportMap.get(norm);
-
-                if (sportEntity == null) {
-                    continue; // 없는 운동은 무시   
-                }
+                if (sportEntity == null) continue;
 
                 ClubSport cs = ClubSport.builder()
                         .sport(sportEntity)
@@ -109,81 +120,60 @@ public class ClubService {
                         .build();
                 cs.setClub(club);
                 entityManager.persist(cs);
-                try {
-                    if (club.getSports() != null) club.getSports().add(cs);
-                } catch (Exception ignored) {}
+                if (club.getSports() != null) {
+                    club.getSports().add(cs);
+                }
             }
         }
 
         SimpleProfileResponse ownerProfile = profileService.getSimpleProfile(ownerId);
-        Long mainFacilityId = null;
-        try { mainFacilityId = club.getMainFacility() != null ? club.getMainFacility().getId() : null; } catch (Exception ignored) {}
+        Long mainFacilityId = club.getMainFacility() != null ? club.getMainFacility().getId() : null;
 
         return new ClubCreatedResponse(
-            club.getId(),
-            club.getName(),
-            club.getDescription(),
-            ownerProfile,
-            mainFacilityId
+                club.getId(),
+                club.getName(),
+                club.getDescription(),
+                ownerProfile,
+                mainFacilityId
         );
     }
-
     // 동호회 목록 조회 (간단 정보 DTO 반환)
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ClubSimpleInfoResponse> listClubs() {
         List<Club> clubs = clubRepository.findAll();
+
         // ownerId들을 수집해 한 번에 프로필 조회
         List<Long> ownerIds = clubs.stream()
-                .map(c -> {
-                    try { return c.getOwner() != null ? c.getOwner().getId() : null; }
-                    catch (Exception e) { return null; }
-                })
+                .map(c -> c.getOwner() != null ? c.getOwner().getId() : null)
                 .filter(Objects::nonNull)
                 .distinct()
                 .collect(Collectors.toList());
 
-        Map<Long, SimpleProfileResponse> ownerProfiles = profileService.getSimpleProfiles(ownerIds);
+        Map<Long, SimpleProfileResponse> ownerProfiles =
+                ownerIds.isEmpty() ? Map.of() : profileService.getSimpleProfiles(ownerIds);
 
-        return clubs.stream().map(club -> {
-            Long ownerId = null;
-            try { ownerId = club.getOwner() != null ? club.getOwner().getId() : null; } catch (Exception e) { ownerId = null; }
+        return clubs.stream()
+                .map(club -> {
+                    // owner 프로필
+                    SimpleProfileResponse ownerProfile = null;
+                    if (club.getOwner() != null) {
+                        ownerProfile = ownerProfiles.get(club.getOwner().getId());
+                    }
 
-            Long mainFacilityId = null;
-            try { mainFacilityId = club.getMainFacility() != null ? club.getMainFacility().getId() : null; } catch (Exception e) { mainFacilityId = null; }
-
-            Integer memberCount = 0;
-            try { memberCount = club.getMembers() != null ? club.getMembers().size() : 0; } catch (Exception e) { memberCount = 0; }
-
-            List<ClubSportResponse> sports;
-            if (club.getSports() != null) {
-                try {
-                    sports = club.getSports().stream()
+                    // sports -> DTO
+                    List<ClubSportResponse> sports = club.getSports() == null
+                            ? List.of()
+                            : club.getSports().stream()
                             .map(s -> new ClubSportResponse(
-                                    s.getId(),
+                                    // 조인 테이블 id 대신 실제 sport id를 쓰고 싶으면 이렇게:
+                                    s.getSport() != null ? s.getSport().getId() : null,
                                     s.getSport() != null ? s.getSport().getName() : null
                             ))
                             .collect(Collectors.toList());
-                } catch (Exception ex) {
-                    sports = List.of();
-                }
-            } else {
-                sports = List.of();
-            }
 
-            SimpleProfileResponse ownerProfile = ownerId == null ? null : ownerProfiles.get(ownerId);
-
-            return new ClubSimpleInfoResponse(
-                    club.getId(),
-                    club.getName(),
-                    club.getRegionName(),
-                    club.getMemberLimit(),
-                    club.getVisibility(),
-                    club.getStatus(),
-                    ownerProfile,
-                    mainFacilityId,
-                    memberCount,
-                    sports
-            );
-        }).collect(Collectors.toList());
+                    // DTO 변환
+                    return ClubSimpleInfoResponse.from(club, ownerProfile, sports);
+                })
+                .collect(Collectors.toList());
     }
 }
