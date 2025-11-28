@@ -30,4 +30,7 @@ public class User {
     
     // providerId: 공급자에서 사용자를 유일하게 식별하기 위한 값임.
     private String providerId; // 소셜 로그인 시 외부 식별자
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private UserProfile profile;
 }
