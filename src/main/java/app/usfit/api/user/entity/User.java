@@ -1,13 +1,7 @@
 package app.usfit.api.user.entity;
 
 import app.usfit.api.common.enums.AuthProviderEnum;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,4 +30,7 @@ public class User {
     
     // providerId: 공급자에서 사용자를 유일하게 식별하기 위한 값임.
     private String providerId; // 소셜 로그인 시 외부 식별자
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private UserProfile profile;
 }
