@@ -51,12 +51,9 @@ public class UserProfileImageService {
             throw new RuntimeException("S3 업로드 실패", e);
         }
 
-        // 업로드 후 공개 URL 생성
-        String url = getProfileImageUrl(key);
-
-        // User의 profileImageUrl에 저장
+        // User의 image key에 저장
         userProfileRepository.findById(userId).ifPresent(user -> {
-            user.setProfileImageKey(url);
+            user.setProfileImageKey(key);
             userProfileRepository.save(user);
         });
 

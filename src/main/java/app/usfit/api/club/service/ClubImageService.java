@@ -173,4 +173,33 @@ public class ClubImageService {
             );
         }).collect(Collectors.toList());
     }
+
+    // 클럽 메인(프로필) 이미지 업로드용
+    public String uploadClubMainImage(Long clubId, Long uploaderId, MultipartFile file) {
+        if (file == null || file.isEmpty()) return null;
+
+        String original = file.getOriginalFilename();
+        String ext = "";
+        if (original != null && original.contains(".")) {
+            ext = original.substring(original.lastIndexOf('.'));
+        }
+
+        // 프로필 이미지는 따로 path 분리
+        String key = "club/main/" + clubId + "/" + UUID.randomUUID() + ext;
+
+        PutObjectRequest putReq = PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .contentType(file.getContentType())
+                .build();
+
+        try (InputStream is = file.getInputStream()) {
+            s3Client.putObject(putReq, RequestBody.fromInputStream(is, file.getSize()));
+        } catch (IOException e) {
+            throw new RuntimeException("S3 업로드 실패", e);
+        }
+
+        // 프로필 이미지는 club_image 테이블에 안 넣고, club에만 저장해도 됨
+        return key;
+    }
 }
