@@ -112,10 +112,9 @@ public class ClubController {
             @RequestBody ClubRecommendRequest request
     ) {
         List<String> sports = request != null ? request.getSports() : null;
-        Long facilityId = request != null ? request.getFacilityId() : null;
         int limit = (request != null && request.getLimit() != null) ? request.getLimit() : 20;
 
-        List<ClubSimpleInfoResponse> res = clubService.recommendClubs(sports, facilityId, limit);
+        List<ClubSimpleInfoResponse> res = clubService.recommendClubs(sports, request.getSidoNm(), request.getSigunguNm() , limit);
         return ResponseEntity.ok(res);
     }
 }

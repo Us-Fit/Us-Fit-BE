@@ -1,14 +1,13 @@
 package app.usfit.api.club.service;
 
-import java.util.Comparator;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -273,93 +272,152 @@ public class ClubService {
         return ClubCreatedResponse.fromEntity(club, ownerProfile);
     }
 
-    // 동호회 FacilityId를 통해 필터링
-    // 관심운동 필터를 통해 동호회 우선순위 지정
-    @Transactional(readOnly = true)
-    public List<ClubSimpleInfoResponse> recommendClubs(List<String> sports, Long facilityId, int limit) {
+    /*
+        * 추천 알고리즘 (지역 우선 분류)
+        * 우선순위 (운동 있음):
+     * 1. 시군구 일치 + 운동 일치
+     * 2. 시도만 일치 + 운동 일치
+     * 3. 운동일치
+     * 4. 지역 일치 (시군구 or 시도)
+     * 5. 나머지
+     *
+     * 우선순위 (운동 없음):
+     * 1. 시군구 일치
+     * 2. 시도 일치
+     * 3. 나머지
+    */
+   @Transactional(readOnly = true)
+    public List<ClubSimpleInfoResponse> recommendClubs(List<String> sports, String sidoNm, String sigunguNm, int limit) {
+        final int maxLimit = (limit <= 0) ? 20 : limit;
+
+        // 운동 세팅 - 정규화 (소문자, trim, 중복 제거)
         List<String> normNames = (sports == null) ? List.of()
                 : sports.stream().filter(Objects::nonNull).map(s -> s.trim().toLowerCase()).distinct().collect(Collectors.toList());
 
-        // 운동 매칭 클럽
-        List<Club> matchedBySport = normNames.isEmpty() ? List.of() :
-                entityManager.createQuery(
-                        "SELECT DISTINCT c FROM Club c JOIN c.sports cs JOIN cs.sport s WHERE LOWER(s.name) IN :names", Club.class)
-                        .setParameter("names", normNames)
-                        .getResultList();
+        String lowSido = sidoNm == null ? null : sidoNm.trim().toLowerCase();
+        String lowSigungu = sigunguNm == null ? null : sigunguNm.trim().toLowerCase();
 
-        // facility 매칭 클럽 (facilityId 없으면 빈 리스트)
-        List<Club> facilityMatched = (facilityId == null) ? List.of() :
-                entityManager.createQuery("SELECT c FROM Club c WHERE c.mainFacility.id = :fid", Club.class)
-                        .setParameter("fid", facilityId)
-                        .getResultList();
+        // 누적된 id 보관 (순서 유지, 중복 제거)
+        List<Long> orderedIds = new ArrayList<>();
+        Set<Long> seen = new HashSet<>();
 
-        // 전체 클럽 (for fallback)
-        List<Club> allClubs = entityManager.createQuery("SELECT c FROM Club c", Club.class).getResultList();
-
-        // 매칭 카운트 계산 (운동 매칭 개수)
-        Map<Long, Integer> matchCount = new HashMap<>();
-        for (Club c : matchedBySport) {
-            int cnt = 0;
-            if (c.getSports() != null) {
-                for (ClubSport cs : c.getSports()) {
-                    if (cs.getSport() != null && normNames.contains(cs.getSport().getName().trim().toLowerCase())) cnt++;
-                }
+        // helper: append unique up to remaining
+        Consumer<List<Long>> appendUniqueLimited = ids -> {
+            for (Long id : ids) {
+                if (orderedIds.size() >= maxLimit) break;
+                if (seen.add(id)) orderedIds.add(id);
             }
-            matchCount.put(c.getId(), cnt);
+        };
+
+        // 1) 운동이 있는 경우: group1~5 차례로 DB에서 id를 가져와 누적
+        if (!normNames.isEmpty()) {
+            // group1: 운동 일치 + sigungu match + sido match
+            if (lowSigungu != null && !lowSigungu.isBlank()) {
+                List<Long> g1 = entityManager.createQuery(
+                        "SELECT c.id FROM Club c JOIN c.sports cs JOIN cs.sport s LEFT JOIN c.members m " +
+                                "WHERE LOWER(s.name) IN :names AND LOWER(c.sigunguNm) = :sigungu AND LOWER(c.sidoNm) = :sido " +
+                                "GROUP BY c.id ORDER BY COUNT(DISTINCT s.id) DESC, COUNT(DISTINCT m.id) DESC", Long.class)
+                        .setParameter("names", normNames)
+                        .setParameter("sigungu", lowSigungu)
+                        .setParameter("sido", lowSido)
+                        .setMaxResults(limit)
+                        .getResultList();
+                appendUniqueLimited.accept(g1);
+            }
+
+            // group2: 운동 일치 + sido match
+            if (orderedIds.size() < limit && lowSido != null && !lowSido.isBlank()) {
+                List<Long> g2 = entityManager.createQuery(
+                        "SELECT c.id FROM Club c JOIN c.sports cs JOIN cs.sport s LEFT JOIN c.members m " +
+                                "WHERE LOWER(s.name) IN :names AND LOWER(c.sidoNm) = :sido " +
+                                "GROUP BY c.id ORDER BY COUNT(DISTINCT s.id) DESC, COUNT(DISTINCT m.id) DESC", Long.class)
+                        .setParameter("names", normNames)
+                        .setParameter("sido", lowSido)
+                        .setMaxResults(limit)
+                        .getResultList();
+                appendUniqueLimited.accept(g2);
+            }
+
+            // group3: 운동일치 (모든 운동매칭 클럽)
+            if (orderedIds.size() < limit) {
+                List<Long> g3 = entityManager.createQuery(
+                        "SELECT c.id FROM Club c JOIN c.sports cs JOIN cs.sport s LEFT JOIN c.members m " +
+                                "WHERE LOWER(s.name) IN :names " +
+                                "GROUP BY c.id ORDER BY COUNT(DISTINCT s.id) DESC, COUNT(DISTINCT m.id) DESC", Long.class)
+                        .setParameter("names", normNames)
+                        .setMaxResults(limit)
+                        .getResultList();
+                appendUniqueLimited.accept(g3);
+            }
+
+            // group4: 지역 일치 (sigungu 또는 sido) - 멤버수 기준
+            if (orderedIds.size() < limit && (lowSigungu != null || lowSido != null)) {
+                List<Long> g4 = entityManager.createQuery(
+                        "SELECT c.id FROM Club c LEFT JOIN c.members m WHERE " +
+                                "(:sigungu IS NOT NULL AND LOWER(c.sigunguNm)=:sigungu) OR " +
+                                "(:sido IS NOT NULL AND LOWER(c.sidoNm)=:sido) " +
+                                "GROUP BY c.id ORDER BY COUNT(DISTINCT m.id) DESC", Long.class)
+                        .setParameter("sigungu", lowSigungu)
+                        .setParameter("sido", lowSido)
+                        .setMaxResults(limit)
+                        .getResultList();
+                appendUniqueLimited.accept(g4);
+            }
+
+            // group5: 나머지 (모든 클럽, 멤버수 기준)
+            if (orderedIds.size() < limit) {
+                List<Long> g5 = entityManager.createQuery(
+                        "SELECT c.id FROM Club c LEFT JOIN c.members m GROUP BY c.id ORDER BY COUNT(DISTINCT m.id) DESC", Long.class)
+                        .setMaxResults(limit)
+                        .getResultList();
+                appendUniqueLimited.accept(g5);
+            }
+
+        }
+        // 운동 없음: 그룹1 sigungu, group2 sido, group3 rest (그냥 지역순으로)
+        else {
+            if (lowSigungu != null && !lowSigungu.isBlank()) {
+                List<Long> g1 = entityManager.createQuery(
+                        "SELECT c.id FROM Club c LEFT JOIN c.members m WHERE LOWER(c.sigunguNm) = :sigungu GROUP BY c.id ORDER BY COUNT(DISTINCT m.id) DESC", Long.class)
+                        .setParameter("sigungu", lowSigungu)
+                        .setMaxResults(limit)
+                        .getResultList();
+                appendUniqueLimited.accept(g1);
+            }
+
+            if (orderedIds.size() < limit && lowSido != null && !lowSido.isBlank()) {
+                List<Long> g2 = entityManager.createQuery(
+                        "SELECT c.id FROM Club c LEFT JOIN c.members m WHERE LOWER(c.sidoNm) = :sido GROUP BY c.id ORDER BY COUNT(DISTINCT m.id) DESC", Long.class)
+                        .setParameter("sido", lowSido)
+                        .setMaxResults(limit)
+                        .getResultList();
+                appendUniqueLimited.accept(g2);
+            }
+
+            if (orderedIds.size() < limit) {
+                List<Long> g3 = entityManager.createQuery(
+                        "SELECT c.id FROM Club c LEFT JOIN c.members m GROUP BY c.id ORDER BY COUNT(DISTINCT m.id) DESC", Long.class)
+                        .setMaxResults(limit)
+                        .getResultList();
+                appendUniqueLimited.accept(g3);
+            }
         }
 
-        // id 집합 생성
-        Set<Long> sportIds = matchedBySport.stream().map(Club::getId).collect(Collectors.toSet());
-        Set<Long> facilityIds = facilityMatched.stream().map(Club::getId).collect(Collectors.toSet());
+        if (orderedIds.isEmpty()) return List.of();
 
-        // 그룹 분류
-        List<Club> group1 = matchedBySport.stream()
-                .filter(c -> facilityId != null && facilityIds.contains(c.getId()))
-                .distinct()
-                .collect(Collectors.toList()); // 시설+운동
+        // 한 번에 엔티티 로드 (IN 쿼리) -> map으로 재정렬
+        List<Club> clubs = entityManager.createQuery("SELECT c FROM Club c WHERE c.id IN :ids", Club.class)
+                .setParameter("ids", orderedIds)
+                .getResultList();
+        Map<Long, Club> clubById = clubs.stream().collect(Collectors.toMap(Club::getId, c -> c));
 
-        List<Club> group3 = matchedBySport.stream()
-                .filter(c -> !facilityIds.contains(c.getId()))
-                .distinct()
-                .collect(Collectors.toList()); // 운동만
-
-        List<Club> group2 = facilityMatched.stream()
-                .filter(c -> !sportIds.contains(c.getId()))
-                .distinct()
-                .collect(Collectors.toList()); // 시설만
-
-        // 나머지 (group4): allClubs에서 이미 포함된 것 제외
-        Set<Long> included = Stream.of(group1, group2, group3)
-                .flatMap(List::stream)
-                .map(Club::getId)
-                .collect(Collectors.toSet());
-
-        List<Club> group4 = allClubs.stream()
-                .filter(c -> !included.contains(c.getId()))
+        List<Club> finalList = orderedIds.stream()
+                .filter(clubById::containsKey)
+                .limit(limit)
+                .map(clubById::get)
                 .collect(Collectors.toList());
 
-        // 정렬 규칙: group1 -> 시설일치 우선 + matchCount desc + memberCount desc
-        Comparator<Club> byMatchThenMembers = Comparator
-                .comparing((Club c) -> matchCount.getOrDefault(c.getId(), 0), Comparator.reverseOrder())
-                .thenComparing((Club c) -> c.getMembers() != null ? c.getMembers().size() : 0, Comparator.reverseOrder());
-
-        group1.sort(byMatchThenMembers);
-        // group2: 시설만 - 멤버수 기준 내림차순
-        group2.sort(Comparator.comparing((Club c) -> c.getMembers() != null ? c.getMembers().size() : 0, Comparator.reverseOrder()));
-        // group3: 운동만 - matchCount desc then members desc
-        group3.sort(byMatchThenMembers);
-        // group4: 멤버수 기준 내림차순
-        group4.sort(Comparator.comparing((Club c) -> c.getMembers() != null ? c.getMembers().size() : 0, Comparator.reverseOrder()));
-
-        // 합치기 및 limit 적용
-        List<Club> combined = Stream.of(group1, group2, group3, group4)
-                .flatMap(List::stream)
-                .filter(Objects::nonNull)
-                .distinct()
-                .limit(Math.max(0, limit))
-                .collect(Collectors.toList());
-
-        return mapToSimpleResponses(combined);
+        return mapToSimpleResponses(finalList);
     }
 
     // helper: Club -> ClubSimpleInfoResponse 매핑 (owner 프로필 batch 조회)
