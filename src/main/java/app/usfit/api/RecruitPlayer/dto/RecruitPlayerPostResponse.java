@@ -17,6 +17,7 @@ public record RecruitPlayerPostResponse(
     Integer maxMember,
     Boolean isActive,
 
-    // 시설 ID로 활동 위치 지정
-    Long facilityId
+    Long facilityId,
+    String sidoNm,
+    String sigunguNm
 ) {}
