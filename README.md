@@ -224,8 +224,7 @@
 ---
 
 ##  시스템 아키텍처
-![System Architecture](images/architecture_diagram.png)
-
+<img width="3212" height="2023" alt="image" src="https://github.com/Us-Fit/Us-Fit-BE/blob/feat/README/images/system-architecture.png" />
 ### 아키텍처 특징
 
 - **3-Tier Architecture**: Presentation - Business Logic - Data Access 계층 분리
