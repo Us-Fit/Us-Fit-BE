@@ -225,7 +225,7 @@
 
 ##  시스템 아키텍처
 
-```mermaid
+<!-- ```mermaid
 graph TB
     subgraph "Client Layer"
         A[React Native App]
@@ -279,7 +279,8 @@ graph TB
     I --> N
     E --> O
     F -.Map API.-> O
-```
+``` -->
+![System Architecture](images/architecture_diagram.png)
 
 ### 아키텍처 특징
 
