@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,9 +36,7 @@ public class ClubImageService {
     private final ClubImageRepository clubImageRepository;
     private final ClubRepository clubRepository;
     private final ProfileService profileService;
-
-    @Autowired
-    private ClubinfoService clubinfoService;
+    private final ClubinfoService clubinfoService;
     
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -55,7 +52,7 @@ public class ClubImageService {
 
         // 동호회 멤버 목록에서 현재 사용자 조회
         var clubUserOpt = clubinfoService.listClubMemebers(clubId).stream()
-                .filter(cm -> cm.userSimpleProfile().userId().equals(clubId))
+                .filter(cm -> cm.userSimpleProfile().userId().equals(userId))
                 .findFirst();
 
         if (clubUserOpt.isEmpty()) {
