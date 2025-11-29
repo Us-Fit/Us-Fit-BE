@@ -135,24 +135,4 @@ public interface FacilityRepository extends JpaRepository<Facility, Long> {
             @Param("limit") int limit,
             @Param("offset") int offset
     );
-
-    @Query(value = """
-        SELECT 
-          f.id          AS id,
-          f.name        AS name,
-          f.type_name   AS typeName,
-          f.sido_nm     AS sidoNm,
-          f.sigungu_nm  AS sigunguNm,
-          f.road_addr1  AS roadAddr1,
-          f.road_addr2  AS roadAddr2,
-          f.lat         AS lat,
-          f.lng         AS lng,
-          f.manager_phone AS managerPhone,
-          f.area_sqm    AS areaSqm,
-          f.indoor_outdoor AS indoorOutdoor,
-          0.0           AS distance
-        FROM facility f
-        WHERE f.id = :id
-        """, nativeQuery = true)
-    Optional<FacilityDetailView> findProjectedById(Long id);
 }
