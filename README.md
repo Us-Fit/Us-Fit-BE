@@ -409,7 +409,7 @@ gradlew.bat bootRun
 ./gradlew bootRun
 ```
 
-### 4️⃣ 서버 확인
+### 4️. 서버 확인
 
 - 서버 주소: `http://3.27.134.2:8080`
 - Health Check: `http://3.27.134.2:8080/actuator/health` (설정 시)
@@ -499,6 +499,13 @@ http://3.27.134.2:8080/swagger-ui/index.html#
 - `POST /api/club/join/requests/{id}/decision` - 가입 승인/거절
 - `GET /api/club-info/{id}` - 동호회 상세 정보
 - `PATCH /api/club-info/{id}/member/{memberId}` - 회원 역할 변경
+
+#### 동호회 활동 API
+- `POST /api/clubs/{clubId}/activities` - 활동 생성
+- `GET /api/clubs/{clubId}/activities` - 활동 목록 조회
+- `POST /api/clubs/{clubId}/activities/{activityId}/join` - 활동 참여
+- `GET /api/clubs/{clubId}/activities/{activityId}/members` - 활동 멤버 리스트 조회
+- `POST /api/clubs/{clubId}/activities/members/{activityMemberId}/status` - 활동 멤버 상태 변경
 
 #### 용병 모집 API
 - `POST /api/recruits` - 용병 모집글 작성
@@ -624,7 +631,7 @@ gradlew.bat jacocoTestReport
 
 <div align="center">
 
-**UsFit - 운동으로 연결되는 우리, 함께 만들어가는 건강한 대한민국 🏃‍♂️🏃‍♀️**
+**UsFit - 운동으로 연결되는 우리, 함께 만들어가는 건강한 대한민국 **
 
 Made with ❤️ by Us-Fit Team
 
