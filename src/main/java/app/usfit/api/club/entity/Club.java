@@ -48,11 +48,11 @@ public class Club {
     @Column(columnDefinition = "longtext")
     private String description; // 소개(긴 텍스트 가능)
 
-    @Column(name = "region_code", length = 20)
-    private String regionCode; // 활동 지역 코드(시/군/구)
+    @Column(name = "sido_nm")
+    private String sidoNm; // 활동 시/도 명
 
-    @Column(name = "region_name", length = 100)
-    private String regionName; // 활동 지역 명
+    @Column(name = "sigungu_nm")
+    private String sigunguNm; // 활동 시/군/구 명
 
     @Column(name = "member_limit")
     private Integer memberLimit; // 최대 인원
