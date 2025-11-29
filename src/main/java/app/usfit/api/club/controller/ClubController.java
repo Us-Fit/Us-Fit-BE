@@ -5,14 +5,20 @@ import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import app.usfit.api.club.DTO.ClubCreatedResponse;
 import app.usfit.api.club.DTO.ClubSimpleInfoResponse;
 import app.usfit.api.club.DTO.CreateClubRequest;
 import app.usfit.api.club.service.ClubService;
 import io.swagger.v3.oas.annotations.Operation;
-import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -76,4 +82,36 @@ public class ClubController {
         public ResponseEntity<List<ClubSimpleInfoResponse>> listClubs() {
                 return ResponseEntity.ok(clubService.listClubs());
         }
+
+    // 클럽 업데이트
+    @PatchMapping(value = "/{clubId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "동호회 수정", description = "동호회 정보를 수정합니다. request(JSON) + mainImage(file) 파트 전송")
+    public ResponseEntity<ClubCreatedResponse> updateClub(
+            @PathVariable("clubId") Long clubId,
+            @RequestPart("request") CreateClubRequest req,
+            @RequestPart(value = "mainImage", required = false) MultipartFile mainImage,
+            Authentication authentication
+    ) {
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        Long userId;
+        try {
+            userId = Long.parseLong(authentication.getName());
+        } catch (NumberFormatException ex) {
+            return ResponseEntity.status(401).build();
+        }
+
+        try {
+            ClubCreatedResponse c = clubService.updateClub(clubId, userId, req, mainImage);
+            return ResponseEntity.ok(c);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
 }

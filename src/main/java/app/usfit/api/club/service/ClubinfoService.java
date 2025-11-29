@@ -1,10 +1,8 @@
 package app.usfit.api.club.service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import app.usfit.api.facility.dto.FacilityDetailDto;
 import org.springframework.stereotype.Service;
 
 import app.usfit.api.club.DTO.ClubDetailInfoResponse;
@@ -12,18 +10,20 @@ import app.usfit.api.club.DTO.ClubMemberResponse;
 import app.usfit.api.club.DTO.ClubSportResponse;
 import app.usfit.api.club.entity.Club;
 import app.usfit.api.club.entity.ClubMember;
+import app.usfit.api.facility.dto.FacilityDetailDto;
 import app.usfit.api.facility.repository.FacilityRepository;
 import app.usfit.api.user.dto.SimpleProfileResponse;
 import app.usfit.api.user.service.ProfileService;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
 @Service
 public class ClubinfoService {
-    private final jakarta.persistence.EntityManager entityManager;
+    private final EntityManager entityManager;
     private final FacilityRepository facilityRepository;
     private final ProfileService profileService;
     
-    public ClubinfoService(jakarta.persistence.EntityManager entityManager, FacilityRepository facilityRepository, ProfileService profileService) {
+    public ClubinfoService(EntityManager entityManager, FacilityRepository facilityRepository, ProfileService profileService) {
         this.entityManager = entityManager;
         this.facilityRepository = facilityRepository;
         this.profileService = profileService;
