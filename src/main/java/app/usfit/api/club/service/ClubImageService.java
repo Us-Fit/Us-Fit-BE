@@ -117,13 +117,15 @@ public class ClubImageService {
             throw new IllegalArgumentException("존재하지 않는 동호회입니다.");
         }
 
+        // 동호회 소속 멤버인지 확인하는 부분
+        /*
         var members = clubinfoService.listClubMemebers(clubId);
         boolean isMember = members.stream().anyMatch(cm -> cm.userSimpleProfile().userId().equals(currentUserId));
         boolean isOwner = clubRepository.existsByIdAndOwnerId(clubId, currentUserId);
 
         if (!isMember && !isOwner) {
             throw new SecurityException("클럽 소속 멤버만 접근할 수 있습니다.");
-        }
+        }*/
 
         // 최신순 조회 (repo 메서드명에 OrderByCreatedAtDesc 적용됨)
         List<ClubImage> images = clubImageRepository.findByClubIdOrderByCreatedAtDesc(clubId);
