@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import app.usfit.api.facility.dto.FacilityDetailDto;
 import org.springframework.stereotype.Service;
 
 import app.usfit.api.club.DTO.ClubDetailInfoResponse;
@@ -11,7 +12,6 @@ import app.usfit.api.club.DTO.ClubMemberResponse;
 import app.usfit.api.club.DTO.ClubSportResponse;
 import app.usfit.api.club.entity.Club;
 import app.usfit.api.club.entity.ClubMember;
-import app.usfit.api.facility.dto.FacilityDetailView;
 import app.usfit.api.facility.repository.FacilityRepository;
 import app.usfit.api.user.dto.SimpleProfileResponse;
 import app.usfit.api.user.service.ProfileService;
@@ -37,66 +37,28 @@ public class ClubinfoService {
             throw new IllegalStateException("동호회가 존재하지 않습니다.");
         }
 
-        // 이미 URL을 Club에 저장해두었으므로 직접 사용
-        String imageUrl = null;
-        try {
-            imageUrl = club.getClubMainImageUrl();
-        } catch (Throwable ignored) {
-            imageUrl = null;
+        // 메인 시설 정보
+        FacilityDetailDto facilityDto = null;
+        if (club.getMainFacility() != null && club.getMainFacility().getId() != null) {
+            Long mainFacilityId = club.getMainFacility().getId();
+            facilityDto = facilityRepository.getFacilityInfo(mainFacilityId);
         }
 
-        // member count - JPQL count로 안전하게 계산
-        int currMemberCount = club.getMembers() != null ? club.getMembers().size() : 0;
-
-        // facility -> projection (FacilityDetailView) 사용
-        FacilityDetailView facilityView = null;
-        try {
-            if (club.getMainFacility() != null && club.getMainFacility().getId() != null) {
-                Long mainFacilityId = club.getMainFacility().getId();
-                facilityView = facilityRepository.findProjectedById(mainFacilityId).orElse(null);
-            }
-        } catch (Throwable ignored) {
-            facilityView = null;
-        }
-
-        // sports -> DTO (트랜잭션 내에서 안전하게 lazy 접근)
+        // sports -> DTO
         List<ClubSportResponse> sports = List.of();
-        try {
-            if (club.getSports() != null) {
-                sports = club.getSports().stream()
-                        .map(s -> new ClubSportResponse(
-                                s.getId(),
-                                s.getSport() != null ? s.getSport().getName() : null
-                        ))
-                        .collect(Collectors.toList());
-            }
-        } catch (Throwable ignored) {
-            sports = List.of();
+        if (club.getSports() != null) {
+            sports = club.getSports().stream()
+                    .map(s -> new ClubSportResponse(
+                            s.getId(),
+                            s.getSport() != null ? s.getSport().getName() : null
+                    ))
+                    .collect(Collectors.toList());
         }
 
-        // created date
-        LocalDate createdAt = null;
-        try {
-            if (club.getCreatedAt() != null) {
-                createdAt = club.getCreatedAt().toLocalDate();
-            }
-        } catch (Throwable ignored) {
-            createdAt = null;
-        }
-
-        return new ClubDetailInfoResponse(
-                club.getName(),
-                club.getDescription(),
-                imageUrl,
-                currMemberCount,
-                club.getMemberLimit(),
-                club.getPhoneNumber(),
-                createdAt,
-                club.getSnsLink(),
-                facilityView,
-                sports
-        );
+        // DTO 변환
+        return ClubDetailInfoResponse.from(club, facilityDto, sports);
     }
+
 
     // 동호회 모든 동호회원 조회
     @Transactional
