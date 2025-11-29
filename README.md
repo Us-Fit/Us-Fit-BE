@@ -224,7 +224,7 @@
 ---
 
 ##  시스템 아키텍처
-<img width="3212" height="2023" alt="image" src="https://github.com/Us-Fit/Us-Fit-BE/blob/feat/README/images/system-architecture.png" />
+<img width="800" alt="System Architecture" src="images/system-architecture.png" />
 ### 아키텍처 특징
 
 - **3-Tier Architecture**: Presentation - Business Logic - Data Access 계층 분리
@@ -247,7 +247,13 @@ Us-Fit-BE/
 │   │   │   │   ├── dto/               # 요청/응답 DTO
 │   │   │   │   ├── entity/            # 동호회 엔티티 (Club, ClubMember, ClubJoin 등)
 │   │   │   │   ├── repository/        # JPA Repository
-│   │   │   │   └── service/           # 비즈니스 로직
+│   │   │   │   ├── service/           # 비즈니스 로직
+│   │   │   │   └── activity/                # 활동 도메인
+│   │   │   │       ├── controller/        # 활동 API 엔드포인트
+│   │   │   │       ├── dto/               # 요청/응답 DTO
+│   │   │   │       ├── entity/            # 활동 엔티티 (Activity, ActivityMember, ActivityJoin 등)
+│   │   │   │       ├── repository/        # JPA Repository
+│   │   │   │       └── service/           # 비즈니스 로직
 │   │   │   │
 │   │   │   ├── facility/               # 체육시설 도메인
 │   │   │   │   ├── controller/        # 시설 검색 API
@@ -452,7 +458,7 @@ CommandLineRunner initData(FacilityImportService facilityService,
 서버 실행 후 아래 주소로 접속:
 
 ```
-http://localhost:8080/swagger-ui/index.html
+http://3.27.134.2:8080/swagger-ui/index.html#
 ```
 
 ### 주요 API 엔드포인트
