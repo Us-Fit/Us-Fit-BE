@@ -18,15 +18,16 @@
 
 ## 목차
 
-- [프로젝트 소개](#-프로젝트-소개)
-- [핵심 가치](#-핵심-가치)
-- [주요 기능](#-주요-기능)
-- [공공데이터 활용](#-공공데이터-활용)
-- [기술 스택](#-기술-스택)
-- [시스템 아키텍처](#-시스템-아키텍처)
-- [팀 구성](#-팀-구성)
-- [설치 및 실행](#-설치-및-실행)
-- [API 문서](#-api-문서)
+- [프로젝트 소개](#프로젝트-소개)
+- [핵심 가치](#핵심-가치)
+- [주요 기능](#주요-기능)
+- [공공데이터 활용](#공공데이터-활용)
+- [기술 스택](#기술-스택)
+- [시스템 아키텍처](#시스템-아키텍처)
+- [데이터베이스 ERD](#데이터베이스-ERD)
+- [팀 구성](#팀-구성)
+- [설치 및 실행](#설치-및-실행)
+- [API 문서](#api-문서)
 
 ---
 
@@ -106,7 +107,7 @@
 ### 데이터 출처
 - **제공 기관**: 국민체육진흥공단
 - **데이터 형식**: CSV
-- **데이터 양**: 전국 공공체육시설 수만 건, 강좌 수천 건
+- **데이터 양**: 전국 공공체육시설 14만 건, 강좌 20만 건
 
 ### 데이터 처리 프로세스
 
@@ -224,63 +225,7 @@
 ---
 
 ##  시스템 아키텍처
-
-```mermaid
-graph TB
-    subgraph "Client Layer"
-        A[React Native App]
-        B[Web Browser]
-    end
-    
-    subgraph "API Gateway"
-        C[Spring Boot 3.5<br/>REST API Server]
-    end
-    
-    subgraph "Security Layer"
-        D[Spring Security<br/>JWT Filter]
-        E[OAuth 2.0 Handler]
-    end
-    
-    subgraph "Business Logic"
-        F[시설/강좌 서비스]
-        G[동호회 서비스]
-        H[용병 매칭 서비스]
-        I[리뷰 서비스]
-        J[회원 서비스]
-    end
-    
-    subgraph "Data Layer"
-        K[(MySQL 8.x<br/>AWS RDS)]
-        L[Spring Data JPA<br/>Hibernate]
-    end
-    
-    subgraph "External Services"
-        M[국민체육진흥공단<br/>공공데이터]
-        N[AWS S3<br/>이미지 저장소]
-        O[Kakao API<br/>OAuth/Map]
-    end
-    
-    A --> C
-    B --> C
-    C --> D
-    D --> E
-    C --> F
-    C --> G
-    C --> H
-    C --> I
-    C --> J
-    F --> L
-    G --> L
-    H --> L
-    I --> L
-    J --> L
-    L --> K
-    F -.CSV Import.-> M
-    I --> N
-    E --> O
-    F -.Map API.-> O
-```
-
+<img width="800" alt="System Architecture" src="images/system-architecture.png" />
 ### 아키텍처 특징
 
 - **3-Tier Architecture**: Presentation - Business Logic - Data Access 계층 분리
@@ -288,6 +233,27 @@ graph TB
 - **JWT 기반 인증**: Stateless 토큰 방식으로 확장성 확보
 - **JPA/Hibernate**: 객체 지향적 데이터 접근 및 데이터베이스 독립성
 - **AWS 인프라**: EC2(서버), RDS(DB), S3(스토리지) 활용한 안정적 운영
+
+---
+
+## 데이터베이스 ERD
+<img width="800" alt="Database ERD" src="images/ERD.png" />
+
+**주요 엔티티:**
+- **User**: 사용자 정보 및 프로필 관리
+- **Club**: 동호회 생성 및 회원 관리
+- **Facility**: 공공 체육시설 정보
+- **Course**: 공공 체육강좌 정보
+- **RecruitPlayer**: 용병 모집 및 신청
+- **Review**: 시설/강좌 리뷰
+- **Sport**: 종목 정보
+
+**관계:**
+- User ↔ UserProfile (1:1)
+- User ↔ Club ↔ ClubMember (M:N)
+- Club ↔ Sport (M:N via ClubSport)
+- Facility ↔ Sport (M:N via FacilitySport)
+- RecruitPlayerPost ↔ User (M:N via RecruitApplication)
 
 ---
 
@@ -303,7 +269,13 @@ Us-Fit-BE/
 │   │   │   │   ├── dto/               # 요청/응답 DTO
 │   │   │   │   ├── entity/            # 동호회 엔티티 (Club, ClubMember, ClubJoin 등)
 │   │   │   │   ├── repository/        # JPA Repository
-│   │   │   │   └── service/           # 비즈니스 로직
+│   │   │   │   ├── service/           # 비즈니스 로직
+│   │   │   │   └── activity/                # 활동 도메인
+│   │   │   │       ├── controller/        # 활동 API 엔드포인트
+│   │   │   │       ├── dto/               # 요청/응답 DTO
+│   │   │   │       ├── entity/            # 활동 엔티티 (Activity, ActivityMember, ActivityJoin 등)
+│   │   │   │       ├── repository/        # JPA Repository
+│   │   │   │       └── service/           # 비즈니스 로직
 │   │   │   │
 │   │   │   ├── facility/               # 체육시설 도메인
 │   │   │   │   ├── controller/        # 시설 검색 API
@@ -438,7 +410,7 @@ gradlew.bat bootRun
 ./gradlew bootRun
 ```
 
-### 4️⃣ 서버 확인
+### 4️. 서버 확인
 
 - 서버 주소: `http://3.27.134.2:8080`
 - Health Check: `http://3.27.134.2:8080/actuator/health` (설정 시)
@@ -508,7 +480,7 @@ CommandLineRunner initData(FacilityImportService facilityService,
 서버 실행 후 아래 주소로 접속:
 
 ```
-http://localhost:8080/swagger-ui/index.html
+http://3.27.134.2:8080/swagger-ui/index.html#
 ```
 
 ### 주요 API 엔드포인트
@@ -528,6 +500,13 @@ http://localhost:8080/swagger-ui/index.html
 - `POST /api/club/join/requests/{id}/decision` - 가입 승인/거절
 - `GET /api/club-info/{id}` - 동호회 상세 정보
 - `PATCH /api/club-info/{id}/member/{memberId}` - 회원 역할 변경
+
+#### 동호회 활동 API
+- `POST /api/clubs/{clubId}/activities` - 활동 생성
+- `GET /api/clubs/{clubId}/activities` - 활동 목록 조회
+- `POST /api/clubs/{clubId}/activities/{activityId}/join` - 활동 참여
+- `GET /api/clubs/{clubId}/activities/{activityId}/members` - 활동 멤버 리스트 조회
+- `POST /api/clubs/{clubId}/activities/members/{activityMemberId}/status` - 활동 멤버 상태 변경
 
 #### 용병 모집 API
 - `POST /api/recruits` - 용병 모집글 작성
@@ -653,7 +632,7 @@ gradlew.bat jacocoTestReport
 
 <div align="center">
 
-**UsFit - 운동으로 연결되는 우리, 함께 만들어가는 건강한 대한민국 🏃‍♂️🏃‍♀️**
+**UsFit - 운동으로 연결되는 우리, 함께 만들어가는 건강한 대한민국 **
 
 Made with ❤️ by Us-Fit Team
 
