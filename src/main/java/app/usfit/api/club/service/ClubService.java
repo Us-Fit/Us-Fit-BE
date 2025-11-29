@@ -63,8 +63,8 @@ public class ClubService {
                 .owner(owner)
                 .name(req.getName())
                 .description(req.getDescription())
-                .regionCode(req.getRegionCode())
-                .regionName(req.getRegionName())
+                .sidoNm(req.getSidoNm())
+                .sigunguNm(req.getSigunguNm())
                 .memberLimit(req.getMemberLimit())
                 .visibility(req.getVisibility())
                 .status(req.getStatus())
@@ -189,8 +189,8 @@ public class ClubService {
         // 필드별 업데이트 (null 체크)
         if (req.getName() != null) club.setName(req.getName());
         if (req.getDescription() != null) club.setDescription(req.getDescription());
-        if (req.getRegionCode() != null) club.setRegionCode(req.getRegionCode());
-        if (req.getRegionName() != null) club.setRegionName(req.getRegionName());
+        if (req.getSidoNm() != null) club.setSidoNm(req.getSidoNm());
+        if (req.getSigunguNm() != null) club.setSigunguNm(req.getSigunguNm());
         if (req.getMemberLimit() != null) club.setMemberLimit(req.getMemberLimit());
         if (req.getVisibility() != null) club.setVisibility(req.getVisibility());
         if (req.getStatus() != null) club.setStatus(req.getStatus());
