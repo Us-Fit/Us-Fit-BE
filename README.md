@@ -106,7 +106,7 @@
 ### 데이터 출처
 - **제공 기관**: 국민체육진흥공단
 - **데이터 형식**: CSV
-- **데이터 양**: 전국 공공체육시설 수만 건, 강좌 수천 건
+- **데이터 양**: 전국 공공체육시설 14만 건, 강좌 20만 건
 
 ### 데이터 처리 프로세스
 
@@ -232,6 +232,27 @@
 - **JWT 기반 인증**: Stateless 토큰 방식으로 확장성 확보
 - **JPA/Hibernate**: 객체 지향적 데이터 접근 및 데이터베이스 독립성
 - **AWS 인프라**: EC2(서버), RDS(DB), S3(스토리지) 활용한 안정적 운영
+
+---
+
+## 데이터베이스 ERD
+<img width="800" alt="Database ERD" src="images/ERD.png" />
+
+**주요 엔티티:**
+- **User**: 사용자 정보 및 프로필 관리
+- **Club**: 동호회 생성 및 회원 관리
+- **Facility**: 공공 체육시설 정보
+- **Course**: 공공 체육강좌 정보
+- **RecruitPlayer**: 용병 모집 및 신청
+- **Review**: 시설/강좌 리뷰
+- **Sport**: 종목 정보
+
+**관계:**
+- User ↔ UserProfile (1:1)
+- User ↔ Club ↔ ClubMember (M:N)
+- Club ↔ Sport (M:N via ClubSport)
+- Facility ↔ Sport (M:N via FacilitySport)
+- RecruitPlayerPost ↔ User (M:N via RecruitApplication)
 
 ---
 
