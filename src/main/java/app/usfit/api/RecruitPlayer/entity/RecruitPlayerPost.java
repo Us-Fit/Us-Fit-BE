@@ -59,4 +59,10 @@ public class RecruitPlayerPost {
 
     @Column(name = "updated_at", insertable = false, updatable = false)
     private LocalDateTime updatedAt;
+
+    @Column(name = "sido_nm")
+    private String sidoNm; // 활동 시/도 명
+
+    @Column(name = "sigungu_nm")
+    private String sigunguNm; // 활동 시/군/구 명
 }
