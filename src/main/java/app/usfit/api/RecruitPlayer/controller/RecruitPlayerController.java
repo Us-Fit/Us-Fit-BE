@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import app.usfit.api.RecruitPlayer.dto.RecruitPlayerPostRequest;
 import app.usfit.api.RecruitPlayer.dto.RecruitPlayerPostResponse;
+import app.usfit.api.RecruitPlayer.dto.RecruitRecommendRequest;
 import app.usfit.api.RecruitPlayer.entity.RecruitPlayerPost;
 import app.usfit.api.RecruitPlayer.service.RecruitPlayerPostService;
 import app.usfit.api.user.dto.SimpleProfileResponse;
@@ -36,20 +37,7 @@ public class RecruitPlayerController {
     }
 
         @PostMapping
-        @io.swagger.v3.oas.annotations.Operation(summary = "모집글 작성", description = "새 모집글을 작성합니다. 요청 예시를 참고하세요.")
-        @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "모집글 작성 예시", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = RecruitPlayerPostRequest.class), examples = {@io.swagger.v3.oas.annotations.media.ExampleObject(name = "예시",
-        value = """
-                {
-                    "sportName": "축구 (예: 운동 이름)",
-                    "title": "주말 축구 용병 모집 (예: 모임 제목)",
-                    "description": "주말에 같이 뛸 분 구합니다. 실력 상관없음. (예: 상세 설명)",
-                    "facilityId": 5,
-                    "recruitDeadline": "2025-12-01T18:00:00 (ISO-8601 날짜/시간)",
-                    "activityStartTime": "2025-12-07T10:00:00 (ISO-8601 날짜/시간)",
-                    "activityDurationMinutes": 90,
-                    "maxMember": 5
-                }
-                """)}))
+        @io.swagger.v3.oas.annotations.Operation(summary = "모집글 만들기")
         public ResponseEntity<RecruitPlayerPostResponse> createPost(@Valid @RequestBody RecruitPlayerPostRequest req, Authentication authentication) {
         if (authentication == null || authentication.getName() == null) {
             return ResponseEntity.status(401).build();
@@ -76,7 +64,9 @@ public class RecruitPlayerController {
             saved.getActivityDurationMinutes(),
             saved.getMaxMember(),
             saved.getIsActive(),
-            saved.getFacilityId()
+            saved.getFacilityId(),
+            saved.getSidoNm(),
+            saved.getSigunguNm()
         );
 
         return ResponseEntity.ok(res);
@@ -102,7 +92,9 @@ public class RecruitPlayerController {
                 p.getActivityDurationMinutes(),
                 p.getMaxMember(),
                 p.getIsActive(),
-                p.getFacilityId()
+                p.getFacilityId(),
+                p.getSidoNm(),
+                p.getSigunguNm()
             );
          }).toList();
 
@@ -137,9 +129,31 @@ public class RecruitPlayerController {
                     p.getActivityDurationMinutes(),
                     p.getMaxMember(),
                     p.getIsActive(),
-                    p.getFacilityId()
+                    p.getFacilityId(),
+                    p.getSidoNm(),
+                    p.getSigunguNm()
                 );
             }).toList();
         return ResponseEntity.ok(list);
     }
+
+    /**
+     * 추천 용병 목록 조회
+     * - sports: "축구,농구" 처럼 콤마로 구분된 이름(옵션)
+     * - sido: 시도 이름(옵션)
+     * - sigungu: 시군구 이름(옵션)
+     * - limit: 반환 개수 (기본 20)
+     */
+    @PostMapping("/recommend")
+    @io.swagger.v3.oas.annotations.Operation(summary = "용병 추천 시스템", description = "지역 + 선택 운동에 따라 진행")
+    public ResponseEntity<List<RecruitPlayerPostResponse>> recommend(@RequestBody RecruitRecommendRequest req) {
+        String sido = req.getSidoNm();
+        String sigungu = req.getSigunguNm();
+        int limit = req.getLimit();
+        
+        List<String> sports = req != null ? req.getSports() : null;
+        List<RecruitPlayerPostResponse> result = service.recommendRecruits(sports, sido, sigungu, limit);
+        return ResponseEntity.ok(result);
+    }
+
 }

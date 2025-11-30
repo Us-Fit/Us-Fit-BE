@@ -8,8 +8,8 @@ import lombok.Data;
 public class CreateClubRequest {
     private String name;
     private String description;
-    private String regionCode;
-    private String regionName;
+    private String sidoNm;
+    private String sigunguNm;
     private Integer memberLimit;
     private Boolean visibility;
     private String status;

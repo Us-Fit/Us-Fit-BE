@@ -8,7 +8,8 @@ import app.usfit.api.user.dto.SimpleProfileResponse;
 public record ClubSimpleInfoResponse(
         Long id,
         String name,
-        String regionName,
+        String sidoNm,
+        String sigunguNm,
         Integer memberLimit,
         Boolean visibility,
         String status,
@@ -50,7 +51,8 @@ public record ClubSimpleInfoResponse(
         return new ClubSimpleInfoResponse(
                 club.getId(),
                 club.getName(),
-                club.getRegionName(),
+                club.getSidoNm(),
+                club.getSigunguNm(),
                 club.getMemberLimit(),
                 club.getVisibility(),
                 club.getStatus(),
