@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.constraints.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -69,6 +71,33 @@ public class FacilityController {
             @RequestParam String sigunguNm
     ) {
         return facilitySportRepository.findFacilitiesBySportNameAndSigungu(sportName, sidoNm, sigunguNm);
+    }
+
+    // pagination 기능 추가
+    @Operation(
+            summary = "스포츠 및 지역명으로 시설 검색 (페이지네이션)",
+            description = """
+                특정 스포츠 종목명과 시군구명을 기반으로 시설 목록을 페이지 단위로 검색합니다.<br>
+                - 예: '간이운동장' + '김천시' → 김천시 내 간이운동장 시설 목록 반환<br>
+                - 쿼리 파라미터: page(0부터 시작), size(페이지 크기), sort(옵션)<br>
+                """
+    )
+    @GetMapping("/search/page")
+    public Page<FacilityDetailDto> getFacilitiesBySportAndSigunguWithPaging(
+            @Parameter(description = "스포츠 이름 (예: 간이운동장)", example = "간이운동장", required = true)
+            @RequestParam String sportName,
+
+            @Parameter(description = "시 이름 (예: 경상북도)", example = "경상북도", required = true)
+            @RequestParam String sidoNm,
+
+            @Parameter(description = "시군구 이름 (예: 김천시)", example = "김천시", required = true)
+            @RequestParam String sigunguNm,
+
+            Pageable pageable   // ?page=0&size=20&sort=name,asc 이런 식으로 사용
+    ) {
+        return facilitySportRepository.findFacilitiesBySportNameAndSigunguPage(
+                sportName, sidoNm, sigunguNm, pageable
+        );
     }
 
     /**
