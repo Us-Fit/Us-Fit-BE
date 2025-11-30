@@ -5,6 +5,8 @@ import app.usfit.api.course.dto.CourseDetailDto;
 import app.usfit.api.course.entity.Course;
 import app.usfit.api.course.repository.CourseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,6 +31,21 @@ public class CourseService {
         return courses.stream()
                 .map(CourseDetailDto::fromEntity)
                 .toList();
+    }
+
+    /**
+     * itemNm, ctprvnNm, signguNm 기준으로 강좌 리스트 조회 pagination
+     */
+    public Page<CourseDetailDto> getCoursesByFilter(String itemNm, String ctprvnNm, String signguNm, Pageable pageable) {
+
+        Page<Course> page = courseRepository.findByItemNmAndCtprvnNmAndSignguNm(
+                itemNm,
+                ctprvnNm,
+                signguNm,
+                pageable
+        );
+
+        return page.map(CourseDetailDto::fromEntity);
     }
 
     public CourseDetailDto getCourseById(Long id) {
