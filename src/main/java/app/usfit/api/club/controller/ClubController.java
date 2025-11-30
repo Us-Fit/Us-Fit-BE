@@ -51,36 +51,7 @@ public class ClubController {
 
     @GetMapping
     @Operation(summary = "동호회 목록 조회", description = "등록된 동호회 목록을 간단히 조회합니다. 각 항목은 동호회의 요약 정보만 포함합니다.")
-    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "동호회 요약 목록 반환", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
-    examples = {@io.swagger.v3.oas.annotations.media.ExampleObject(name = "한글_예시",
-    value = """
-                    [
-                        {
-                            "id": 10,
-                            "name": "주말 축구 모임",
-                            "regionName": "서울 강남구",
-                            "memberLimit": 20,
-                            "visibility": true,
-                            "status": "recruiting",
-                            "ownerId": 100,
-                            "mainFacilityId": 5,
-                            "memberCount": 8,
-                            "sports": [ { "sportId": 1, "sportName": "축구", "levelMin": 1, "levelMax": 5, "note": "초중급 환영" } ]
-                        },
-                        {
-                            "id": 11,
-                            "name": "저녁 농구",
-                            "regionName": "서울 송파구",
-                            "memberLimit": 12,
-                            "visibility": false,
-                            "status": "active",
-                            "ownerId": 101,
-                            "mainFacilityId": null,
-                            "memberCount": 5,
-                            "sports": [ { "sportId": 2, "sportName": "농구", "levelMin": 2, "levelMax": 5, "note": "중급 이상" } ]
-                        }
-                    ]
-                    """)}))
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "동호회 요약 목록 반환", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json"))
     public ResponseEntity<List<ClubSimpleInfoResponse>> listClubs() {
             return ResponseEntity.ok(clubService.listClubs());
     }
@@ -141,10 +112,9 @@ public class ClubController {
             @RequestBody ClubRecommendRequest request
     ) {
         List<String> sports = request != null ? request.getSports() : null;
-        Long facilityId = request != null ? request.getFacilityId() : null;
         int limit = (request != null && request.getLimit() != null) ? request.getLimit() : 20;
 
-        List<ClubSimpleInfoResponse> res = clubService.recommendClubs(sports, facilityId, limit);
+        List<ClubSimpleInfoResponse> res = clubService.recommendClubs(sports, request.getSidoNm(), request.getSigunguNm() , limit);
         return ResponseEntity.ok(res);
     }
 }
