@@ -1,3 +1,5 @@
+한국어 | [English](./README_ENG.md)
+
 # UsFit - 운동으로 연결되는 우리
 
 <div align="center">
