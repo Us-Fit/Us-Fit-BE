@@ -413,7 +413,6 @@ gradlew.bat bootRun
 ### 4️. 서버 확인
 
 - 서버 주소: `http://3.27.134.2:8080`
-- Health Check: `http://3.27.134.2:8080/actuator/health` (설정 시)
 - Swagger UI: `http://3.27.134.2:8080/swagger-ui/index.html#`
 
 ---
@@ -596,7 +595,6 @@ gradlew.bat jacocoTestReport
 - [ ] **채팅 기능**: 동호회 내부 채팅방, 용병 매칭 1:1 채팅
 - [ ] **통계 대시보드**: 관리자용 사용자/시설 통계 시각화
 - [ ] **다국어 지원**: 외국인을 위한 영어, 중국어 등 다국어 서비스
-- [ ] **지도 기반 시각화**: Kakao Map API를 활용한 시설 지도 뷰
 
 ---
 
