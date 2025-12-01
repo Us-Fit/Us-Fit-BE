@@ -242,7 +242,7 @@ Reviews and ratings allow users to share their experience and help foster active
 
 ### Project Structure
 
-```json
+```
 Us-Fit-BE/
 ├── src/
 │   ├── main/
