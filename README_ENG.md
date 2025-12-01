@@ -5,11 +5,8 @@
 <div align="center">
 
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-brightgreen.svg)
-
 ![Java](https://img.shields.io/badge/Java-21-orange.svg)
-
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-blue.svg)
-
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 **A Sports Life Integration Platform Powered by Public Data from the Korea Sports Promotion Foundation**
@@ -24,24 +21,24 @@ UsFit combines public data and community features to boost sports participation 
 
 ## Table of Contents
 
-- [Project Overview](https://www.notion.so/Final-2bbdf92e76a1807cbc1af4434773f4fc?pvs=21)
-- [Core Values](https://www.notion.so/Final-2bbdf92e76a1807cbc1af4434773f4fc?pvs=21)
-- [Main Features](https://www.notion.so/Final-2bbdf92e76a1807cbc1af4434773f4fc?pvs=21)
-- [Public Data Utilization](https://www.notion.so/Final-2bbdf92e76a1807cbc1af4434773f4fc?pvs=21)
-- [Tech Stack](https://www.notion.so/Final-2bbdf92e76a1807cbc1af4434773f4fc?pvs=21)
-- [System Architecture](https://www.notion.so/Final-2bbdf92e76a1807cbc1af4434773f4fc?pvs=21)
-- [Database ERD](https://www.notion.so/Final-2bbdf92e76a1807cbc1af4434773f4fc?pvs=21)
-- [Project Structure](https://www.notion.so/Final-2bbdf92e76a1807cbc1af4434773f4fc?pvs=21)
-- [Team](https://www.notion.so/Final-2bbdf92e76a1807cbc1af4434773f4fc?pvs=21)
-- [Setup & Run](https://www.notion.so/Final-2bbdf92e76a1807cbc1af4434773f4fc?pvs=21)
-- [Public Data CSV Import](https://www.notion.so/Final-2bbdf92e76a1807cbc1af4434773f4fc?pvs=21)
-- [API Documentation](https://www.notion.so/Final-2bbdf92e76a1807cbc1af4434773f4fc?pvs=21)
-- [Testing](https://www.notion.so/Final-2bbdf92e76a1807cbc1af4434773f4fc?pvs=21)
-- [Expected Impact](https://www.notion.so/Final-2bbdf92e76a1807cbc1af4434773f4fc?pvs=21)
-- [Future Work](https://www.notion.so/Final-2bbdf92e76a1807cbc1af4434773f4fc?pvs=21)
-- [Contact & Contribution](https://www.notion.so/Final-2bbdf92e76a1807cbc1af4434773f4fc?pvs=21)
-- [License](https://www.notion.so/Final-2bbdf92e76a1807cbc1af4434773f4fc?pvs=21)
-- [Acknowledgements](https://www.notion.so/Final-2bbdf92e76a1807cbc1af4434773f4fc?pvs=21)
+- [Project Overview](#project-overview)
+- [Core Values](#core-values)
+- [Main Features](#main-features)
+- [Public Data Utilization](#public-data-utilization)
+- [Tech Stack](#tech-stack)
+- [System Architecture](#system-architecture)
+- [Database ERD](#database-erd)
+- [Project Structure](#project-structure)
+- [Team](#team)
+- [Setup & Run](#setup--run)
+- [Public Data CSV Import](#public-data-csv-import)
+- [API Documentation](#api-documentation)
+- [Testing](#testing)
+- [Expected Impact](#expected-impact)
+- [Future Work](#future-work)
+- [Contact & Contribution](#contact--contribution)
+- [License](#license)
+- [Acknowledgements](#acknowledgements)
 
 ---
 
