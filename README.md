@@ -413,7 +413,6 @@ gradlew.bat bootRun
 ### 4️. 서버 확인
 
 - 서버 주소: `http://3.27.134.2:8080`
-- Health Check: `http://3.27.134.2:8080/actuator/health` (설정 시)
 - Swagger UI: `http://3.27.134.2:8080/swagger-ui/index.html#`
 
 ---
