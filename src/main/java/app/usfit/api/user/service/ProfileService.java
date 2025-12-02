@@ -131,7 +131,8 @@ public class ProfileService {
             p.getPreferredArea(),
             p.getLat(),
             p.getLng(),
-            interests
+            interests,
+            p.getPhoneNumber()
         );
     }
 
@@ -149,7 +150,8 @@ public class ProfileService {
             p.getUserId(),
             p.getNickname(),
             profileImageUrl,
-            p.isGender()
+            p.isGender(),
+            p.getPhoneNumber()
         );
     }
 
@@ -194,7 +196,8 @@ public class ProfileService {
                         p.getUserId(),
                         p.getNickname(),
                         profileImageUrl,
-                        safeGetGender(p)
+                        safeGetGender(p),
+                        p.getPhoneNumber()
                     );
                 },
                 // duplicate key 방지: 첫번째 값 유지

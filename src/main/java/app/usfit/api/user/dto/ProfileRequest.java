@@ -15,5 +15,8 @@ public record ProfileRequest (
     Double lng,
 
     //관심 운동
-    List<InterestInput> interests
+    List<InterestInput> interests,
+
+    // 전화번호
+    String phoneNumber
 ) {}
