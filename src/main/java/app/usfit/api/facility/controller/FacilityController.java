@@ -51,54 +51,86 @@ public class FacilityController {
     }
 
     // -------------------- [2] 스포츠명 + 시군구 검색 --------------------
+//    @Operation(
+//            summary = "스포츠 및 지역명으로 시설 검색",
+//            description = """
+//                    특정 스포츠 종목명과 시군구명을 기반으로 시설 목록을 검색합니다.<br>
+//                    - 예: '간이운동장' + '김천시' → 김천시 내 간이운동장 시설 목록 반환<br>
+//                    - 반환 항목: 시설명, 유형, 주소, 좌표, 면적, 실내/실외, 관리자 연락처 등
+//                    """
+//    )
+//    @GetMapping("/search")
+//    public List<FacilityDetailDto> getFacilitiesBySportAndSigungu(
+//            @Parameter(description = "스포츠 이름 (예: 간이운동장)", example = "간이운동장", required = true)
+//            @RequestParam String sportName,
+//
+//            @Parameter(description = "시 이름 (예: 경상북도)", example = "경상북도", required = true)
+//            @RequestParam String sidoNm,
+//
+//            @Parameter(description = "시군구 이름 (예: 김천시)", example = "김천시", required = true)
+//            @RequestParam String sigunguNm
+//    ) {
+//        return facilitySportRepository.findFacilitiesBySportNameAndSigungu(sportName, sidoNm, sigunguNm);
+//    }
+
+    // pagination 기능 추가
+//    @Operation(
+//            summary = "스포츠 및 지역명으로 시설 검색 (페이지네이션)",
+//            description = """
+//                특정 스포츠 종목명과 시군구명을 기반으로 시설 목록을 페이지 단위로 검색합니다.<br>
+//                - 예: '간이운동장' + '김천시' → 김천시 내 간이운동장 시설 목록 반환<br>
+//                - 쿼리 파라미터: page(0부터 시작), size(페이지 크기), sort(옵션)<br>
+//                """
+//    )
+//    @GetMapping("/search/page")
+//    public Page<FacilityDetailDto> getFacilitiesBySportAndSigunguWithPaging(
+//            @Parameter(description = "스포츠 이름 (예: 간이운동장)", example = "간이운동장", required = true)
+//            @RequestParam String sportName,
+//
+//            @Parameter(description = "시 이름 (예: 경상북도)", example = "경상북도", required = true)
+//            @RequestParam String sidoNm,
+//
+//            @Parameter(description = "시군구 이름 (예: 김천시)", example = "김천시", required = true)
+//            @RequestParam String sigunguNm,
+//
+//            Pageable pageable   // ?page=0&size=20&sort=name,asc 이런 식으로 사용
+//    ) {
+//        return facilitySportRepository.findFacilitiesBySportNameAndSigunguPage(
+//                sportName, sidoNm, sigunguNm, pageable
+//        );
+//    }
+
     @Operation(
             summary = "스포츠 및 지역명으로 시설 검색",
             description = """
-                    특정 스포츠 종목명과 시군구명을 기반으로 시설 목록을 검색합니다.<br>
-                    - 예: '간이운동장' + '김천시' → 김천시 내 간이운동장 시설 목록 반환<br>
-                    - 반환 항목: 시설명, 유형, 주소, 좌표, 면적, 실내/실외, 관리자 연락처 등
-                    """
-    )
-    @GetMapping("/search")
-    public List<FacilityDetailDto> getFacilitiesBySportAndSigungu(
-            @Parameter(description = "스포츠 이름 (예: 간이운동장)", example = "간이운동장", required = true)
-            @RequestParam String sportName,
-
-            @Parameter(description = "시 이름 (예: 경상북도)", example = "경상북도", required = true)
-            @RequestParam String sidoNm,
-
-            @Parameter(description = "시군구 이름 (예: 김천시)", example = "김천시", required = true)
-            @RequestParam String sigunguNm
-    ) {
-        return facilitySportRepository.findFacilitiesBySportNameAndSigungu(sportName, sidoNm, sigunguNm);
-    }
-
-    // pagination 기능 추가
-    @Operation(
-            summary = "스포츠 및 지역명으로 시설 검색 (페이지네이션)",
-            description = """
-                특정 스포츠 종목명과 시군구명을 기반으로 시설 목록을 페이지 단위로 검색합니다.<br>
-                - 예: '간이운동장' + '김천시' → 김천시 내 간이운동장 시설 목록 반환<br>
-                - 쿼리 파라미터: page(0부터 시작), size(페이지 크기), sort(옵션)<br>
+                스포츠명, 시도명, 시군구명을 조합하여 시설 검색<br>
+                - 모든 파라미터는 선택사항<br>
+                - sportName 없이 검색 시 전체 스포츠 기준<br>
+                - sidoNm 없이 검색 시 전국 기준<br>
+                - sigunguNm 없이 검색 시 시도 기준 검색 가능
                 """
     )
-    @GetMapping("/search/page")
-    public Page<FacilityDetailDto> getFacilitiesBySportAndSigunguWithPaging(
-            @Parameter(description = "스포츠 이름 (예: 간이운동장)", example = "간이운동장", required = true)
-            @RequestParam String sportName,
+    @GetMapping("/search")
+    public Page<FacilityDetailDto> getFacilitiesDynamic(
+            @Parameter(description = "스포츠 이름", example = "간이운동장", required = false)
+            @RequestParam(required = false) String sportName,
 
-            @Parameter(description = "시 이름 (예: 경상북도)", example = "경상북도", required = true)
-            @RequestParam String sidoNm,
+            @Parameter(description = "시도 이름", example = "경상북도", required = false)
+            @RequestParam(required = false) String sidoNm,
 
-            @Parameter(description = "시군구 이름 (예: 김천시)", example = "김천시", required = true)
-            @RequestParam String sigunguNm,
+            @Parameter(description = "시군구 이름", example = "김천시", required = false)
+            @RequestParam(required = false) String sigunguNm,
 
-            Pageable pageable   // ?page=0&size=20&sort=name,asc 이런 식으로 사용
+            Pageable pageable
     ) {
-        return facilitySportRepository.findFacilitiesBySportNameAndSigunguPage(
-                sportName, sidoNm, sigunguNm, pageable
-        );
+        // 빈 문자열("")이 들어오면 null 변환 처리
+        sportName = (sportName == null || sportName.isBlank()) ? null : sportName;
+        sidoNm = (sidoNm == null || sidoNm.isBlank()) ? null : sidoNm;
+        sigunguNm = (sigunguNm == null || sigunguNm.isBlank()) ? null : sigunguNm;
+
+        return facilitySportRepository.findFacilitiesDynamic(sportName, sidoNm, sigunguNm, pageable);
     }
+
 
     /**
      * 예시:

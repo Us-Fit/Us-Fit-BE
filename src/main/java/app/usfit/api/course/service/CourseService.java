@@ -36,9 +36,26 @@ public class CourseService {
     /**
      * itemNm, ctprvnNm, signguNm 기준으로 강좌 리스트 조회 pagination
      */
-    public Page<CourseDetailDto> getCoursesByFilter(String itemNm, String ctprvnNm, String signguNm, Pageable pageable) {
+//    public Page<CourseDetailDto> getCoursesByFilter(String itemNm, String ctprvnNm, String signguNm, Pageable pageable) {
+//
+//        Page<Course> page = courseRepository.findByItemNmAndCtprvnNmAndSignguNm(
+//                itemNm,
+//                ctprvnNm,
+//                signguNm,
+//                pageable
+//        );
+//
+//        return page.map(CourseDetailDto::fromEntity);
+//    }
 
-        Page<Course> page = courseRepository.findByItemNmAndCtprvnNmAndSignguNm(
+    public Page<CourseDetailDto> getCoursesByFilter(
+            String itemNm,
+            String ctprvnNm,
+            String signguNm,
+            Pageable pageable
+    ) {
+
+        Page<Course> page = courseRepository.findCoursesDynamic(
                 itemNm,
                 ctprvnNm,
                 signguNm,
@@ -47,6 +64,7 @@ public class CourseService {
 
         return page.map(CourseDetailDto::fromEntity);
     }
+
 
     public CourseDetailDto getCourseById(Long id) {
         Course course = courseRepository.findCourseById(id)
