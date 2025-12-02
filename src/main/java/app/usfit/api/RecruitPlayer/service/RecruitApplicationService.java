@@ -112,5 +112,55 @@ public class RecruitApplicationService {
         return applicationRepo.findByApplicant_IdOrderByApplicationIdDesc(userId)
                 .stream().map(this::toResponse).toList();
     }
+
+    // 멤버용: ACCEPTED만
+    public List<ApplicationResponse> listForPostMember(Long postId, Long requesterId) {
+        RecruitPlayerPost post = postRepo.findById(postId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 모집글"));
+        
+        List<ApplicationResponse> response = applicationRepo.findByPost_IdOrderByApplicationIdDesc(postId)
+                .stream().filter(a -> a.getStatus() == RecruitApplication.Status.ACCEPTED).map(this::toResponse).toList();
+
+        // 작성자 또는 ACCEPTED된 멤버인지 확인
+        boolean requesterIsAccepted = response.stream()
+                .anyMatch(a -> a.applicantId() != null && a.applicantId().equals(requesterId)) || post.getWriter().getId().equals(requesterId);
+
+        if (!requesterIsAccepted) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "작성자 또는 가입된 멤버만 조회 가능합니다.");
+        }
+
+        return response;
+    }
+
+    // ACCEPT된 멤버가 스스로 용병 탈퇴
+    @Transactional
+    public ApplicationResponse exitRecruit(Long postId, Long applicationId, Long requesterId) {
+        RecruitPlayerPost post = postRepo.findById(postId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 모집글"));
+
+        RecruitApplication app = applicationRepo.findById(applicationId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 신청서"));
+
+        // 신청서가 해당 게시글의 신청서인지 확인
+        if (!app.getPost().getId().equals(postId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 모집글의 신청서가 아닙니다.");
+        }
+
+        // 요청자가 신청자 본인인지 확인
+        if (app.getApplicant() == null || !app.getApplicant().getId().equals(requesterId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "자기 자신만 탈퇴할 수 있습니다.");
+        }
+
+        // 현재 상태가 ACCEPTED(가입된 상태)인지 확인
+        if (app.getStatus() != RecruitApplication.Status.ACCEPTED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "가입된 멤버만 탈퇴할 수 있습니다.");
+        }
+        
+        // 상태를 CANCLED로 변경
+        app.setStatus(RecruitApplication.Status.CANCELLED);
+        applicationRepo.save(app);
+
+        return toResponse(app);
+    }
     
 }
