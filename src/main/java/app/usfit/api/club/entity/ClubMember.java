@@ -4,9 +4,12 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import app.usfit.api.common.enums.ClubMemberRole;
 import app.usfit.api.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -57,7 +60,8 @@ public class ClubMember {
     private User user; // 회원 사용자 FK
 
     @Column(name = "role", length = 20)
-    private String role;   // 역할: owner/admin/member 등
+    @Enumerated(EnumType.STRING)
+    private ClubMemberRole role;   // 역할: owner/admin/member 등
 
     @Column(name = "status", length = 20)
     private String status; // 상태: active/pending/banned/left 등
