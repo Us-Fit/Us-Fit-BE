@@ -20,6 +20,7 @@ import app.usfit.api.club.DTO.ClubImageResponse;
 import app.usfit.api.club.entity.ClubImage;
 import app.usfit.api.club.repository.ClubImageRepository;
 import app.usfit.api.club.repository.ClubRepository;
+import app.usfit.api.common.enums.ClubMemberRole;
 import app.usfit.api.user.dto.SimpleProfileResponse;
 import app.usfit.api.user.service.ProfileService;
 import lombok.RequiredArgsConstructor;
@@ -62,8 +63,8 @@ public class ClubImageService {
         var clubUser = clubUserOpt.get();
         
         // role 체크: owner 또는 admin 허용
-        String role = clubUser.role();
-        if (!( "owner".equalsIgnoreCase(role) || "admin".equalsIgnoreCase(role) )) {
+        ClubMemberRole role = clubUser.role();
+        if (!(ClubMemberRole.OWNER.equals(role) || ClubMemberRole.ADMIN.equals(role) )) {
             throw new SecurityException("동호회 관리자만 이미지 업로드가 가능합니다.");
         }
 
