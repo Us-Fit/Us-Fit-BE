@@ -121,7 +121,7 @@ public class RecruitPlayerController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping(value = "/me", produces = "application/json")
+    @GetMapping(value = "/my/applications", produces = "application/json")
     @Operation(summary = "내가 신청한 내역 조회", description = "로그인한 사용자가 본인이 신청한 모든 모집 내역을 조회합니다. 반환 예시를 참고하세요.")
     public ResponseEntity<List<ApplicationResponse>> listMyApplications(Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
