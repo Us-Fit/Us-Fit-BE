@@ -4,6 +4,8 @@ import app.usfit.api.course.entity.Course;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +29,32 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
             String signguNm,
             Pageable pageable
     );
+
+    /**
+     * 종목명 + 시도명 + 시군구명으로 강좌 검색 + null 허용
+     */
+    @Query(value = """
+    SELECT c
+    FROM Course c
+    WHERE (:itemNm IS NULL OR c.itemNm = :itemNm)
+      AND (:ctprvnNm IS NULL OR c.ctprvnNm = :ctprvnNm)
+      AND (:signguNm IS NULL OR c.signguNm = :signguNm)
+    """,
+            countQuery = """
+    SELECT COUNT(c)
+    FROM Course c
+    WHERE (:itemNm IS NULL OR c.itemNm = :itemNm)
+      AND (:ctprvnNm IS NULL OR c.ctprvnNm = :ctprvnNm)
+      AND (:signguNm IS NULL OR c.signguNm = :signguNm)
+    """
+    )
+    Page<Course> findCoursesDynamic(
+            @Param("itemNm") String itemNm,
+            @Param("ctprvnNm") String ctprvnNm,
+            @Param("signguNm") String signguNm,
+            Pageable pageable
+    );
+
 
     //강좌 id로 특정 강좌 검색
     Optional<Course> findCourseById(
