@@ -76,13 +76,6 @@ public class RecruitApplicationController {
         return ResponseEntity.ok(service.changeStatus(postId, applicationId, userId, req));
     }
 
-    @GetMapping(value = "/me", produces = "application/json")
-    @Operation(summary = "내가 신청한 내역 조회", description = "로그인한 사용자가 본인이 신청한 모든 모집 내역을 조회합니다. 반환 예시를 참고하세요.")
-    public ResponseEntity<List<ApplicationResponse>> listMyApplications(Authentication authentication) {
-        Long userId = Long.parseLong(authentication.getName());
-        return ResponseEntity.ok(service.listMyApplications(userId)); // 내가 신청한 모든 모집글 조회
-    }
-
     // 특정 모집글에서 참여된 멤버 목록 조회 (작성자 및 참여 멤버)
     @GetMapping(value = "/members", produces = "application/json")
     @Operation(summary = "모집글 참여 멤버 목록 조회", description = "해당 모집글에 참여된 멤버 목록을 조회합니다. 작성자 및 참여 멤버만 조회할 수 있습니다. 반환 예시를 참고하세요.")
