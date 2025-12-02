@@ -2,6 +2,7 @@ package app.usfit.api.RecruitPlayer.dto;
 
 import java.time.LocalDateTime;
 
+import app.usfit.api.facility.dto.FacilityDetailDto;
 import app.usfit.api.user.dto.SimpleProfileResponse;
 
 public record RecruitPlayerPostResponse(
@@ -15,9 +16,10 @@ public record RecruitPlayerPostResponse(
     LocalDateTime activityStartTime,
     Integer activityDurationMinutes,
     Integer maxMember,
+    Integer currtMember,
     Boolean isActive,
 
-    Long facilityId,
+    FacilityDetailDto facility,
     String sidoNm,
     String sigunguNm
 ) {}
