@@ -12,13 +12,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import app.usfit.api.RecruitPlayer.dto.ApplicationResponse;
 import app.usfit.api.RecruitPlayer.dto.RecruitPlayerPostRequest;
 import app.usfit.api.RecruitPlayer.dto.RecruitPlayerPostResponse;
 import app.usfit.api.RecruitPlayer.dto.RecruitRecommendRequest;
 import app.usfit.api.RecruitPlayer.entity.RecruitPlayerPost;
+import app.usfit.api.RecruitPlayer.service.RecruitApplicationService;
 import app.usfit.api.RecruitPlayer.service.RecruitPlayerPostService;
 import app.usfit.api.user.dto.SimpleProfileResponse;
 import app.usfit.api.user.service.ProfileService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 
 @RestController
@@ -30,10 +33,12 @@ public class RecruitPlayerController {
     private final RecruitPlayerPostService service;
 
     private final ProfileService profileService;
+    private final RecruitApplicationService applicationService;
 
-    public RecruitPlayerController(RecruitPlayerPostService service, ProfileService profileService) {
+    public RecruitPlayerController(RecruitPlayerPostService service, ProfileService profileService, RecruitApplicationService applicationService) {
         this.service = service;
         this.profileService = profileService;
+        this.applicationService = applicationService;
     }
 
         @PostMapping
@@ -113,6 +118,13 @@ public class RecruitPlayerController {
         List<String> sports = req != null ? req.getSports() : null;
         List<RecruitPlayerPostResponse> result = service.recommendRecruits(sports, sido, sigungu, limit);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping(value = "/my/applications", produces = "application/json")
+    @Operation(summary = "내가 신청한 내역 조회", description = "로그인한 사용자가 본인이 신청한 모든 모집 내역을 조회합니다. 반환 예시를 참고하세요.")
+    public ResponseEntity<List<ApplicationResponse>> listMyApplications(Authentication authentication) {
+        Long userId = Long.parseLong(authentication.getName());
+        return ResponseEntity.ok(applicationService.listMyApplications(userId)); // 내가 신청한 모든 모집글 조회
     }
 
 }
