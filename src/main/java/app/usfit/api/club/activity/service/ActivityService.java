@@ -1,5 +1,12 @@
 package app.usfit.api.club.activity.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import app.usfit.api.club.activity.dto.ActivityCreateRequest;
 import app.usfit.api.club.activity.dto.ActivityMemberResponse;
 import app.usfit.api.club.activity.dto.ActivityResponse;
@@ -14,19 +21,13 @@ import app.usfit.api.club.entity.Club;
 import app.usfit.api.club.entity.ClubMember;
 import app.usfit.api.club.repository.ClubMemberRepository;
 import app.usfit.api.club.repository.ClubRepository;
+import app.usfit.api.common.enums.ClubMemberRole;
 import app.usfit.api.facility.entity.Facility;
 import app.usfit.api.facility.repository.FacilityRepository;
 import app.usfit.api.security.SecurityUtil;
 import app.usfit.api.user.entity.User;
 import app.usfit.api.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -277,9 +278,9 @@ public class ActivityService {
         ClubMember cm = clubMemberRepository.findByClubIdAndUserId(clubId, userId)
                 .orElseThrow(() -> new AccessDeniedException("클럽 멤버가 아닙니다."));
 
-        String role = cm.getRole(); // "owner" / "admin" / "member" 등
+        ClubMemberRole role = cm.getRole(); // "owner" / "admin" / "member" 등
 
-        if (!"owner".equalsIgnoreCase(role) && !"admin".equalsIgnoreCase(role)) {
+        if (!ClubMemberRole.OWNER.equals(role) && !ClubMemberRole.ADMIN.equals(role)) {
             throw new AccessDeniedException("활동 관리 권한이 없습니다 (owner/admin만 가능).");
         }
     }
