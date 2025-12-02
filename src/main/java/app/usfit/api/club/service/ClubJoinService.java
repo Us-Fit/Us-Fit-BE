@@ -14,6 +14,7 @@ import app.usfit.api.club.entity.ClubJoin;
 import app.usfit.api.club.entity.ClubMember;
 import app.usfit.api.club.repository.ClubJoinRequestRepository;
 import app.usfit.api.club.repository.ClubRepository;
+import app.usfit.api.common.enums.ClubMemberRole;
 import app.usfit.api.user.dto.SimpleProfileResponse;
 import app.usfit.api.user.entity.User;
 import app.usfit.api.user.service.ProfileService;
@@ -153,7 +154,7 @@ public class ClubJoinService {
             ClubMember member = ClubMember.builder()
                     .club(club)
                     .user(jr.getUser())
-                    .role("member")
+                    .role(ClubMemberRole.MEMBER)
                     .status("active")
                     .build();
             entityManager.persist(member);

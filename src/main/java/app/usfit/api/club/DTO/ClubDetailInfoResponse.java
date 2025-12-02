@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import app.usfit.api.club.entity.Club;
+import app.usfit.api.common.enums.ClubMemberRole;
 import app.usfit.api.facility.dto.FacilityDetailDto;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,13 +30,17 @@ public class ClubDetailInfoResponse{
     // 동호회가 제공하는 스포츠 종목 리스트
     private List<ClubSportResponse> sports;
 
+    // 이 동호회에 내 권한이 뭔지
+    private ClubMemberRole myRoleInClub; // MEMBER, ADMIN, NONE
+
     /**
      * Club → ClubDetailInfoResponse 변환용 팩토리 메서드
      */
     public static ClubDetailInfoResponse from(
             Club club,
             FacilityDetailDto facility,
-            List<ClubSportResponse> sports
+            List<ClubSportResponse> sports,
+            ClubMemberRole myRoleInClub
     ) {
         String mainImageUrl = null;
 
@@ -66,6 +71,7 @@ public class ClubDetailInfoResponse{
                 .snsLink(club.getSnsLink())
                 .mainFacility(facility)
                 .sports(sports)
+                .myRoleInClub(myRoleInClub) // 기본값 null
                 .build();
     }
 

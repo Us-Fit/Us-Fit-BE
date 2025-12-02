@@ -1,6 +1,7 @@
 package app.usfit.api.club.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import app.usfit.api.club.DTO.ClubMemberResponse;
 import app.usfit.api.club.DTO.ClubSportResponse;
 import app.usfit.api.club.entity.Club;
 import app.usfit.api.club.entity.ClubMember;
+import app.usfit.api.common.enums.ClubMemberRole;
 import app.usfit.api.facility.dto.FacilityDetailDto;
 import app.usfit.api.facility.repository.FacilityRepository;
 import app.usfit.api.user.dto.SimpleProfileResponse;
@@ -31,7 +33,7 @@ public class ClubinfoService {
 
     // 특정 동호회 정보 상세 조회
     @Transactional
-    public ClubDetailInfoResponse getClubDetail(Long clubId) {
+    public ClubDetailInfoResponse getClubDetail(Long clubId, Long UserId) {
         Club club = entityManager.find(Club.class, clubId);
         if (club == null) {
             throw new IllegalStateException("동호회가 존재하지 않습니다.");
@@ -54,9 +56,16 @@ public class ClubinfoService {
                     ))
                     .collect(Collectors.toList());
         }
+        
+        ClubMemberRole myRole = club.getMembers().stream()
+            .filter(m -> m.getUser() != null && Objects.equals(m.getUser().getId(), UserId))
+            .map(ClubMember::getRole) // method reference without ()
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElse(ClubMemberRole.NONE);
 
         // DTO 변환
-        return ClubDetailInfoResponse.from(club, facilityDto, sports);
+        return ClubDetailInfoResponse.from(club, facilityDto, sports, myRole);
     }
 
 
@@ -91,7 +100,7 @@ public class ClubinfoService {
 
     // 동호회원 역할 변경
     @Transactional
-    public ClubMemberResponse changeMemberRole(Long clubId, Long memberId, Long ownerId, String newRole) {
+    public ClubMemberResponse changeMemberRole(Long clubId, Long memberId, Long ownerId, ClubMemberRole newRole) {
         Club club = entityManager.find(Club.class, clubId);
         if (club == null) throw new IllegalStateException("동호회가 존재하지 않습니다.");
         if (club.getOwner() == null || !club.getOwner().getId().equals(ownerId)) {
@@ -102,7 +111,7 @@ public class ClubinfoService {
 
         if (cm == null) throw new IllegalStateException("동호회원이 존재하지 않습니다.");
         if (!cm.getClub().getId().equals(clubId)) throw new IllegalStateException("해당 동호회의 동호회원이 아닙니다.");
-        if ("owner".equalsIgnoreCase(cm.getRole())) throw new IllegalStateException("동호회 소유자의 역할은 변경할 수 없습니다.");
+        if (ClubMemberRole.OWNER.equals(cm.getRole())) throw new IllegalStateException("동호회 소유자의 역할은 변경할 수 없습니다.");
 
         cm.setRole(newRole);
         entityManager.merge(cm);
@@ -155,18 +164,18 @@ public class ClubinfoService {
         if (target == null) throw new IllegalStateException("대상이 동호회원이 아닙니다.");
 
         // 권한 확인
-        String userRole = user.getRole() == null ? "member" : user.getRole().toLowerCase();
-        String targetRole = target.getRole() == null ? "member" : target.getRole().toLowerCase();
+        ClubMemberRole userRole = user.getRole() == null ? ClubMemberRole.MEMBER : user.getRole();
+        ClubMemberRole targetRole = target.getRole() == null ? ClubMemberRole.MEMBER : target.getRole();
 
         // 권한 검증
-        if ("owner".equals(userRole)) {
+        if (ClubMemberRole.OWNER.equals(userRole)) {
             // 혹시 몰라서 넣어둠. owner는 owner 삭제 불가
-            if ("owner".equals(targetRole)) {
+            if (ClubMemberRole.OWNER.equals(targetRole)) {
                 throw new IllegalStateException("다른 소유자를 삭제할 수 없습니다.");
             }
         }
-        else if ("admin".equals(userRole)) {
-            if (!"member".equals(targetRole)) {
+        else if (ClubMemberRole.ADMIN.equals(userRole)) {
+            if (!ClubMemberRole.MEMBER.equals(targetRole)) {
                 throw new IllegalStateException("관리자는 일반 멤버만 강제 탈퇴시킬 수 있습니다.");
             }
         }
@@ -192,7 +201,7 @@ public class ClubinfoService {
 
         
         if (cm == null) throw new IllegalStateException("동호회원이 존재하지 않습니다.");
-        if (cm.getRole().equalsIgnoreCase("owner")) throw new IllegalStateException("동호회 소유자는 탈퇴할 수 없습니다.");
+        if (cm.getRole().equals(ClubMemberRole.OWNER)) throw new IllegalStateException("동호회 소유자는 탈퇴할 수 없습니다.");
 
         entityManager.remove(cm);
     }
@@ -230,11 +239,11 @@ public class ClubinfoService {
                 .getSingleResult();
         
         // 기존 소유자 역할을 admin으로 변경
-        currentOwnerMember.setRole("admin");
+        currentOwnerMember.setRole(ClubMemberRole.ADMIN);
         entityManager.merge(currentOwnerMember);
 
         // 새 소유자 역할 변경
-        newOwnerMember.setRole("owner");
+        newOwnerMember.setRole(ClubMemberRole.OWNER);
         entityManager.merge(newOwnerMember);
 
         // 동호회 소유자 변경
@@ -264,11 +273,11 @@ public class ClubinfoService {
         if (target == null) throw new IllegalStateException("대상 사용자가 동호회원이 아닙니다.");
 
         // 이미 owner이면 권한 변경 불필요
-        if ("owner".equalsIgnoreCase(target.getRole())) {
+        if (ClubMemberRole.OWNER.equals(target.getRole())) {
             throw new IllegalStateException("소유자에게는 관리자 권한을 부여할 수 없습니다.");
         }
 
-        target.setRole("admin");
+        target.setRole(ClubMemberRole.ADMIN);
         entityManager.merge(target);
     }
 
@@ -294,11 +303,11 @@ public class ClubinfoService {
         if (target == null) throw new IllegalStateException("대상 사용자가 동호회원이 아닙니다.");
 
         // 이미 owner이면 권한 변경 불필요
-        if ("owner".equalsIgnoreCase(target.getRole())) {
+        if (ClubMemberRole.OWNER.equals(target.getRole())) {
             throw new IllegalStateException("소유자의 관리자 권한은 박탈할 수 없습니다.");
         }
 
-        target.setRole("member");
+        target.setRole(ClubMemberRole.MEMBER);
         entityManager.merge(target);
     }
 }

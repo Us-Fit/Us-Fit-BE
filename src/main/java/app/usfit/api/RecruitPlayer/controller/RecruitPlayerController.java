@@ -52,22 +52,7 @@ public class RecruitPlayerController {
             writerProfile = profileService.getSimpleProfile(saved.getWriter().getId());
         } catch (Exception ignored) {}
 
-        RecruitPlayerPostResponse res = new RecruitPlayerPostResponse(
-            saved.getId(),
-            writerProfile,
-            saved.getSport().getId(),
-            saved.getSport().getName(),
-            saved.getTitle(),
-            saved.getDescription(),
-            saved.getRecruitDeadline(),
-            saved.getActivityStartTime(),
-            saved.getActivityDurationMinutes(),
-            saved.getMaxMember(),
-            saved.getIsActive(),
-            saved.getFacilityId(),
-            saved.getSidoNm(),
-            saved.getSigunguNm()
-        );
+        RecruitPlayerPostResponse res = service.toResponse(saved, writerProfile);
 
         return ResponseEntity.ok(res);
     }
@@ -75,28 +60,15 @@ public class RecruitPlayerController {
     @GetMapping
     @io.swagger.v3.oas.annotations.Operation(summary = "활성 모집글 목록 조회", description = "현재 활성화된 모집글들을 조회합니다. 반환 예시를 참고하세요.")
     public ResponseEntity<List<RecruitPlayerPostResponse>> getAllActivePosts() {
-        var list = service.getActivePosts().stream().map(p -> {
-            SimpleProfileResponse writerProfile = null;
-            try {
-                writerProfile = profileService.getSimpleProfile(p.getWriter().getId());
-            } catch (Exception ignored) {}
-            return new RecruitPlayerPostResponse(
-                p.getId(),
-                writerProfile,
-                p.getSport().getId(),
-                p.getSport().getName(),
-                p.getTitle(),
-                p.getDescription(),
-                p.getRecruitDeadline(),
-                p.getActivityStartTime(),
-                p.getActivityDurationMinutes(),
-                p.getMaxMember(),
-                p.getIsActive(),
-                p.getFacilityId(),
-                p.getSidoNm(),
-                p.getSigunguNm()
-            );
-         }).toList();
+        var list = service.getActivePosts().stream()
+            .map(p -> {
+                SimpleProfileResponse writerProfile = null;
+                try {
+                    writerProfile = profileService.getSimpleProfile(p.getWriter().getId());
+                } catch (Exception ignored) {}
+                return service.toResponse(p, writerProfile);
+            })
+            .toList();
 
         return ResponseEntity.ok(list);
     }
@@ -112,28 +84,15 @@ public class RecruitPlayerController {
             return ResponseEntity.status(401).build();
         }
         Long userId = Long.parseLong(authentication.getName());
-        var list = service.getMyPosts(userId, activeOnly).stream().map(p -> {
-            SimpleProfileResponse writerProfile = null;
+        var list = service.getMyPosts(userId, activeOnly).stream()
+            .map(p -> {
+                SimpleProfileResponse writerProfile = null;
                 try {
                     writerProfile = profileService.getSimpleProfile(p.getWriter().getId());
                 } catch (Exception ignored) {}
-                return new RecruitPlayerPostResponse(
-                    p.getId(),                          // 엔티티 식별자 getter에 맞춰 사용
-                    writerProfile,
-                    p.getSport().getId(),
-                    p.getSport().getName(),
-                    p.getTitle(),
-                    p.getDescription(),
-                    p.getRecruitDeadline(),
-                    p.getActivityStartTime(),
-                    p.getActivityDurationMinutes(),
-                    p.getMaxMember(),
-                    p.getIsActive(),
-                    p.getFacilityId(),
-                    p.getSidoNm(),
-                    p.getSigunguNm()
-                );
-            }).toList();
+                return service.toResponse(p, writerProfile);
+            })
+            .toList();
         return ResponseEntity.ok(list);
     }
 

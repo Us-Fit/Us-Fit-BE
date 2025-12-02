@@ -14,5 +14,6 @@ public record ProfileResponse (
     String preferredArea,
     Double lat,
     Double lng,
-    List<InterestOutput> interests
+    List<InterestOutput> interests,
+    String phoneNumber
 ) {}

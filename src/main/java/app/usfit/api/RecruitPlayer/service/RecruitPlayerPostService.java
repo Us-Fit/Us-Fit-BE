@@ -17,6 +17,8 @@ import app.usfit.api.RecruitPlayer.dto.RecruitPlayerPostRequest;
 import app.usfit.api.RecruitPlayer.dto.RecruitPlayerPostResponse;
 import app.usfit.api.RecruitPlayer.entity.RecruitPlayerPost;
 import app.usfit.api.RecruitPlayer.repository.RecruitPlayerPostRepository;
+import app.usfit.api.facility.dto.FacilityDetailDto;
+import app.usfit.api.facility.repository.FacilityRepository;
 import app.usfit.api.sport.entity.Sport;
 import app.usfit.api.sport.service.SportService;
 import app.usfit.api.user.dto.SimpleProfileResponse;
@@ -31,14 +33,16 @@ public class RecruitPlayerPostService {
     private final RecruitPlayerPostRepository repository;
     private final SportService sportService;
     private final ProfileService profileService;
+    private final FacilityRepository facilityRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    public RecruitPlayerPostService(RecruitPlayerPostRepository repository, SportService sportService, ProfileService profileService) {
+    public RecruitPlayerPostService(RecruitPlayerPostRepository repository, SportService sportService, ProfileService profileService, FacilityRepository facilityRepository) {
         this.repository = repository;
         this.sportService = sportService;
         this.profileService = profileService;
+        this.facilityRepository = facilityRepository;
     }
     
     @Transactional
@@ -313,24 +317,39 @@ public class RecruitPlayerPostService {
         final Map<Long, SimpleProfileResponse> profiles = writerIds.isEmpty() ? Map.of() : profileService.getSimpleProfiles(new ArrayList<>(writerIds));
 
         // DTO 변환
-        return finalList.stream().map(p -> {
-            SimpleProfileResponse writerDto = p.getWriter() != null ? profiles.get(p.getWriter().getId()) : null;
-            return new RecruitPlayerPostResponse(
-                    p.getId(),
-                    writerDto,
-                    p.getSport() != null ? p.getSport().getId() : null,
-                    p.getSport() != null ? p.getSport().getName() : null,
-                    p.getTitle(),
-                    p.getDescription(),
-                    p.getRecruitDeadline(),
-                    p.getActivityStartTime(),
-                    p.getActivityDurationMinutes(),
-                    p.getMaxMember(),
-                    p.getIsActive(),
-                    p.getFacilityId(),
-                    p.getSidoNm(),
-                    p.getSigunguNm()
-            );
-        }).collect(Collectors.toList());
+        return finalList.stream()
+                .map(p -> {
+                    SimpleProfileResponse writerDto = p.getWriter() != null ? profiles.get(p.getWriter().getId()) : null;
+                    return toResponse(p, writerDto);
+                })
+                .collect(Collectors.toList());
+    }
+
+    public RecruitPlayerPostResponse toResponse(RecruitPlayerPost post, SimpleProfileResponse writerProfile) {
+        Integer currtMember = 0;
+
+        FacilityDetailDto facilityDto = null;
+        if (post.getFacilityId() != null) {
+           facilityDto = facilityRepository.getFacilityInfo(post.getFacilityId());
+        }
+
+        return new RecruitPlayerPostResponse(
+           post.getId(),
+           writerProfile,
+           post.getSport() != null ? post.getSport().getId() : null,
+           post.getSport() != null ? post.getSport().getName() : null,
+           post.getTitle(),
+           post.getDescription(),
+           post.getRecruitDeadline(),
+           post.getActivityStartTime(),
+           post.getActivityDurationMinutes(),
+           post.getMaxMember(),
+           currtMember,
+           post.getIsActive(),
+
+           facilityDto,
+           post.getSidoNm(),
+           post.getSigunguNm()
+        );
     }
 }

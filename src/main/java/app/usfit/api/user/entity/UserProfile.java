@@ -50,6 +50,8 @@ public class UserProfile implements Persistable<Long> {
     @Column(name = "birth_date")
     private LocalDate birthDate; // 생년월일 (YYYY-MM-DD)
 
+    @Column(name = "phone_number")
+    private String phoneNumber; // 전화번호
     
 
     @Column(name = "preferred_area")

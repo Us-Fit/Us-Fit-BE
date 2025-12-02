@@ -22,6 +22,7 @@ import app.usfit.api.club.entity.Club;
 import app.usfit.api.club.entity.ClubMember;
 import app.usfit.api.club.entity.ClubSport;
 import app.usfit.api.club.repository.ClubRepository;
+import app.usfit.api.common.enums.ClubMemberRole;
 import app.usfit.api.facility.entity.Facility;
 import app.usfit.api.sport.entity.Sport;
 import app.usfit.api.sport.service.SportService;
@@ -94,7 +95,7 @@ public class ClubService {
         ClubMember ownerMember = ClubMember.builder()
                 .club(club)
                 .user(owner)
-                .role("owner")
+                .role(ClubMemberRole.OWNER)
                 .status("active")
                 .build();
         entityManager.persist(ownerMember);

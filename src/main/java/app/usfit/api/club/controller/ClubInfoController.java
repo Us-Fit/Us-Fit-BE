@@ -32,9 +32,11 @@ public class ClubInfoController {
     // 특정 동호회 상세 정보 조회
     @GetMapping("/{clubId}")
     @Operation(summary = "동호회 상세 정보 조회", description = "특정 동호회의 상세 정보를 반환합니다. 반환 예시는 아래를 참고하세요.")
-    public ResponseEntity<Object> getClubDetail(@PathVariable("clubId") Long clubId) {
+    public ResponseEntity<Object> getClubDetail(@PathVariable("clubId") Long clubId, Authentication authentication) {
         try {
-            ClubDetailInfoResponse resp = clubinfoService.getClubDetail(clubId);
+            Long userId = Long.parseLong(authentication.getName());
+            
+            ClubDetailInfoResponse resp = clubinfoService.getClubDetail(clubId,userId);
             return ResponseEntity.ok(resp);
         } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));

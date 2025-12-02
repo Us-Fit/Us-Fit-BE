@@ -15,6 +15,7 @@ import app.usfit.api.RecruitPlayer.entity.RecruitPlayerPost;
 import app.usfit.api.RecruitPlayer.repository.RecruitApplicationRepository;
 import app.usfit.api.RecruitPlayer.repository.RecruitPlayerPostRepository;
 import app.usfit.api.user.entity.User;
+import app.usfit.api.user.service.ProfileService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -22,6 +23,7 @@ import jakarta.persistence.PersistenceContext;
 public class RecruitApplicationService {
     private final RecruitApplicationRepository applicationRepo;
     private final RecruitPlayerPostRepository postRepo;
+    private final ProfileService profileService;
 
     // persistenceContext -> EntityManager를 주입받기 위한 어노테이션 (우체국 직원 느낌.)
     // EntityManager -> JPA의 핵심 인터페이스로, 엔티티의 생명주기 관리, 쿼리 실행 등을 담당 (JPA에서 DB와 소통)
@@ -29,9 +31,10 @@ public class RecruitApplicationService {
     private EntityManager entityManager;
 
     public RecruitApplicationService(RecruitApplicationRepository recruitApplicationRepository,
-            RecruitPlayerPostRepository recruitPlayerPostService) {
+            RecruitPlayerPostRepository recruitPlayerPostService, ProfileService profileService) {
         this.applicationRepo = recruitApplicationRepository;
         this.postRepo = recruitPlayerPostService;
+        this.profileService = profileService;
     }
 
     @Transactional
@@ -58,10 +61,11 @@ public class RecruitApplicationService {
 
     // 엔티티 -> 응답 DTO 매핑 헬퍼
     private ApplicationResponse toResponse(RecruitApplication a) {
+        var userProfile = profileService.getSimpleProfile(a.getApplicant().getId());
         return new ApplicationResponse(
             a.getApplicationId(),
             a.getPost().getId(),
-            a.getApplicant().getId(),
+            userProfile,
             a.getIntroduction(),
             a.getStatus(),
             a.getAppliedAt()
@@ -92,6 +96,14 @@ public class RecruitApplicationService {
             System.out.println("작성자만 변경 가능합니다.");
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "작성자만 변경 가능합니다.");
         }
+
+        // 모집 정원 초과 확인 (ACCEPTED로 변경 시)
+        List<ApplicationResponse> acceptedApps = AcceptedApplications(postId);
+
+        if (post.getMaxMember() <= acceptedApps.size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "모집 정원이 가득 찼습니다.");
+        }
+        
         // 신청서 존재 여부 확인
         var app = applicationRepo.findById(applicationId).orElseThrow(() -> 
             new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 신청서"));
@@ -112,5 +124,61 @@ public class RecruitApplicationService {
         return applicationRepo.findByApplicant_IdOrderByApplicationIdDesc(userId)
                 .stream().map(this::toResponse).toList();
     }
-    
+
+    // 멤버용: ACCEPTED만
+    public List<ApplicationResponse> listForPostMember(Long postId, Long requesterId) {
+        RecruitPlayerPost post = postRepo.findById(postId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 모집글"));
+        
+        List<ApplicationResponse> response = AcceptedApplications(postId);
+
+        // 작성자 또는 ACCEPTED된 멤버인지 확인
+        boolean requesterIsAccepted = response.stream()
+                .anyMatch(a -> a.user() != null && a.user().userId().equals(requesterId)) || post.getWriter().getId().equals(requesterId);
+
+        if (!requesterIsAccepted) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "작성자 또는 가입된 멤버만 조회 가능합니다.");
+        }
+
+        return response;
+    }
+
+    // ACCEPT된 멤버가 스스로 용병 탈퇴
+    @Transactional
+    public ApplicationResponse exitRecruit(Long postId, Long applicationId, Long requesterId) {
+        RecruitPlayerPost post = postRepo.findById(postId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 모집글"));
+
+        RecruitApplication app = applicationRepo.findById(applicationId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 신청서"));
+
+        // 신청서가 해당 게시글의 신청서인지 확인
+        if (!app.getPost().getId().equals(postId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 모집글의 신청서가 아닙니다.");
+        }
+
+        // 요청자가 신청자 본인인지 확인
+        if (app.getApplicant() == null || !app.getApplicant().getId().equals(requesterId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "자기 자신만 탈퇴할 수 있습니다.");
+        }
+
+        // 현재 상태가 ACCEPTED(가입된 상태)인지 확인
+        if (app.getStatus() != RecruitApplication.Status.ACCEPTED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "가입된 멤버만 탈퇴할 수 있습니다.");
+        }
+        
+        // 상태를 CANCLED로 변경
+        app.setStatus(RecruitApplication.Status.CANCELLED);
+        applicationRepo.save(app);
+
+        return toResponse(app);
+    }
+
+    private List<ApplicationResponse> AcceptedApplications(Long postId) {
+        return applicationRepo.findByPost_IdOrderByApplicationIdDesc(postId)
+                .stream()
+                .filter(a -> a.getStatus() == RecruitApplication.Status.ACCEPTED)
+                .map(this::toResponse)
+                .toList();
+    }
 }
