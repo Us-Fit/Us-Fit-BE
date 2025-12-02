@@ -39,7 +39,8 @@ public class ClubDetailInfoResponse{
     public static ClubDetailInfoResponse from(
             Club club,
             FacilityDetailDto facility,
-            List<ClubSportResponse> sports
+            List<ClubSportResponse> sports,
+            ClubMemberRole myRoleInClub
     ) {
         String mainImageUrl = null;
 
@@ -70,6 +71,7 @@ public class ClubDetailInfoResponse{
                 .snsLink(club.getSnsLink())
                 .mainFacility(facility)
                 .sports(sports)
+                .myRoleInClub(myRoleInClub) // 기본값 null
                 .build();
     }
 
