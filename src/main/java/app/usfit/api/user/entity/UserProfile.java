@@ -52,10 +52,12 @@ public class UserProfile implements Persistable<Long> {
 
     @Column(name = "phone_number")
     private String phoneNumber; // 전화번호
-    
 
-    @Column(name = "preferred_area")
-    private String preferredArea; // 선호 운동 지역
+    @Column(name = "sido_nm")
+    private String sidoNm; // 시도 이름
+
+    @Column(name = "sigungu_nm")
+    private String sigunguNm; // 시군구 이름
 
     @Column(name = "lat")
     private Double lat; // 위도
