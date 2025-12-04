@@ -65,6 +65,7 @@ public class ProfileService {
         profile.setSigunguNm(req.sigunguNm());
         profile.setLat(req.lat());
         profile.setLng(req.lng());
+        profile.setPhoneNumber(req.phoneNumber());
         
 
         // 관심운동 저장(전체 교체)
