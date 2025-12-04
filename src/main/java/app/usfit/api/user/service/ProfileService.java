@@ -62,7 +62,8 @@ public class ProfileService {
         profile.setHeight(req.height());
         profile.setWeight(req.weight());
         profile.setBirthDate(req.birthDate());
-        profile.setPreferredArea(req.preferredArea());
+        profile.setSidoNm(req.sidoNm());
+        profile.setSigunguNm(req.sigunguNm());
         profile.setLat(req.lat());
         profile.setLng(req.lng());
         
@@ -128,7 +129,8 @@ public class ProfileService {
             p.getHeight(),
             p.getWeight(),
             p.getBirthDate(),
-            p.getPreferredArea(),
+            p.getSidoNm(),
+            p.getSigunguNm(),
             p.getLat(),
             p.getLng(),
             interests,
