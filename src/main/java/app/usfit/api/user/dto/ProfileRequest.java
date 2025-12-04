@@ -10,9 +10,10 @@ public record ProfileRequest (
     Double height,
     Double weight,
     LocalDate birthDate,
-    String preferredArea,
     Double lat,
     Double lng,
+    String sidoNm,
+    String sigunguNm,
 
     //관심 운동
     List<InterestInput> interests,
