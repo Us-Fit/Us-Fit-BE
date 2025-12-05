@@ -472,4 +472,22 @@ public class ClubService {
             return ClubSimpleInfoResponse.from(club, ownerProfile, sports);
         }).collect(Collectors.toList());
     }
+
+    // 특정 동호회 삭제 -> 운영자만 가능 
+    @Transactional
+    public void deleteClub(Long clubId, Long userId) {
+        // 동호회 조회
+        Club club = entityManager.find(Club.class, clubId);
+        if (club == null) {
+            throw new IllegalArgumentException("존재하지 않는 동호회입니다.");
+        }
+
+        // 소유자 확인
+        if (club.getOwner() == null || !Objects.equals(club.getOwner().getId(), userId)) {
+            throw new SecurityException("동호회 소유자만 동호회를 삭제할 수 있습니다.");
+        }   
+
+        // 동호회 삭제
+        entityManager.remove(club);
+    }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -116,5 +117,30 @@ public class ClubController {
 
         List<ClubSimpleInfoResponse> res = clubService.recommendClubs(sports, request.getSidoNm(), request.getSigunguNm() , limit);
         return ResponseEntity.ok(res);
+    }
+
+    @DeleteMapping("{clubId}/delete")
+    @Operation(summary = "동호회 삭제", description = "동호회를 삭제합니다.")
+    public ResponseEntity<Void> deleteClub(@PathVariable("clubId") Long clubId, Authentication authentication ) {
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(401).build();  
+        }
+
+        Long userId;
+        try {
+            userId = Long.parseLong(authentication.getName());
+        } catch (NumberFormatException ex) {
+            return ResponseEntity.status(401).build();
+        }
+        try {
+            clubService.deleteClub(clubId, userId);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
     }
 }

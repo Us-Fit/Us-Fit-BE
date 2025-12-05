@@ -8,8 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import app.usfit.api.RecruitPlayer.dto.ApplicationApplyRequest;
+import app.usfit.api.RecruitPlayer.dto.ApplicationPostResponse;
 import app.usfit.api.RecruitPlayer.dto.ApplicationResponse;
 import app.usfit.api.RecruitPlayer.dto.ApplicationStatusRequest;
+import app.usfit.api.RecruitPlayer.dto.RecruitPostResponse;
 import app.usfit.api.RecruitPlayer.entity.RecruitApplication;
 import app.usfit.api.RecruitPlayer.entity.RecruitPlayerPost;
 import app.usfit.api.RecruitPlayer.repository.RecruitApplicationRepository;
@@ -62,9 +64,35 @@ public class RecruitApplicationService {
     // 엔티티 -> 응답 DTO 매핑 헬퍼
     private ApplicationResponse toResponse(RecruitApplication a) {
         var userProfile = profileService.getSimpleProfile(a.getApplicant().getId());
+        
         return new ApplicationResponse(
             a.getApplicationId(),
             a.getPost().getId(),
+            userProfile,
+            a.getIntroduction(),
+            a.getStatus(),
+            a.getAppliedAt()
+        );
+    }
+    private ApplicationPostResponse toPostResponse(RecruitApplication a) {
+        var userProfile = profileService.getSimpleProfile(a.getApplicant().getId());
+
+        var post = a.getPost();
+        var sportName = post.getSport() != null ? post.getSport().getName() : null;
+
+        RecruitPostResponse RecruitPostResponse = new RecruitPostResponse(
+            sportName,
+            post.getTitle(),
+            post.getDescription(),
+            post.getFacilityId() != null ? post.getFacilityId() : null,
+            post.getSidoNm(),
+            post.getSigunguNm(),
+            post.getActivityDurationMinutes()
+        );
+
+        return new ApplicationPostResponse(
+            a.getApplicationId(),
+            RecruitPostResponse,
             userProfile,
             a.getIntroduction(),
             a.getStatus(),
@@ -120,9 +148,9 @@ public class RecruitApplicationService {
 
     // 내가 신청한 모집글 조회
     @Transactional
-    public List<ApplicationResponse> listMyApplications(Long userId) {
+    public List<ApplicationPostResponse> listMyApplications(Long userId) {
         return applicationRepo.findByApplicant_IdOrderByApplicationIdDesc(userId)
-                .stream().map(this::toResponse).toList();
+                .stream().map(this::toPostResponse).toList();
     }
 
     // 멤버용: ACCEPTED만
