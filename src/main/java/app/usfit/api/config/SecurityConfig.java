@@ -44,7 +44,9 @@ public class SecurityConfig {
         // 추후 프론트 도메인으로 변경해야함. 여러 개면 addAllowedOriginPattern 사용 가능
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000",
-                "http://3.27.134.2:8080" //ec2 address
+                "http://3.27.134.2:8080", //ec2 address
+                "https://api.usfit.kr",   // 배포용 API 도메인
+                "https://usfit.kr"        // 루트 도메인
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
