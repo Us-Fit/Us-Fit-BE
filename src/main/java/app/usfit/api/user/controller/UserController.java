@@ -78,8 +78,8 @@ public class UserController {
             Authentication auth
     ) {
         // 현재 로그인 사용자 확인
-        Long userId = Long.valueOf(auth.getName());
-        
+        //Long userId = Long.valueOf(auth.getName());
+        var userId = Long.parseLong(auth.getName());
         try {
             authService.deleteUser(userId);
             return ResponseEntity.ok().build();
