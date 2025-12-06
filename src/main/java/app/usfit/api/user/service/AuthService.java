@@ -75,7 +75,17 @@ public class AuthService {
             .orElseThrow(() -> 
                 new jakarta.persistence.EntityNotFoundException("사용자를 찾을 수 없습니다: " + userId)
             );
-    
-        userRepository.deleteById(userId);
+            
+        try {
+            userRepository.deleteById(userId);
+            System.out.println("deleteById 호출 완료 for userId=" + userId);
+        
+            userRepository.flush();  // FK 제약 오류 즉시 발생
+            System.out.println("=== deleteUser 완료 ===");
+        } catch (Exception e) {
+            System.out.println("=== 삭제 중 예외 발생 ===");
+            e.printStackTrace();
+            throw e;  // 트랜잭션 롤백
+        }
     }
 }
