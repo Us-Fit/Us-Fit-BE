@@ -3,6 +3,9 @@ package app.usfit.api.user.repository;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import app.usfit.api.common.enums.AuthProviderEnum;
 import app.usfit.api.user.entity.User;
@@ -16,4 +19,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // 만약 Jpa사용 안하면 직접 쿼리 작성해야함. (ex. @Query("select u from User u where u.email = :email or u.username = :email"))
     Optional<User> findByEmail(String email);
     Optional<User> findByProviderAndProviderId(AuthProviderEnum provider, String providerId);
+
+    @Modifying
+    @Query(value = "DELETE FROM users WHERE id = :userId", nativeQuery = true)
+    void deleteUserByIdNative(@Param("userId") Long userId);
 }
