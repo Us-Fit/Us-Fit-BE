@@ -67,4 +67,16 @@ public class AuthService {
         }
         return handler.handle(request);
     }
+
+    //계정 삭제
+    @Transactional
+    public void deleteUser(Long userId) {
+        var user = userRepository.findById(userId)
+            .orElseThrow(() -> 
+                new jakarta.persistence.EntityNotFoundException("사용자를 찾을 수 없습니다: " + userId)
+            );
+    
+        userRepository.deleteById(userId);
+        userRepository.flush();  
+    }
 }
