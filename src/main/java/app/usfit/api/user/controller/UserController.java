@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -68,5 +70,21 @@ public class UserController {
     @GetMapping("/signup")
     public ResponseEntity<String> signupGetInfo() {
         return ResponseEntity.ok("회원가입은 POST /api/user/signup 로 호출하세요.");
+    }
+
+    @DeleteMapping("/delete")
+    @io.swagger.v3.oas.annotations.Operation(summary = "계정 삭제", description = "사용자 계정을 완전히 삭제합니다.")
+    public ResponseEntity<Void> deleteUser(
+            Authentication auth
+    ) {
+        // 현재 로그인 사용자 확인
+        Long userId = Long.valueOf(auth.getName());
+        
+        try {
+            authService.deleteUser(userId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
     }
 }
