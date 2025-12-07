@@ -458,8 +458,8 @@ gradlew.bat bootRun
 
 ### 4. Server Check
 
-- Server: `http://3.27.134.2:8080`
-- Swagger UI: `http://3.27.134.2:8080/swagger-ui/index.html#`
+- Server: `https://usfit.kr/`
+- Swagger UI: `https://api.usfit.kr/swagger-ui/index.html`
 
 ---
 
@@ -525,7 +525,7 @@ CommandLineRunner initData(FacilityImportService facilityService,
 Once the server is running:
 
 ```
-http://3.27.134.2:8080/swagger-ui/index.html#
+https://api.usfit.kr/swagger-ui/index.html
 
 ```
 
