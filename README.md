@@ -422,8 +422,8 @@ gradlew.bat bootRun
 
 ### 4️. 서버 확인
 
-- 서버 주소: `http://3.27.134.2:8080`
-- Swagger UI: `http://3.27.134.2:8080/swagger-ui/index.html#`
+- 서버 주소: `https://usfit.kr/`
+- Swagger UI: `https://api.usfit.kr/swagger-ui/index.html`
 
 ---
 
@@ -489,7 +489,7 @@ CommandLineRunner initData(FacilityImportService facilityService,
 서버 실행 후 아래 주소로 접속:
 
 ```
-http://3.27.134.2:8080/swagger-ui/index.html#
+https://api.usfit.kr/swagger-ui/index.html#
 ```
 
 ### 주요 API 엔드포인트
