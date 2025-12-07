@@ -190,7 +190,7 @@
         </a>
       </td>
     </tr>
-    <tr>
+    <!-- <tr>
       <td align="center">
         <a href="" target="_blank">개인 리포트</a>
       </td>
@@ -203,7 +203,7 @@
       <td align="center">
         <a href="" target="_blank">개인 리포트</a>
       </td>
-    </tr>
+    </tr> -->
   </tbody>
 </table>
 
