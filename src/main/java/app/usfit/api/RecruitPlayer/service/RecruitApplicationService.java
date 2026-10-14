@@ -125,20 +125,26 @@ public class RecruitApplicationService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "작성자만 변경 가능합니다.");
         }
 
-        // 모집 정원 초과 확인 (ACCEPTED로 변경 시)
-        List<ApplicationResponse> acceptedApps = AcceptedApplications(postId);
-
-        if (post.getMaxMember() <= acceptedApps.size()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "모집 정원이 가득 찼습니다.");
-        }
-        
         // 신청서 존재 여부 확인
-        var app = applicationRepo.findById(applicationId).orElseThrow(() -> 
+        var app = applicationRepo.findById(applicationId).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 신청서"));
-        
+
         if (!app.getPost().getId().equals(postId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 모집글의 신청서가 아닙니다.");
         }
+
+        // 정원 확보/반납 (조건부 UPDATE로 원자적으로 처리)
+        boolean wasAccepted = app.getStatus() == RecruitApplication.Status.ACCEPTED;
+        boolean willBeAccepted = req.status() == RecruitApplication.Status.ACCEPTED;
+
+        if (!wasAccepted && willBeAccepted) {
+            if (postRepo.reserveSeat(postId) == 0) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "모집 정원이 가득 찼습니다.");
+            }
+        } else if (wasAccepted && !willBeAccepted) {
+            postRepo.releaseSeat(postId);
+        }
+
         // 상태 변경
         app.setStatus(req.status());
         applicationRepo.save(app);
@@ -195,8 +201,9 @@ public class RecruitApplicationService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "가입된 멤버만 탈퇴할 수 있습니다.");
         }
         
-        // 상태를 CANCLED로 변경
+        // 상태를 CANCLED로 변경 + 자리 반납
         app.setStatus(RecruitApplication.Status.CANCELLED);
+        postRepo.releaseSeat(postId);
         applicationRepo.save(app);
 
         return toResponse(app);
