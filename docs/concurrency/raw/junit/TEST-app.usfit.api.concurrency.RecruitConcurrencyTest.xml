@@ -1,0 +1,529 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.usfit.api.concurrency.RecruitConcurrencyTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-15T05:09:41.733Z" hostname="iyunhyeong-ui-MacBookAir-6.local" time="17.49">
+  <properties/>
+  <testcase name="실험 2: 같은 신청서 동시 수락 - accepted_count 이중 증가" classname="app.usfit.api.concurrency.RecruitConcurrencyTest" time="3.782"/>
+  <testcase name="실험 1: 정원이 있는 수락 - 전략별 정원 초과 비교" classname="app.usfit.api.concurrency.RecruitConcurrencyTest" time="12.118"/>
+  <testcase name="실험 3: 중복 지원 - exists 검사 vs UNIQUE" classname="app.usfit.api.concurrency.RecruitConcurrencyTest" time="1.586"/>
+  <system-out><![CDATA[14:09:22.299 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [app.usfit.api.concurrency.RecruitConcurrencyTest]: RecruitConcurrencyTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+14:09:22.398 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration app.usfit.api.UsFitApplication for test class app.usfit.api.concurrency.RecruitConcurrencyTest
+14:09:22.495 [Test worker] INFO org.testcontainers.images.PullPolicy -- Image pull policy will be performed by: DefaultPullPolicy()
+14:09:22.497 [Test worker] INFO org.testcontainers.utility.ImageNameSubstitutor -- Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+14:09:22.502 [Test worker] INFO org.testcontainers.DockerClientFactory -- Testcontainers version: 1.21.3
+14:09:23.006 [Test worker] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy -- Found Docker environment with Docker accessed via Unix socket (/Users/yoonbro/.docker/run/docker.sock)
+14:09:23.007 [Test worker] INFO org.testcontainers.DockerClientFactory -- Docker host IP address is localhost
+14:09:23.027 [Test worker] INFO org.testcontainers.DockerClientFactory -- Connected to docker: 
+  Server Version: 29.8.1
+  API Version: 1.56
+  Operating System: Docker Desktop
+  Total Memory: 3916 MB
+  Labels: 
+    com.docker.desktop.address=unix:///Users/yoonbro/Library/Containers/com.docker.docker/Data/docker-cli.sock
+14:09:23.120 [Test worker] INFO tc.testcontainers/ryuk:0.12.0 -- Creating container for image: testcontainers/ryuk:0.12.0
+14:09:23.240 [Test worker] INFO org.testcontainers.utility.RegistryAuthLocator -- Credential helper/store (docker-credential-desktop) does not have credentials for https://index.docker.io/v1/
+14:09:23.377 [Test worker] INFO tc.testcontainers/ryuk:0.12.0 -- Container testcontainers/ryuk:0.12.0 is starting: 2561992434e9fe1fe338908c50affc05447b8f7cb53f0077c48771b3ce5376c3
+14:09:23.705 [Test worker] INFO tc.testcontainers/ryuk:0.12.0 -- Container testcontainers/ryuk:0.12.0 started in PT0.58455S
+14:09:23.709 [Test worker] INFO org.testcontainers.utility.RyukResourceReaper -- Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+14:09:23.710 [Test worker] INFO org.testcontainers.DockerClientFactory -- Checking the system...
+14:09:23.710 [Test worker] INFO org.testcontainers.DockerClientFactory -- ✔︎ Docker server version should be at least 1.6.0
+14:09:23.712 [Test worker] INFO tc.mysql:8.0.36 -- Creating container for image: mysql:8.0.36
+14:09:23.798 [Test worker] INFO tc.mysql:8.0.36 -- Container mysql:8.0.36 is starting: de26082cae4dbdfc25a40080951645a773bbf965395a728c04f8b751027ae8dd
+14:09:23.939 [Test worker] INFO tc.mysql:8.0.36 -- Waiting for database connection to become available at jdbc:mysql://localhost:51325/usfit using query 'SELECT 1'
+14:09:33.898 [Test worker] INFO tc.mysql:8.0.36 -- Container mysql:8.0.36 started in PT10.186001S
+14:09:33.899 [Test worker] INFO tc.mysql:8.0.36 -- Container is started (JDBC URL: jdbc:mysql://localhost:51325/usfit)
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.6)
+
+2026-10-15T14:09:34.123+09:00  INFO 60109 --- [UsFit] [    Test worker] a.u.a.c.RecruitConcurrencyTest           : Starting RecruitConcurrencyTest using Java 21.0.3 with PID 60109 (started by yoonbro in /Users/yoonbro/Desktop/Yoon/UsFit/Us-Fit-BE)
+2026-10-15T14:09:34.124+09:00  INFO 60109 --- [UsFit] [    Test worker] a.u.a.c.RecruitConcurrencyTest           : The following 1 profile is active: "concurrency"
+2026-10-15T14:09:34.884+09:00  INFO 60109 --- [UsFit] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-10-15T14:09:34.952+09:00  INFO 60109 --- [UsFit] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 60 ms. Found 19 JPA repository interfaces.
+2026-10-15T14:09:35.331+09:00  INFO 60109 --- [UsFit] [    Test worker] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-10-15T14:09:35.372+09:00  INFO 60109 --- [UsFit] [    Test worker] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.29.Final
+2026-10-15T14:09:35.397+09:00  INFO 60109 --- [UsFit] [    Test worker] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-10-15T14:09:35.594+09:00  INFO 60109 --- [UsFit] [    Test worker] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-10-15T14:09:35.615+09:00  INFO 60109 --- [UsFit] [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-10-15T14:09:35.793+09:00  INFO 60109 --- [UsFit] [    Test worker] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5a88849
+2026-10-15T14:09:35.794+09:00  INFO 60109 --- [UsFit] [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-10-15T14:09:35.828+09:00  WARN 60109 --- [UsFit] [    Test worker] org.hibernate.orm.deprecation            : HHH90000025: MySQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-10-15T14:09:35.840+09:00  INFO 60109 --- [UsFit] [    Test worker] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 8.0.36
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-10-15T14:09:36.917+09:00  INFO 60109 --- [UsFit] [    Test worker] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-10-15T14:09:39.118+09:00  INFO 60109 --- [UsFit] [    Test worker] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-10-15T14:09:39.345+09:00  INFO 60109 --- [UsFit] [    Test worker] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-10-15T14:09:41.200+09:00  WARN 60109 --- [UsFit] [    Test worker] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-10-15T14:09:41.461+09:00  WARN 60109 --- [UsFit] [    Test worker] o.s.s.c.a.web.builders.WebSecurity       : You are asking Spring Security to ignore Deferred [Mvc [pattern='/v3/api-docs'], Ant [pattern='/v3/api-docs']]. This is not recommended -- please use permitAll via HttpSecurity#authorizeHttpRequests instead.
+2026-10-15T14:09:41.461+09:00  WARN 60109 --- [UsFit] [    Test worker] o.s.s.c.a.web.builders.WebSecurity       : You are asking Spring Security to ignore Deferred [Mvc [pattern='/v3/api-docs/**'], Ant [pattern='/v3/api-docs/**']]. This is not recommended -- please use permitAll via HttpSecurity#authorizeHttpRequests instead.
+2026-10-15T14:09:41.462+09:00  WARN 60109 --- [UsFit] [    Test worker] o.s.s.c.a.web.builders.WebSecurity       : You are asking Spring Security to ignore Deferred [Mvc [pattern='/swagger-ui.html'], Ant [pattern='/swagger-ui.html']]. This is not recommended -- please use permitAll via HttpSecurity#authorizeHttpRequests instead.
+2026-10-15T14:09:41.462+09:00  WARN 60109 --- [UsFit] [    Test worker] o.s.s.c.a.web.builders.WebSecurity       : You are asking Spring Security to ignore Deferred [Mvc [pattern='/swagger-ui/**'], Ant [pattern='/swagger-ui/**']]. This is not recommended -- please use permitAll via HttpSecurity#authorizeHttpRequests instead.
+2026-10-15T14:09:41.462+09:00  WARN 60109 --- [UsFit] [    Test worker] o.s.s.c.a.web.builders.WebSecurity       : You are asking Spring Security to ignore Deferred [Mvc [pattern='/login'], Ant [pattern='/login']]. This is not recommended -- please use permitAll via HttpSecurity#authorizeHttpRequests instead.
+2026-10-15T14:09:41.721+09:00  INFO 60109 --- [UsFit] [    Test worker] a.u.a.c.RecruitConcurrencyTest           : Started RecruitConcurrencyTest in 7.784 seconds (process running for 20.144)
+>>> spring.datasource.url = jdbc:mysql://localhost:51325/usfit
+>>> ENV SPRING_DATASOURCE_URL = null
+>>> ENV DB_URL = null
+>>> JVM prop spring.datasource.url = null
+>>> Active profiles = concurrency
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=1 | success=10 | failed=10 | elapsedMs=98 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+
+[DB] 실험 2 / 조건부 UPDATE: 자리만 (1차 수정) / trial 1 직후 모집글 상태
+  SQL   : SELECT p.post_id, p.max_member, p.accepted_count, (SELECT COUNT(*) FROM recruit_applications a WHERE a.post_id = p.post_id AND a.status = 'ACCEPTED') AS accepted_rows FROM recruit_posts p WHERE p.post_id = ?
+  params: [1]
+  | post_id | max_member | accepted_count | accepted_rows |
+  | 1 | 10 | 10 | 1 |
+  (1 rows)
+
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=1 | success=1 | failed=19 | elapsedMs=198 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+
+[DB] 실험 2 / 조건부 UPDATE: 자리 + 상태 전이 (현재 코드) / trial 1 직후 모집글 상태
+  SQL   : SELECT p.post_id, p.max_member, p.accepted_count, (SELECT COUNT(*) FROM recruit_applications a WHERE a.post_id = p.post_id AND a.status = 'ACCEPTED') AS accepted_rows FROM recruit_posts p WHERE p.post_id = ?
+  params: [2]
+  | post_id | max_member | accepted_count | accepted_rows |
+  | 2 | 10 | 1 | 1 |
+  (1 rows)
+
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=2 | success=11 | failed=9 | elapsedMs=45 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=2 | success=1 | failed=19 | elapsedMs=34 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=3 | success=10 | failed=10 | elapsedMs=33 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=3 | success=1 | failed=19 | elapsedMs=34 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=4 | success=10 | failed=10 | elapsedMs=35 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=4 | success=1 | failed=19 | elapsedMs=35 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=5 | success=10 | failed=10 | elapsedMs=41 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=5 | success=1 | failed=19 | elapsedMs=35 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=6 | success=10 | failed=10 | elapsedMs=39 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=6 | success=1 | failed=19 | elapsedMs=34 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=7 | success=10 | failed=10 | elapsedMs=39 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=7 | success=1 | failed=19 | elapsedMs=43 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=8 | success=10 | failed=10 | elapsedMs=38 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=8 | success=1 | failed=19 | elapsedMs=45 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=9 | success=10 | failed=10 | elapsedMs=74 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=9 | success=1 | failed=19 | elapsedMs=43 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=10 | success=10 | failed=10 | elapsedMs=42 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=10 | success=1 | failed=19 | elapsedMs=38 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=11 | success=10 | failed=10 | elapsedMs=43 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=11 | success=1 | failed=19 | elapsedMs=75 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=12 | success=10 | failed=10 | elapsedMs=46 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=12 | success=1 | failed=19 | elapsedMs=36 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=13 | success=10 | failed=10 | elapsedMs=37 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=13 | success=1 | failed=19 | elapsedMs=37 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=14 | success=10 | failed=10 | elapsedMs=40 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=14 | success=1 | failed=19 | elapsedMs=35 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=15 | success=10 | failed=10 | elapsedMs=37 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=15 | success=1 | failed=19 | elapsedMs=33 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=16 | success=10 | failed=10 | elapsedMs=32 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=16 | success=1 | failed=19 | elapsedMs=32 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=17 | success=10 | failed=10 | elapsedMs=40 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=17 | success=1 | failed=19 | elapsedMs=39 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=18 | success=10 | failed=10 | elapsedMs=61 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=18 | success=1 | failed=19 | elapsedMs=41 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=19 | success=10 | failed=10 | elapsedMs=47 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=19 | success=1 | failed=19 | elapsedMs=33 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=20 | success=10 | failed=10 | elapsedMs=38 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=20 | success=1 | failed=19 | elapsedMs=32 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=21 | success=10 | failed=10 | elapsedMs=53 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=21 | success=1 | failed=19 | elapsedMs=53 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=22 | success=10 | failed=10 | elapsedMs=85 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=22 | success=1 | failed=19 | elapsedMs=39 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=23 | success=10 | failed=10 | elapsedMs=36 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=23 | success=1 | failed=19 | elapsedMs=32 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=24 | success=10 | failed=10 | elapsedMs=39 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=24 | success=1 | failed=19 | elapsedMs=41 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=25 | success=10 | failed=10 | elapsedMs=36 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=25 | success=1 | failed=19 | elapsedMs=29 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=26 | success=10 | failed=10 | elapsedMs=53 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=26 | success=1 | failed=19 | elapsedMs=37 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=27 | success=10 | failed=10 | elapsedMs=38 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=27 | success=1 | failed=19 | elapsedMs=32 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=28 | success=10 | failed=10 | elapsedMs=35 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=28 | success=1 | failed=19 | elapsedMs=28 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=29 | success=10 | failed=10 | elapsedMs=30 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=29 | success=1 | failed=19 | elapsedMs=27 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리만 (1차 수정) | trial=30 | success=10 | failed=10 | elapsedMs=30 | acceptedRows=1 | acceptedCount=10 | mismatch=true
+[RAW] 02-same-application | strategy=조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | trial=30 | success=1 | failed=19 | elapsedMs=28 | acceptedRows=1 | acceptedCount=1 | mismatch=false
+
+# 실험 2. 같은 신청서 동시 수락
+
+- 실행 시각: 2026-10-15 14:09:45
+- 환경: MySQL 8.0.36 (Testcontainers), 격리수준 REPEATABLE-READ, 스레드 20, 반복 30회, 커넥션 풀 40
+- 시나리오: WAITING 신청서 1건을 20개 스레드가 동시에 수락, 전략마다 30회 반복
+- 기대값: 수락 1명, accepted_count = 1
+
+## 결과
+
+| 전략 | 카운터 불일치 trial | 평균 accepted_count | trial 평균(ms) |
+|---|---|---|---|
+| 조건부 UPDATE: 자리만 (1차 수정) | **30/30** | 10.0 | 44.7 |
+| 조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | **0/30** | 1.0 | 42.6 |
+
+<details><summary>요청 실패 사유 (전체 trial 합계)</summary>
+
+| 전략 | 사유 | 건수 |
+|---|---|---|
+| 조건부 UPDATE: 자리만 (1차 수정) | 정원 마감 | 299 |
+| 조건부 UPDATE: 자리 + 상태 전이 (현재 코드) | 409 다른 요청에 의해 신청서 상태가 이미 변경되었습니다. | 570 |
+
+</details>
+
+>>> report: /Users/yoonbro/Desktop/Yoon/UsFit/Us-Fit-BE/build/reports/concurrency/02-same-application.md
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=1 | success=20 | failed=0 | elapsedMs=12 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+
+[DB] 실험 1 / A. 조회 후 검사 (수정 전 코드) / trial 1 직후 모집글 상태
+  SQL   : SELECT p.post_id, p.max_member, p.accepted_count, (SELECT COUNT(*) FROM recruit_applications a WHERE a.post_id = p.post_id AND a.status = 'ACCEPTED') AS accepted_rows FROM recruit_posts p WHERE p.post_id = ?
+  params: [61]
+  | post_id | max_member | accepted_count | accepted_rows |
+  | 61 | 10 | 0 | 20 |
+  (1 rows)
+
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=1 | success=10 | failed=10 | elapsedMs=38 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+
+[DB] 실험 1 / B. 비관적 락 (SELECT ... FOR UPDATE) / trial 1 직후 모집글 상태
+  SQL   : SELECT p.post_id, p.max_member, p.accepted_count, (SELECT COUNT(*) FROM recruit_applications a WHERE a.post_id = p.post_id AND a.status = 'ACCEPTED') AS accepted_rows FROM recruit_posts p WHERE p.post_id = ?
+  params: [62]
+  | post_id | max_member | accepted_count | accepted_rows |
+  | 62 | 10 | 0 | 10 |
+  (1 rows)
+
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=1 | success=4 | failed=16 | elapsedMs=55 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+
+[DB] 실험 1 / C. 낙관적 락 (accepted_count CAS, 재시도 3회) / trial 1 직후 모집글 상태
+  SQL   : SELECT p.post_id, p.max_member, p.accepted_count, (SELECT COUNT(*) FROM recruit_applications a WHERE a.post_id = p.post_id AND a.status = 'ACCEPTED') AS accepted_rows FROM recruit_posts p WHERE p.post_id = ?
+  params: [63]
+  | post_id | max_member | accepted_count | accepted_rows |
+  | 63 | 10 | 4 | 4 |
+  (1 rows)
+
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=1 | success=10 | failed=10 | elapsedMs=31 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+
+[DB] 실험 1 / D. 조건부 UPDATE (JDBC 재현) / trial 1 직후 모집글 상태
+  SQL   : SELECT p.post_id, p.max_member, p.accepted_count, (SELECT COUNT(*) FROM recruit_applications a WHERE a.post_id = p.post_id AND a.status = 'ACCEPTED') AS accepted_rows FROM recruit_posts p WHERE p.post_id = ?
+  params: [64]
+  | post_id | max_member | accepted_count | accepted_rows |
+  | 64 | 10 | 10 | 10 |
+  (1 rows)
+
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=1 | success=10 | failed=10 | elapsedMs=73 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+
+[DB] 실험 1 / D. 조건부 UPDATE (실제 서비스 호출) / trial 1 직후 모집글 상태
+  SQL   : SELECT p.post_id, p.max_member, p.accepted_count, (SELECT COUNT(*) FROM recruit_applications a WHERE a.post_id = p.post_id AND a.status = 'ACCEPTED') AS accepted_rows FROM recruit_posts p WHERE p.post_id = ?
+  params: [65]
+  | post_id | max_member | accepted_count | accepted_rows |
+  | 65 | 10 | 10 | 10 |
+  (1 rows)
+
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=2 | success=20 | failed=0 | elapsedMs=13 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=2 | success=10 | failed=10 | elapsedMs=37 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=2 | success=4 | failed=16 | elapsedMs=54 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=2 | success=10 | failed=10 | elapsedMs=24 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=2 | success=10 | failed=10 | elapsedMs=68 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=3 | success=20 | failed=0 | elapsedMs=12 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=3 | success=10 | failed=10 | elapsedMs=34 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=3 | success=4 | failed=16 | elapsedMs=66 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=3 | success=10 | failed=10 | elapsedMs=28 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=3 | success=10 | failed=10 | elapsedMs=67 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=4 | success=20 | failed=0 | elapsedMs=14 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=4 | success=10 | failed=10 | elapsedMs=35 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=4 | success=4 | failed=16 | elapsedMs=46 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=4 | success=10 | failed=10 | elapsedMs=25 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=4 | success=10 | failed=10 | elapsedMs=69 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=5 | success=20 | failed=0 | elapsedMs=12 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=5 | success=10 | failed=10 | elapsedMs=37 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=5 | success=4 | failed=16 | elapsedMs=49 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=5 | success=10 | failed=10 | elapsedMs=23 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=5 | success=10 | failed=10 | elapsedMs=72 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=6 | success=20 | failed=0 | elapsedMs=27 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=6 | success=10 | failed=10 | elapsedMs=36 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=6 | success=4 | failed=16 | elapsedMs=47 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=6 | success=10 | failed=10 | elapsedMs=23 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=6 | success=10 | failed=10 | elapsedMs=66 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=7 | success=20 | failed=0 | elapsedMs=13 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=7 | success=10 | failed=10 | elapsedMs=35 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=7 | success=4 | failed=16 | elapsedMs=46 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=7 | success=10 | failed=10 | elapsedMs=25 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=7 | success=10 | failed=10 | elapsedMs=77 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=8 | success=20 | failed=0 | elapsedMs=14 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=8 | success=10 | failed=10 | elapsedMs=35 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=8 | success=4 | failed=16 | elapsedMs=54 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=8 | success=10 | failed=10 | elapsedMs=37 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=8 | success=10 | failed=10 | elapsedMs=106 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=9 | success=20 | failed=0 | elapsedMs=15 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=9 | success=10 | failed=10 | elapsedMs=38 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=9 | success=4 | failed=16 | elapsedMs=49 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=9 | success=10 | failed=10 | elapsedMs=23 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=9 | success=10 | failed=10 | elapsedMs=57 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=10 | success=20 | failed=0 | elapsedMs=12 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=10 | success=10 | failed=10 | elapsedMs=37 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=10 | success=4 | failed=16 | elapsedMs=42 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=10 | success=10 | failed=10 | elapsedMs=21 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=10 | success=10 | failed=10 | elapsedMs=74 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=11 | success=20 | failed=0 | elapsedMs=15 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=11 | success=10 | failed=10 | elapsedMs=39 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=11 | success=4 | failed=16 | elapsedMs=54 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=11 | success=10 | failed=10 | elapsedMs=24 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=11 | success=10 | failed=10 | elapsedMs=79 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=12 | success=20 | failed=0 | elapsedMs=13 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=12 | success=10 | failed=10 | elapsedMs=35 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=12 | success=4 | failed=16 | elapsedMs=50 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=12 | success=10 | failed=10 | elapsedMs=27 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=12 | success=10 | failed=10 | elapsedMs=58 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=13 | success=20 | failed=0 | elapsedMs=11 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=13 | success=10 | failed=10 | elapsedMs=40 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=13 | success=4 | failed=16 | elapsedMs=54 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=13 | success=10 | failed=10 | elapsedMs=25 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=13 | success=10 | failed=10 | elapsedMs=62 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=14 | success=20 | failed=0 | elapsedMs=11 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=14 | success=10 | failed=10 | elapsedMs=37 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=14 | success=4 | failed=16 | elapsedMs=46 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=14 | success=10 | failed=10 | elapsedMs=26 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=14 | success=10 | failed=10 | elapsedMs=61 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=15 | success=20 | failed=0 | elapsedMs=12 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=15 | success=10 | failed=10 | elapsedMs=41 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=15 | success=4 | failed=16 | elapsedMs=43 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=15 | success=10 | failed=10 | elapsedMs=24 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=15 | success=10 | failed=10 | elapsedMs=57 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=16 | success=20 | failed=0 | elapsedMs=15 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=16 | success=10 | failed=10 | elapsedMs=57 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=16 | success=4 | failed=16 | elapsedMs=44 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=16 | success=10 | failed=10 | elapsedMs=24 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=16 | success=10 | failed=10 | elapsedMs=64 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=17 | success=20 | failed=0 | elapsedMs=14 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=17 | success=10 | failed=10 | elapsedMs=47 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=17 | success=4 | failed=16 | elapsedMs=48 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=17 | success=10 | failed=10 | elapsedMs=24 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=17 | success=10 | failed=10 | elapsedMs=58 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=18 | success=20 | failed=0 | elapsedMs=12 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=18 | success=10 | failed=10 | elapsedMs=39 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=18 | success=4 | failed=16 | elapsedMs=54 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=18 | success=10 | failed=10 | elapsedMs=42 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=18 | success=10 | failed=10 | elapsedMs=58 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=19 | success=20 | failed=0 | elapsedMs=13 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=19 | success=10 | failed=10 | elapsedMs=39 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=19 | success=4 | failed=16 | elapsedMs=46 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=19 | success=10 | failed=10 | elapsedMs=24 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=19 | success=10 | failed=10 | elapsedMs=60 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=20 | success=20 | failed=0 | elapsedMs=12 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=20 | success=10 | failed=10 | elapsedMs=41 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=20 | success=4 | failed=16 | elapsedMs=44 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=20 | success=10 | failed=10 | elapsedMs=23 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=20 | success=10 | failed=10 | elapsedMs=68 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=21 | success=20 | failed=0 | elapsedMs=15 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=21 | success=10 | failed=10 | elapsedMs=61 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=21 | success=4 | failed=16 | elapsedMs=42 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=21 | success=10 | failed=10 | elapsedMs=26 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=21 | success=10 | failed=10 | elapsedMs=69 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=22 | success=20 | failed=0 | elapsedMs=13 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=22 | success=10 | failed=10 | elapsedMs=42 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=22 | success=4 | failed=16 | elapsedMs=42 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=22 | success=10 | failed=10 | elapsedMs=22 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=22 | success=10 | failed=10 | elapsedMs=54 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=23 | success=20 | failed=0 | elapsedMs=12 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=23 | success=10 | failed=10 | elapsedMs=45 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=23 | success=4 | failed=16 | elapsedMs=41 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=23 | success=10 | failed=10 | elapsedMs=86 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=23 | success=10 | failed=10 | elapsedMs=67 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=24 | success=20 | failed=0 | elapsedMs=12 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=24 | success=10 | failed=10 | elapsedMs=43 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=24 | success=4 | failed=16 | elapsedMs=46 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=24 | success=10 | failed=10 | elapsedMs=40 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=24 | success=10 | failed=10 | elapsedMs=61 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=25 | success=20 | failed=0 | elapsedMs=13 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=25 | success=10 | failed=10 | elapsedMs=41 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=25 | success=4 | failed=16 | elapsedMs=43 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=25 | success=10 | failed=10 | elapsedMs=27 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=25 | success=10 | failed=10 | elapsedMs=59 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=26 | success=20 | failed=0 | elapsedMs=22 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=26 | success=10 | failed=10 | elapsedMs=60 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=26 | success=4 | failed=16 | elapsedMs=43 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=26 | success=10 | failed=10 | elapsedMs=24 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=26 | success=10 | failed=10 | elapsedMs=70 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=27 | success=20 | failed=0 | elapsedMs=14 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=27 | success=10 | failed=10 | elapsedMs=42 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=27 | success=4 | failed=16 | elapsedMs=46 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=27 | success=10 | failed=10 | elapsedMs=24 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=27 | success=10 | failed=10 | elapsedMs=60 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=28 | success=20 | failed=0 | elapsedMs=14 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=28 | success=10 | failed=10 | elapsedMs=54 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=28 | success=4 | failed=16 | elapsedMs=62 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=28 | success=10 | failed=10 | elapsedMs=35 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=28 | success=10 | failed=10 | elapsedMs=56 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=29 | success=20 | failed=0 | elapsedMs=15 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=29 | success=10 | failed=10 | elapsedMs=44 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=29 | success=4 | failed=16 | elapsedMs=43 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=29 | success=10 | failed=10 | elapsedMs=24 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=29 | success=10 | failed=10 | elapsedMs=52 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=A. 조회 후 검사 (수정 전 코드) | trial=30 | success=20 | failed=0 | elapsedMs=14 | capacity=10 | acceptedRows=20 | acceptedCount=- | overCapacity=true
+[RAW] 01-seat-capacity | strategy=B. 비관적 락 (SELECT ... FOR UPDATE) | trial=30 | success=10 | failed=10 | elapsedMs=46 | capacity=10 | acceptedRows=10 | acceptedCount=- | overCapacity=false
+[RAW] 01-seat-capacity | strategy=C. 낙관적 락 (accepted_count CAS, 재시도 3회) | trial=30 | success=4 | failed=16 | elapsedMs=40 | capacity=10 | acceptedRows=4 | acceptedCount=4 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (JDBC 재현) | trial=30 | success=10 | failed=10 | elapsedMs=24 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+[RAW] 01-seat-capacity | strategy=D. 조건부 UPDATE (실제 서비스 호출) | trial=30 | success=10 | failed=10 | elapsedMs=81 | capacity=10 | acceptedRows=10 | acceptedCount=10 | overCapacity=false
+
+# 실험 1. 정원이 있는 수락: 전략별 비교
+
+- 실행 시각: 2026-10-15 14:09:57
+- 환경: MySQL 8.0.36 (Testcontainers), 격리수준 REPEATABLE-READ, 스레드 20, 반복 30회, 커넥션 풀 40
+- 시나리오: 정원 10명인 모집글에 서로 다른 WAITING 신청서 20건을 20개 스레드가 동시에 수락, 전략마다 30회 반복
+- 정원 초과: 수락된 신청서 수 > 정원 / 정원 미달: 자리가 남았는데 거절됨 / 카운터 불일치: accepted_count ≠ 실제 ACCEPTED 행 수
+- A~C와 'D (JDBC 재현)'은 같은 SQL 흐름을 JDBC로 실행 → 소요 시간 비교는 이 네 가지끼리만 의미 있음
+- 'D (실제 서비스 호출)'은 RecruitApplicationService.changeStatus를 그대로 호출 (엔티티 조회·권한 검사·응답 매핑 포함) → 정합성 검증용
+
+## 결과
+
+| 전략 | 정원 초과 trial | 정원 미달 trial | 카운터 불일치 | 평균 수락 인원 | 재시도 합계 | trial 평균(ms) | trial p95(ms) |
+|---|---|---|---|---|---|---|---|
+| A. 조회 후 검사 (수정 전 코드) | **30/30** | 0/30 | - | 20.0 / 10 | 0 | 13.9 | 22 |
+| B. 비관적 락 (SELECT ... FOR UPDATE) | **0/30** | 0/30 | - | 10.0 / 10 | 0 | 41.8 | 60 |
+| C. 낙관적 락 (accepted_count CAS, 재시도 3회) | **0/30** | 30/30 | 0/30 | 4.0 / 10 | 1620 | 48.0 | 62 |
+| D. 조건부 UPDATE (JDBC 재현) | **0/30** | 0/30 | 0/30 | 10.0 / 10 | 0 | 28.5 | 42 |
+| D. 조건부 UPDATE (실제 서비스 호출) | **0/30** | 0/30 | 0/30 | 10.0 / 10 | 0 | 66.1 | 81 |
+
+<details><summary>요청 실패 사유 (전체 trial 합계)</summary>
+
+| 전략 | 사유 | 건수 |
+|---|---|---|
+| A. 조회 후 검사 (수정 전 코드) | - | 0 |
+| B. 비관적 락 (SELECT ... FOR UPDATE) | 정원 마감 | 300 |
+| C. 낙관적 락 (accepted_count CAS, 재시도 3회) | 재시도 초과 (낙관적 락 충돌) | 480 |
+| D. 조건부 UPDATE (JDBC 재현) | 정원 마감 | 300 |
+| D. 조건부 UPDATE (실제 서비스 호출) | 400 모집 정원이 가득 찼습니다. | 300 |
+
+</details>
+
+>>> report: /Users/yoonbro/Desktop/Yoon/UsFit/Us-Fit-BE/build/reports/concurrency/01-seat-capacity.md
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=1 | success=20 | failed=0 | elapsedMs=13 | applications=20 | duplicated=true
+
+[DB] 실험 3 / exists 검사 후 INSERT (UNIQUE 없음, 수정 전) / trial 1 직후 신청서
+  SQL   : SELECT application_id, post_id, user_id, status FROM recruit_applications WHERE post_id = ? AND user_id = ?
+  params: [211, 25]
+  | application_id | post_id | user_id | status |
+  | 3061 | 211 | 25 | WAITING |
+  | 3062 | 211 | 25 | WAITING |
+  | 3063 | 211 | 25 | WAITING |
+  | 3064 | 211 | 25 | WAITING |
+  | 3065 | 211 | 25 | WAITING |
+  | 3066 | 211 | 25 | WAITING |
+  | 3067 | 211 | 25 | WAITING |
+  | 3068 | 211 | 25 | WAITING |
+  | 3069 | 211 | 25 | WAITING |
+  | 3070 | 211 | 25 | WAITING |
+  | 3071 | 211 | 25 | WAITING |
+  | 3072 | 211 | 25 | WAITING |
+  | 3073 | 211 | 25 | WAITING |
+  | 3074 | 211 | 25 | WAITING |
+  | 3075 | 211 | 25 | WAITING |
+  | 3076 | 211 | 25 | WAITING |
+  | 3077 | 211 | 25 | WAITING |
+  | 3078 | 211 | 25 | WAITING |
+  | 3079 | 211 | 25 | WAITING |
+  | 3080 | 211 | 25 | WAITING |
+  (20 rows)
+
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=2 | success=20 | failed=0 | elapsedMs=10 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=3 | success=20 | failed=0 | elapsedMs=12 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=4 | success=20 | failed=0 | elapsedMs=11 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=5 | success=20 | failed=0 | elapsedMs=12 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=6 | success=20 | failed=0 | elapsedMs=11 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=7 | success=20 | failed=0 | elapsedMs=11 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=8 | success=20 | failed=0 | elapsedMs=9 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=9 | success=20 | failed=0 | elapsedMs=10 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=10 | success=20 | failed=0 | elapsedMs=12 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=11 | success=20 | failed=0 | elapsedMs=11 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=12 | success=20 | failed=0 | elapsedMs=10 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=13 | success=20 | failed=0 | elapsedMs=10 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=14 | success=20 | failed=0 | elapsedMs=8 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=15 | success=20 | failed=0 | elapsedMs=8 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=16 | success=20 | failed=0 | elapsedMs=9 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=17 | success=20 | failed=0 | elapsedMs=8 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=18 | success=20 | failed=0 | elapsedMs=8 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=19 | success=20 | failed=0 | elapsedMs=8 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=20 | success=20 | failed=0 | elapsedMs=10 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=21 | success=20 | failed=0 | elapsedMs=8 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=22 | success=20 | failed=0 | elapsedMs=11 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=23 | success=20 | failed=0 | elapsedMs=9 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=24 | success=20 | failed=0 | elapsedMs=10 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=25 | success=20 | failed=0 | elapsedMs=9 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=26 | success=20 | failed=0 | elapsedMs=9 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=27 | success=20 | failed=0 | elapsedMs=10 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=28 | success=20 | failed=0 | elapsedMs=10 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=29 | success=20 | failed=0 | elapsedMs=11 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | trial=30 | success=20 | failed=0 | elapsedMs=11 | applications=20 | duplicated=true
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=1 | success=1 | failed=19 | elapsedMs=86 | applications=1 | duplicated=false
+
+[DB] 실험 3 / exists 검사 + UNIQUE(post_id, user_id) (현재 코드) / trial 1 직후 신청서
+  SQL   : SELECT application_id, post_id, user_id, status FROM recruit_applications WHERE post_id = ? AND user_id = ?
+  params: [241, 25]
+  | application_id | post_id | user_id | status |
+  | 3679 | 241 | 25 | WAITING |
+  (1 rows)
+
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=2 | success=1 | failed=19 | elapsedMs=27 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=3 | success=1 | failed=19 | elapsedMs=21 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=4 | success=1 | failed=19 | elapsedMs=20 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=5 | success=1 | failed=19 | elapsedMs=23 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=6 | success=1 | failed=19 | elapsedMs=23 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=7 | success=1 | failed=19 | elapsedMs=33 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=8 | success=1 | failed=19 | elapsedMs=21 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=9 | success=1 | failed=19 | elapsedMs=20 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=10 | success=1 | failed=19 | elapsedMs=21 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=11 | success=1 | failed=19 | elapsedMs=23 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=12 | success=1 | failed=19 | elapsedMs=22 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=13 | success=1 | failed=19 | elapsedMs=23 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=14 | success=1 | failed=19 | elapsedMs=23 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=15 | success=1 | failed=19 | elapsedMs=24 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=16 | success=1 | failed=19 | elapsedMs=32 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=17 | success=1 | failed=19 | elapsedMs=22 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=18 | success=1 | failed=19 | elapsedMs=19 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=19 | success=1 | failed=19 | elapsedMs=22 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=20 | success=1 | failed=19 | elapsedMs=21 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=21 | success=1 | failed=19 | elapsedMs=20 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=22 | success=1 | failed=19 | elapsedMs=37 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=23 | success=1 | failed=19 | elapsedMs=42 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=24 | success=1 | failed=19 | elapsedMs=24 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=25 | success=1 | failed=19 | elapsedMs=15 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=26 | success=1 | failed=19 | elapsedMs=17 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=27 | success=1 | failed=19 | elapsedMs=19 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=28 | success=1 | failed=19 | elapsedMs=20 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=29 | success=1 | failed=19 | elapsedMs=18 | applications=1 | duplicated=false
+[RAW] 03-duplicate-apply | strategy=exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | trial=30 | success=1 | failed=19 | elapsedMs=19 | applications=1 | duplicated=false
+
+# 실험 3. 중복 지원
+
+- 실행 시각: 2026-10-15 14:09:59
+- 환경: MySQL 8.0.36 (Testcontainers), 격리수준 REPEATABLE-READ, 스레드 20, 반복 30회, 커넥션 풀 40
+- 시나리오: 같은 사용자가 같은 모집글에 20개 스레드로 동시에 지원, 30회 반복
+- 기대값: 신청서 1건
+
+## 결과
+
+| 방식 | 중복 생성 trial | 평균 신청서 수 | trial 평균(ms) |
+|---|---|---|---|
+| exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | **30/30** | 20.0 | 10.0 |
+| exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | **0/30** | 1.0 | 25.2 |
+
+<details><summary>요청 실패 사유 (전체 trial 합계)</summary>
+
+| 전략 | 사유 | 건수 |
+|---|---|---|
+| exists 검사 후 INSERT (UNIQUE 없음, 수정 전) | - | 0 |
+| exists 검사 + UNIQUE(post_id, user_id) (현재 코드) | 400 이미 지원한 모집글입니다. | 570 |
+
+</details>
+
+>>> report: /Users/yoonbro/Desktop/Yoon/UsFit/Us-Fit-BE/build/reports/concurrency/03-duplicate-apply.md
+]]></system-out>
+  <system-err><![CDATA[Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (/Users/yoonbro/.gradle/caches/modules-2/files-2.1/net.bytebuddy/byte-buddy-agent/1.17.7/fbf3d6d649ed37fc9e9c59480a05be0a26e3c2da/byte-buddy-agent-1.17.7.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+]]></system-err>
+</testsuite>
