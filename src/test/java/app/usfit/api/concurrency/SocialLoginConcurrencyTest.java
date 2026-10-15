@@ -45,6 +45,11 @@ class SocialLoginConcurrencyTest extends ConcurrencyTestSupport {
                 int count = userCount(providerId);
                 legacy.add("rows", count);
                 legacy.record(r, count > 1);
+                logTrial("04-social-first-login", legacy.name, trial, r, "accounts", count, "duplicated", count > 1);
+                if (trial == 0) {
+                    dumpQuery("실험 4 / " + legacy.name + " / trial 1 직후 계정",
+                            "SELECT id, provider, provider_id FROM users WHERE provider = 'KAKAO' AND provider_id = ?", providerId);
+                }
             }
         } finally {
             // 중복 행을 지워야 UNIQUE를 다시 걸 수 있음
@@ -70,6 +75,12 @@ class SocialLoginConcurrencyTest extends ConcurrencyTestSupport {
             // 계정이 1개여도 일부 요청이 실패(로그인 에러)했다면 실패로 봄
             current.record(r, count != 1 || !r.failures().isEmpty());
             if (returnedIds.size() != 1) differentUserTrials++;
+            logTrial("04-social-first-login", current.name, trial, r,
+                    "accounts", count, "distinctUserIdsReturned", returnedIds.size(), "duplicated", count > 1);
+            if (trial == 0) {
+                dumpQuery("실험 4 / " + current.name + " / trial 1 직후 계정",
+                        "SELECT id, provider, provider_id FROM users WHERE provider = 'KAKAO' AND provider_id = ?", providerId);
+            }
         }
 
         List<Tally> tallies = List.of(legacy, current);

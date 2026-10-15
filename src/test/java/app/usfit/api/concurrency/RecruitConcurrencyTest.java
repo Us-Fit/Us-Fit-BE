@@ -76,6 +76,15 @@ class RecruitConcurrencyTest extends ConcurrencyTestSupport {
                 if (accepted < capacity) tally.add("underfill", 1);
                 if (strategy.usesCounter() && acceptedCounter(post) != accepted) tally.add("counterMismatch", 1);
                 tally.record(r, accepted > capacity);
+                logTrial("01-seat-capacity", strategy.name(), trial, r,
+                        "capacity", capacity, "acceptedRows", accepted,
+                        "acceptedCount", strategy.usesCounter() ? acceptedCounter(post) : "-",
+                        "overCapacity", accepted > capacity);
+                if (trial == 0) {
+                    dumpQuery("실험 1 / " + strategy.name() + " / trial 1 직후 모집글 상태", "SELECT p.post_id, p.max_member, p.accepted_count, "
+                            + "(SELECT COUNT(*) FROM recruit_applications a WHERE a.post_id = p.post_id AND a.status = 'ACCEPTED') AS accepted_rows "
+                            + "FROM recruit_posts p WHERE p.post_id = ?", post);
+                }
             }
         }
 
@@ -202,7 +211,15 @@ class RecruitConcurrencyTest extends ConcurrencyTestSupport {
 
                 int counter = acceptedCounter(post);
                 tally.add("counter", counter);
-                tally.record(r, counter != acceptedRows(post));
+                int rows = acceptedRows(post);
+                tally.record(r, counter != rows);
+                logTrial("02-same-application", strategy.name(), trial, r,
+                        "acceptedRows", rows, "acceptedCount", counter, "mismatch", counter != rows);
+                if (trial == 0) {
+                    dumpQuery("실험 2 / " + strategy.name() + " / trial 1 직후 모집글 상태", "SELECT p.post_id, p.max_member, p.accepted_count, "
+                            + "(SELECT COUNT(*) FROM recruit_applications a WHERE a.post_id = p.post_id AND a.status = 'ACCEPTED') AS accepted_rows "
+                            + "FROM recruit_posts p WHERE p.post_id = ?", post);
+                }
             }
         }
 
@@ -267,6 +284,12 @@ class RecruitConcurrencyTest extends ConcurrencyTestSupport {
                 int count = applicationCount(post, applicant);
                 legacy.add("rows", count);
                 legacy.record(r, count > 1);
+                logTrial("03-duplicate-apply", legacy.name, trial, r, "applications", count, "duplicated", count > 1);
+                if (trial == 0) {
+                    dumpQuery("실험 3 / " + legacy.name + " / trial 1 직후 신청서",
+                            "SELECT application_id, post_id, user_id, status FROM recruit_applications WHERE post_id = ? AND user_id = ?",
+                            post, applicant);
+                }
             }
         } finally {
             // 중복 행을 지워야 UNIQUE를 다시 걸 수 있음
@@ -281,6 +304,12 @@ class RecruitConcurrencyTest extends ConcurrencyTestSupport {
             int count = applicationCount(post, applicant);
             current.add("rows", count);
             current.record(r, count != 1);
+            logTrial("03-duplicate-apply", current.name, trial, r, "applications", count, "duplicated", count > 1);
+            if (trial == 0) {
+                dumpQuery("실험 3 / " + current.name + " / trial 1 직후 신청서",
+                        "SELECT application_id, post_id, user_id, status FROM recruit_applications WHERE post_id = ? AND user_id = ?",
+                        post, applicant);
+            }
         }
 
         List<Tally> tallies = List.of(legacy, current);

@@ -1,12 +1,20 @@
 package app.usfit.api.concurrency;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.IntFunction;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,6 +139,56 @@ abstract class ConcurrencyTestSupport {
     /// 측정용 전략 구현에서 "정상적인 거절"을 표현 (정원 마감, 중복 등)
     protected static class ExpectedRejection extends RuntimeException {
         ExpectedRejection(String message) { super(message, null, false, false); }
+    }
+
+    // ===== 원본 로그 (집계 전 trial별 측정값, 리포트 수치의 근거) =====
+
+    private static final Set<String> RAW_STARTED = ConcurrentHashMap.newKeySet();
+
+    /// trial 1회 측정값을 콘솔에 한 줄로 출력하고 raw/{experiment}.csv에 누적 (kv: 이름, 값 순서로 나열)
+    protected void logTrial(String experiment, String strategy, int trial, RunResult r, Object... kv) {
+        Map<String, Object> fields = new LinkedHashMap<>();
+        fields.put("strategy", strategy);
+        fields.put("trial", trial + 1);
+        fields.put("success", r.success());
+        fields.put("failed", r.failures().values().stream().mapToInt(Integer::intValue).sum());
+        fields.put("elapsedMs", r.elapsedMs());
+        for (int i = 0; i + 1 < kv.length; i += 2) fields.put(String.valueOf(kv[i]), kv[i + 1]);
+
+        StringBuilder line = new StringBuilder("[RAW] ").append(experiment);
+        fields.forEach((k, v) -> line.append(" | ").append(k).append('=').append(v));
+        System.out.println(line);
+
+        try {
+            Path csv = Path.of(System.getProperty("concurrency.reportDir", "build/reports/concurrency"), "raw", experiment + ".csv");
+            Files.createDirectories(csv.getParent());
+            if (RAW_STARTED.add(experiment)) {
+                Files.writeString(csv, String.join(",", fields.keySet()) + "\n");
+            }
+            String row = fields.values().stream().map(v -> "\"" + String.valueOf(v).replace("\"", "\"\"") + "\"")
+                    .collect(Collectors.joining(","));
+            Files.writeString(csv, row + "\n", StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /// 실행 직후 DB 상태를 SQL로 직접 조회해 결과를 그대로 출력 (집계 코드를 거치지 않은 증거)
+    protected void dumpQuery(String label, String sql, Object... args) {
+        List<Map<String, Object>> rows = jdbc.queryForList(sql, args);
+        StringBuilder sb = new StringBuilder("\n[DB] ").append(label).append('\n')
+                .append("  SQL   : ").append(sql.replaceAll("\\s+", " ").trim()).append('\n')
+                .append("  params: ").append(Arrays.toString(args)).append('\n');
+        if (rows.isEmpty()) {
+            sb.append("  (0 rows)\n");
+        } else {
+            sb.append("  | ").append(String.join(" | ", rows.get(0).keySet())).append(" |\n");
+            for (Map<String, Object> row : rows) {
+                sb.append("  | ").append(row.values().stream().map(String::valueOf).collect(Collectors.joining(" | "))).append(" |\n");
+            }
+            sb.append("  (").append(rows.size()).append(" rows)\n");
+        }
+        System.out.println(sb);
     }
 
     // ===== 실험 집계 =====
