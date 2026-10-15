@@ -13,6 +13,7 @@ import app.usfit.api.club.entity.Club;
 import app.usfit.api.club.entity.ClubJoin;
 import app.usfit.api.club.entity.ClubMember;
 import app.usfit.api.club.repository.ClubJoinRequestRepository;
+import app.usfit.api.club.repository.ClubMemberRepository;
 import app.usfit.api.club.repository.ClubRepository;
 import app.usfit.api.common.enums.ClubMemberRole;
 import app.usfit.api.user.dto.SimpleProfileResponse;
@@ -26,22 +27,29 @@ import jakarta.persistence.PersistenceContext;
 public class ClubJoinService {
     private final ClubRepository clubRepository;
     private final ClubJoinRequestRepository clubJoinRequestRepository;
+    private final ClubMemberRepository clubMemberRepository;
     private final ProfileService profileService;
     
     @PersistenceContext
     private EntityManager entityManager;
 
-    public ClubJoinService(ClubRepository clubRepository, ClubJoinRequestRepository clubJoinRequestRepository, ProfileService profileService) {
+    public ClubJoinService(ClubRepository clubRepository, ClubJoinRequestRepository clubJoinRequestRepository,
+                           ClubMemberRepository clubMemberRepository, ProfileService profileService) {
         this.clubRepository = clubRepository;
         this.clubJoinRequestRepository = clubJoinRequestRepository;
+        this.clubMemberRepository = clubMemberRepository;
         this.profileService = profileService;
     }
 
     @Transactional
     public ClubJoinResponse createJoinRequest(Long clubId, Long requesterId, String message) {
-        // 중복 요청 방지 (간단히 존재 여부 체크)
-        if (clubJoinRequestRepository.existsByClub_IdAndUser_Id(clubId, requesterId)) {
-            throw new IllegalStateException("이미 가입 요청이 존재합니다.");
+        // 중복 요청 방지: 대기 중인 요청이 있거나 이미 멤버일 때만 막음
+        // (거절됐거나 탈퇴한 사용자는 다시 신청 가능)
+        if (clubJoinRequestRepository.existsByClub_IdAndUser_IdAndStatus(clubId, requesterId, "waiting")) {
+            throw new IllegalStateException("이미 대기 중인 가입 요청이 존재합니다.");
+        }
+        if (clubMemberRepository.existsByClubIdAndUserId(clubId, requesterId)) {
+            throw new IllegalStateException("이미 동호회 멤버입니다.");
         }
 
         Club clubRef = entityManager.getReference(Club.class, clubId);

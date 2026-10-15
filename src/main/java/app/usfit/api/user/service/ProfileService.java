@@ -138,7 +138,10 @@ public class ProfileService {
         );
     }
 
-    @Transactional
+    // 프로필 없음(IllegalArgumentException)은 조회 실패일 뿐이므로 롤백하지 않음
+    // 롤백되면 OSIV로 공유 중인 EntityManager가 clear되어, 호출한 쪽이 이미 조회한 엔티티의
+    // 지연 로딩이 LazyInitializationException으로 깨짐 (예: 모집글 목록에서 프로필 없는 작성자)
+    @Transactional(readOnly = true, noRollbackFor = IllegalArgumentException.class)
     public SimpleProfileResponse getSimpleProfile(Long userId) {
         var profileOpt = userProfileRepository.findByUserId(userId);
         var p = profileOpt.orElseThrow(() -> new IllegalArgumentException("프로필 없음"));

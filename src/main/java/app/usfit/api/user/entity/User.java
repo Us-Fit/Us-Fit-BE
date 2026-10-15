@@ -10,13 +10,22 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "users")
+// (provider, provider_id) 유니크: 첫 로그인 요청이 동시에 와도 소셜 계정이 하나만 생성되도록 DB에서 보장
+// LOCAL 계정은 provider_id가 NULL이라 여러 개여도 제약에 걸리지 않음 (MySQL은 NULL 중복 허용)
+@Table(
+    name = "users",
+    uniqueConstraints = @UniqueConstraint(
+        name = "uk_users_provider_provider_id",
+        columnNames = {"provider", "provider_id"}
+    )
+)
 @Data  // getter, setter, toString, equals, hashCode 자동 생성
 @Builder  // Builder 패턴 자동 생성
 @NoArgsConstructor  // 기본 생성자 (JPA 필수)

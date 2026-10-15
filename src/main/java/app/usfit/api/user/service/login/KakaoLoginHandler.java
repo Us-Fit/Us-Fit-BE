@@ -11,21 +11,20 @@ import app.usfit.api.security.jwt.JwtTokenProvider;
 import app.usfit.api.user.dto.LoginRequest;
 import app.usfit.api.user.dto.LoginResponse;
 import app.usfit.api.user.entity.User;
-import app.usfit.api.user.repository.UserRepository;
 
 @Component
 public class KakaoLoginHandler implements LoginHandler {
 
-    private final UserRepository userRepository;
+    private final SocialUserService socialUserService;
     private final KakaoOAuthClient kakaoOAuthClient;
     private final JwtTokenProvider jwtTokenProvider;
 
     public KakaoLoginHandler(
-        UserRepository userRepository, 
+        SocialUserService socialUserService,
         KakaoOAuthClient kakaoOAuthClient,
         JwtTokenProvider jwtTokenProvider
     ) {
-        this.userRepository = userRepository;
+        this.socialUserService = socialUserService;
         this.kakaoOAuthClient = kakaoOAuthClient;
         this.jwtTokenProvider = jwtTokenProvider;
     }
@@ -64,13 +63,12 @@ public class KakaoLoginHandler implements LoginHandler {
         // 3) upsert (provider + providerId)
         final String emailFinal = email;
         
-        User user = userRepository.findByProviderAndProviderId(AuthProviderEnum.KAKAO, providerId)
-                .orElseGet(() -> userRepository.save(User.builder()
+        User user = socialUserService.findOrCreate(AuthProviderEnum.KAKAO, providerId, () -> User.builder()
                         .email(emailFinal)
                         .provider(AuthProviderEnum.KAKAO)
                         .providerId(providerId)
                         .password(null)
-                        .build()));
+                        .build());
         // .orElseGet -> 값이 없으면 람다 실행
         // .orElse -> 값이 없든 있는 뒤 먼저 실행
         // .build() -> User 객체 생성

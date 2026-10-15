@@ -61,9 +61,9 @@ public class ClubInfoController {
 
 
         @PatchMapping("/{clubId}/members/{memberId}/role")
-        @io.swagger.v3.oas.annotations.Operation(summary = "멤버 역할 변경", description = "지정된 멤버의 역할을 변경합니다. 요청 바디 예시를 참고하세요. 허용되는 역할 값: 'owner', 'admin', 'member'.")
-        @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "변경할 역할 예시 (role에 'owner'|'admin'|'member' 입력)", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", examples = {@io.swagger.v3.oas.annotations.media.ExampleObject(name = "한글_예시", value = """
-            { "role": "admin" }
+        @io.swagger.v3.oas.annotations.Operation(summary = "멤버 역할 변경", description = "지정된 멤버의 역할을 변경합니다. 요청 바디 예시를 참고하세요. 허용되는 역할 값: 'ADMIN', 'MEMBER' (OWNER는 소유권 이전 API 사용).")
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "변경할 역할 예시 (role에 'ADMIN'|'MEMBER' 입력)", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", examples = {@io.swagger.v3.oas.annotations.media.ExampleObject(name = "한글_예시", value = """
+            { "role": "ADMIN" }
             """)}))
     public ResponseEntity<Object> changeMemberRole(
         @PathVariable("clubId") Long clubId,

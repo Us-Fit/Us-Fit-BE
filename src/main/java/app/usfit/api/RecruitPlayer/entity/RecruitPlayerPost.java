@@ -51,6 +51,11 @@ public class RecruitPlayerPost {
     @Column(name = "max_member", nullable = false)
     private Integer maxMember;
 
+    // 수락(ACCEPTED)된 인원 수 - RecruitPlayerPostRepository의 조건부 UPDATE로만 변경
+    // updatable = false: 엔티티 저장 시 오래된 값으로 덮어써지는 것을 방지
+    @Column(name = "accepted_count", nullable = false, updatable = false, columnDefinition = "INT NOT NULL DEFAULT 0")
+    private Integer acceptedCount = 0;
+
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 

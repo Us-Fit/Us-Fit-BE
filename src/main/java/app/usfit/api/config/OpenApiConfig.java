@@ -29,7 +29,9 @@ public class OpenApiConfig {
             .components(new Components().addSecuritySchemes("bearerAuth", bearer))
             .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
                 .servers(List.of(
-                        new Server().url("https://api.usfit.kr")
+                        // "/" = Swagger를 연 서버 그대로 (로컬에서 열면 localhost로 요청)
+                        new Server().url("/").description("현재 접속한 서버"),
+                        new Server().url("https://api.usfit.kr").description("운영 서버")
                 ));
     }
 }

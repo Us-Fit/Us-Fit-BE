@@ -6,15 +6,14 @@ import app.usfit.api.common.enums.AuthProviderEnum;
 import app.usfit.api.user.dto.LoginRequest;
 import app.usfit.api.user.dto.LoginResponse;
 import app.usfit.api.user.entity.User;
-import app.usfit.api.user.repository.UserRepository;
 
 @Component
 public class GoogleLoginHandler implements LoginHandler {
 
-    private final UserRepository userRepository;
+    private final SocialUserService socialUserService;
 
-    public GoogleLoginHandler(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public GoogleLoginHandler(SocialUserService socialUserService) {
+        this.socialUserService = socialUserService;
     }
 
     @Override
@@ -26,13 +25,12 @@ public class GoogleLoginHandler implements LoginHandler {
     public LoginResponse handle(LoginRequest request) {
         // TODO: authCode -> token -> google profile 연동 로직
         String mockProviderId = "google-" + (request.getAuthCode() != null ? request.getAuthCode() : "temp");
-        User user = userRepository.findByProviderAndProviderId(AuthProviderEnum.GOOGLE, mockProviderId)
-                .orElseGet(() -> userRepository.save(User.builder()
+        User user = socialUserService.findOrCreate(AuthProviderEnum.GOOGLE, mockProviderId, () -> User.builder()
                         .email("google_" + mockProviderId + "@placeholder.local")
                         .provider(AuthProviderEnum.GOOGLE)
                         .providerId(mockProviderId)
                         .password(null)
-                        .build()));
+                        .build());
         return LoginResponse.of(user, null);
     }
 }
