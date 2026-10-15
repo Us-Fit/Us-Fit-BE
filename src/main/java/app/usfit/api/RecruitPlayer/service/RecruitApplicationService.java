@@ -50,7 +50,7 @@ public class RecruitApplicationService {
         }
 
         if (applicationRepo.existsByPost_IdAndApplicant_Id(postId, applicantId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 지원한 모집글입니다.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 지원한 모집글입니다.");
         }
 
         RecruitApplication app = new RecruitApplication();
@@ -58,12 +58,12 @@ public class RecruitApplicationService {
         app.setApplicant(entityManager.getReference(User.class, applicantId));
         app.setIntroduction(req == null ? null : req.introduction());
 
-        // 동시에 같은 지원이 들어오면 exists 검사를 둘 다 통과할 수 있음 -> UNIQUE(post_id, user_id)로 최종 차단
+        // 동시에 같은 지원이 들어오면 exists 검사를 둘 다 통과할 수 있음 -> UNIQUE(post_id, user_id)로 최종 차단 (409)
         RecruitApplication saved;
         try {
             saved = applicationRepo.saveAndFlush(app);
         } catch (DataIntegrityViolationException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 지원한 모집글입니다.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 지원한 모집글입니다.");
         }
         return toResponse(saved);
     }
