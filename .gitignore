@@ -44,3 +44,6 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local profile (DB 비밀번호 등)
+src/main/resources/application-local.properties
