@@ -24,6 +24,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// 동시성 통합 테스트용 MySQL 컨테이너 (Docker 필요)
+	testImplementation 'org.testcontainers:junit-jupiter'
+	testImplementation 'org.testcontainers:mysql'
 	
 	//Oauth
 	implementation "org.springframework.boot:spring-boot-starter-oauth2-client"
@@ -57,5 +61,27 @@ dependencies {
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+	useJUnitPlatform {
+		excludeTags 'concurrency'
+	}
+}
+
+// 동시성 측정: ./gradlew concurrencyTest [-Pthreads=20 -Ptrials=30]
+// 결과 리포트: build/reports/concurrency/*.md
+tasks.register('concurrencyTest', Test) {
+	description = 'Runs MySQL(Testcontainers) concurrency experiments and writes reports.'
+	group = 'verification'
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+	useJUnitPlatform {
+		includeTags 'concurrency'
+	}
+	systemProperty 'concurrency.threads', project.findProperty('threads') ?: '20'
+	systemProperty 'concurrency.trials', project.findProperty('trials') ?: '30'
+	systemProperty 'concurrency.reportDir', layout.buildDirectory.dir('reports/concurrency').get().asFile.absolutePath
+	outputs.upToDateWhen { false }
+	testLogging {
+		showStandardStreams = true
+		events 'passed', 'failed'
+	}
 }
