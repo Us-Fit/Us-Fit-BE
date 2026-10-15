@@ -18,6 +18,9 @@ repositories {
 	mavenCentral()
 }
 
+// Spring Boot 기본(1.18.40) 대신 최신 Lombok 사용
+ext['lombok.version'] = '1.18.48'
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter'
