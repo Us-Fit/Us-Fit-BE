@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.usfit.api.concurrency.SocialLoginConcurrencyTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-15T05:09:59.232Z" hostname="iyunhyeong-ui-MacBookAir-6.local" time="1.642">
+  <properties/>
+  <testcase name="실험 4: 첫 로그인 중복 계정 - 조회 후 저장 vs UNIQUE + 재조회" classname="app.usfit.api.concurrency.SocialLoginConcurrencyTest" time="1.642"/>
+  <system-out><![CDATA[2026-10-15T14:09:59.227+09:00  INFO 60109 --- [UsFit] [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [app.usfit.api.concurrency.SocialLoginConcurrencyTest]: SocialLoginConcurrencyTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-10-15T14:09:59.229+09:00  INFO 60109 --- [UsFit] [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration app.usfit.api.UsFitApplication for test class app.usfit.api.concurrency.SocialLoginConcurrencyTest
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=1 | success=20 | failed=0 | elapsedMs=7 | accounts=20 | duplicated=true
+
+[DB] 실험 4 / 조회 후 저장 (UNIQUE 없음, 수정 전) / trial 1 직후 계정
+  SQL   : SELECT id, provider, provider_id FROM users WHERE provider = 'KAKAO' AND provider_id = ?
+  params: [legacy-0-182377384731625]
+  | id | provider | provider_id |
+  | 26 | KAKAO | legacy-0-182377384731625 |
+  | 27 | KAKAO | legacy-0-182377384731625 |
+  | 28 | KAKAO | legacy-0-182377384731625 |
+  | 29 | KAKAO | legacy-0-182377384731625 |
+  | 30 | KAKAO | legacy-0-182377384731625 |
+  | 31 | KAKAO | legacy-0-182377384731625 |
+  | 32 | KAKAO | legacy-0-182377384731625 |
+  | 33 | KAKAO | legacy-0-182377384731625 |
+  | 34 | KAKAO | legacy-0-182377384731625 |
+  | 35 | KAKAO | legacy-0-182377384731625 |
+  | 36 | KAKAO | legacy-0-182377384731625 |
+  | 37 | KAKAO | legacy-0-182377384731625 |
+  | 38 | KAKAO | legacy-0-182377384731625 |
+  | 39 | KAKAO | legacy-0-182377384731625 |
+  | 40 | KAKAO | legacy-0-182377384731625 |
+  | 41 | KAKAO | legacy-0-182377384731625 |
+  | 42 | KAKAO | legacy-0-182377384731625 |
+  | 43 | KAKAO | legacy-0-182377384731625 |
+  | 44 | KAKAO | legacy-0-182377384731625 |
+  | 45 | KAKAO | legacy-0-182377384731625 |
+  (20 rows)
+
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=2 | success=20 | failed=0 | elapsedMs=7 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=3 | success=20 | failed=0 | elapsedMs=6 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=4 | success=20 | failed=0 | elapsedMs=7 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=5 | success=20 | failed=0 | elapsedMs=7 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=6 | success=20 | failed=0 | elapsedMs=7 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=7 | success=20 | failed=0 | elapsedMs=8 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=8 | success=20 | failed=0 | elapsedMs=7 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=9 | success=20 | failed=0 | elapsedMs=14 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=10 | success=20 | failed=0 | elapsedMs=5 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=11 | success=20 | failed=0 | elapsedMs=10 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=12 | success=20 | failed=0 | elapsedMs=6 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=13 | success=20 | failed=0 | elapsedMs=7 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=14 | success=20 | failed=0 | elapsedMs=7 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=15 | success=20 | failed=0 | elapsedMs=6 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=16 | success=20 | failed=0 | elapsedMs=7 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=17 | success=20 | failed=0 | elapsedMs=7 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=18 | success=20 | failed=0 | elapsedMs=9 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=19 | success=20 | failed=0 | elapsedMs=6 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=20 | success=20 | failed=0 | elapsedMs=6 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=21 | success=20 | failed=0 | elapsedMs=7 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=22 | success=20 | failed=0 | elapsedMs=9 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=23 | success=20 | failed=0 | elapsedMs=14 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=24 | success=20 | failed=0 | elapsedMs=10 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=25 | success=20 | failed=0 | elapsedMs=17 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=26 | success=20 | failed=0 | elapsedMs=9 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=27 | success=20 | failed=0 | elapsedMs=13 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=28 | success=20 | failed=0 | elapsedMs=19 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=29 | success=20 | failed=0 | elapsedMs=19 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=조회 후 저장 (UNIQUE 없음, 수정 전) | trial=30 | success=20 | failed=0 | elapsedMs=12 | accounts=20 | duplicated=true
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=1 | success=20 | failed=0 | elapsedMs=40 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+
+[DB] 실험 4 / UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) / trial 1 직후 계정
+  SQL   : SELECT id, provider, provider_id FROM users WHERE provider = 'KAKAO' AND provider_id = ?
+  params: [current-0-182377914516750]
+  | id | provider | provider_id |
+  | 627 | KAKAO | current-0-182377914516750 |
+  (1 rows)
+
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=2 | success=20 | failed=0 | elapsedMs=23 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=3 | success=20 | failed=0 | elapsedMs=25 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=4 | success=20 | failed=0 | elapsedMs=23 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=5 | success=20 | failed=0 | elapsedMs=29 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=6 | success=20 | failed=0 | elapsedMs=27 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=7 | success=20 | failed=0 | elapsedMs=31 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=8 | success=20 | failed=0 | elapsedMs=53 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=9 | success=20 | failed=0 | elapsedMs=64 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=10 | success=20 | failed=0 | elapsedMs=39 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=11 | success=20 | failed=0 | elapsedMs=31 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=12 | success=20 | failed=0 | elapsedMs=35 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=13 | success=20 | failed=0 | elapsedMs=35 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=14 | success=20 | failed=0 | elapsedMs=52 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=15 | success=20 | failed=0 | elapsedMs=35 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=16 | success=20 | failed=0 | elapsedMs=34 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=17 | success=20 | failed=0 | elapsedMs=24 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=18 | success=20 | failed=0 | elapsedMs=22 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=19 | success=20 | failed=0 | elapsedMs=24 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=20 | success=20 | failed=0 | elapsedMs=23 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=21 | success=20 | failed=0 | elapsedMs=32 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=22 | success=20 | failed=0 | elapsedMs=32 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=23 | success=20 | failed=0 | elapsedMs=37 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=24 | success=20 | failed=0 | elapsedMs=23 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=25 | success=20 | failed=0 | elapsedMs=22 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=26 | success=20 | failed=0 | elapsedMs=21 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=27 | success=20 | failed=0 | elapsedMs=21 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=28 | success=20 | failed=0 | elapsedMs=25 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=29 | success=20 | failed=0 | elapsedMs=25 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+[RAW] 04-social-first-login | strategy=UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | trial=30 | success=20 | failed=0 | elapsedMs=31 | accounts=1 | distinctUserIdsReturned=1 | duplicated=false
+
+# 실험 4. 첫 소셜 로그인 중복 계정
+
+- 실행 시각: 2026-10-15 14:10:00
+- 환경: MySQL 8.0.36 (Testcontainers), 격리수준 REPEATABLE-READ, 스레드 20, 반복 30회
+- 시나리오: 같은 (KAKAO, providerId)로 20개 요청이 동시에 첫 로그인
+- 기대값: 계정 1개, 모든 요청이 같은 사용자로 로그인 성공
+
+## 결과
+
+| 방식 | 실패 trial (중복 계정 또는 로그인 에러) | 평균 계정 수 | trial 평균(ms) |
+|---|---|---|---|
+| 조회 후 저장 (UNIQUE 없음, 수정 전) | **30/30** | 20.0 | 9.2 |
+| UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | **0/30** | 1.0 | 31.3 |
+
+<details><summary>요청 실패 사유 (전체 trial 합계)</summary>
+
+| 전략 | 사유 | 건수 |
+|---|---|---|
+| 조회 후 저장 (UNIQUE 없음, 수정 전) | - | 0 |
+| UNIQUE(provider, provider_id) + 위반 시 재조회 (현재 코드) | - | 0 |
+
+</details>
+
+>>> report: /Users/yoonbro/Desktop/Yoon/UsFit/Us-Fit-BE/build/reports/concurrency/04-social-first-login.md
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
