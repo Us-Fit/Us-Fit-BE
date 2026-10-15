@@ -2,6 +2,7 @@ package app.usfit.api.RecruitPlayer.service;
 
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,7 +58,13 @@ public class RecruitApplicationService {
         app.setApplicant(entityManager.getReference(User.class, applicantId));
         app.setIntroduction(req == null ? null : req.introduction());
 
-        RecruitApplication saved = applicationRepo.save(app);
+        // 동시에 같은 지원이 들어오면 exists 검사를 둘 다 통과할 수 있음 -> UNIQUE(post_id, user_id)로 최종 차단
+        RecruitApplication saved;
+        try {
+            saved = applicationRepo.saveAndFlush(app);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 지원한 모집글입니다.");
+        }
         return toResponse(saved);
     }
 
@@ -133,9 +140,22 @@ public class RecruitApplicationService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 모집글의 신청서가 아닙니다.");
         }
 
-        // 정원 확보/반납 (조건부 UPDATE로 원자적으로 처리)
-        boolean wasAccepted = app.getStatus() == RecruitApplication.Status.ACCEPTED;
-        boolean willBeAccepted = req.status() == RecruitApplication.Status.ACCEPTED;
+        var from = app.getStatus();
+        var to = req.status();
+        if (from == to) {
+            return toResponse(app);
+        }
+
+        // 1) 신청서 상태 전이 (조건부 UPDATE)
+        //    같은 신청서를 동시에 수락하면 둘 다 WAITING을 읽고 자리를 두 번 확보할 수 있음 -> 먼저 전이한 요청만 통과
+        if (applicationRepo.transitionStatus(applicationId, from, to) == 0) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "다른 요청에 의해 신청서 상태가 이미 변경되었습니다.");
+        }
+
+        // 2) 정원 확보/반납 (조건부 UPDATE)
+        //    정원 마감 시 예외 -> 트랜잭션 롤백으로 1)의 상태 전이도 함께 취소됨
+        boolean wasAccepted = from == RecruitApplication.Status.ACCEPTED;
+        boolean willBeAccepted = to == RecruitApplication.Status.ACCEPTED;
 
         if (!wasAccepted && willBeAccepted) {
             if (postRepo.reserveSeat(postId) == 0) {
@@ -145,9 +165,8 @@ public class RecruitApplicationService {
             postRepo.releaseSeat(postId);
         }
 
-        // 상태 변경
-        app.setStatus(req.status());
-        applicationRepo.save(app);
+        // 벌크 UPDATE는 영속성 컨텍스트에 반영되지 않으므로 응답용 엔티티 값만 맞춰줌
+        app.setStatus(to);
         return toResponse(app);
     }
 
@@ -196,15 +215,16 @@ public class RecruitApplicationService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "자기 자신만 탈퇴할 수 있습니다.");
         }
 
-        // 현재 상태가 ACCEPTED(가입된 상태)인지 확인
-        if (app.getStatus() != RecruitApplication.Status.ACCEPTED) {
+        // ACCEPTED(가입된 상태)일 때만 CANCELLED로 전이 + 자리 반납
+        // 조건부 UPDATE라 탈퇴 요청이 중복으로 와도 자리는 한 번만 반납됨
+        if (applicationRepo.transitionStatus(applicationId,
+                RecruitApplication.Status.ACCEPTED, RecruitApplication.Status.CANCELLED) == 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "가입된 멤버만 탈퇴할 수 있습니다.");
         }
-        
-        // 상태를 CANCLED로 변경 + 자리 반납
-        app.setStatus(RecruitApplication.Status.CANCELLED);
         postRepo.releaseSeat(postId);
-        applicationRepo.save(app);
+
+        // 벌크 UPDATE는 영속성 컨텍스트에 반영되지 않으므로 응답용 엔티티 값만 맞춰줌
+        app.setStatus(RecruitApplication.Status.CANCELLED);
 
         return toResponse(app);
     }

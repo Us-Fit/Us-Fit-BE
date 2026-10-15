@@ -15,10 +15,18 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
 
 @Entity
-@Table(name = "recruit_applications")
+// (post_id, user_id) 유니크: 동시에 지원 요청이 들어와도 한 모집글에 한 번만 지원되도록 DB에서 보장
+@Table(
+    name = "recruit_applications",
+    uniqueConstraints = @UniqueConstraint(
+        name = "uk_recruit_application_post_user",
+        columnNames = {"post_id", "user_id"}
+    )
+)
 @Data
 public class RecruitApplication {
     public enum Status { WAITING, ACCEPTED, REJECTED, CANCELLED }
