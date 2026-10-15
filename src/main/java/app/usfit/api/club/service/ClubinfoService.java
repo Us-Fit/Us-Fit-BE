@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import app.usfit.api.club.DTO.ClubDetailInfoResponse;
 import app.usfit.api.club.DTO.ClubMemberResponse;
@@ -101,6 +103,11 @@ public class ClubinfoService {
     // 동호회원 역할 변경
     @Transactional
     public ClubMemberResponse changeMemberRole(Long clubId, Long memberId, Long ownerId, ClubMemberRole newRole) {
+        // 역할 변경으로 지정 가능한 값은 ADMIN, MEMBER뿐 (OWNER는 소유권 이전 API로만, NONE은 허용하지 않음)
+        if (newRole != ClubMemberRole.ADMIN && newRole != ClubMemberRole.MEMBER) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "변경 가능한 역할은 ADMIN, MEMBER뿐입니다.");
+        }
+
         Club club = entityManager.find(Club.class, clubId);
         if (club == null) throw new IllegalStateException("동호회가 존재하지 않습니다.");
         if (club.getOwner() == null || !club.getOwner().getId().equals(ownerId)) {
