@@ -159,7 +159,7 @@ public class RecruitApplicationService {
 
         if (!wasAccepted && willBeAccepted) {
             if (postRepo.reserveSeat(postId) == 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "모집 정원이 가득 찼습니다.");
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "모집 정원이 가득 찼습니다.");
             }
         } else if (wasAccepted && !willBeAccepted) {
             postRepo.releaseSeat(postId);
