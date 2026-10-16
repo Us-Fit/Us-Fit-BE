@@ -2,6 +2,8 @@
 
 # UsFit - Connecting People Through Sports
 
+> 📌 **For code reviewers**: The parts YunHyeong Lee owned (authentication, profiles, clubs, player recruitment & concurrency control) and the code worth reading first are summarized in [docs/HIGHLIGHTS.md](./docs/HIGHLIGHTS.md) (Korean). Concurrency test results are in [docs/concurrency](./docs/concurrency/README.md).
+
 <div align="center">
 
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-brightgreen.svg)

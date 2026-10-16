@@ -2,6 +2,8 @@
 
 # UsFit - 운동으로 연결되는 우리
 
+> 📌 **코드 리뷰어용 안내**: 이윤형이 맡은 부분(인증, 프로필, 동호회, 용병 모집·동시성 제어)과 먼저 보면 좋은 코드는 [docs/HIGHLIGHTS.md](./docs/HIGHLIGHTS.md)에, 동시성 테스트 결과는 [docs/concurrency](./docs/concurrency/README.md)에 정리해 두었습니다.
+
 <div align="center">
 
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
